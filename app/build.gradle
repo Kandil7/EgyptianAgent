@@ -1,0 +1,167 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'com.egyptian.agent'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.egyptian.agent"
+        minSdk 28
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        // Critical for Honor X6c (MediaTek Helio G81 Ultra)
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
+
+        // Enable vector drawables
+        vectorDrawables {
+            useSupportLibrary true
+        }
+
+        // Set up resource configurations
+        resConfigs "ar"
+
+        // Enable data binding
+        buildFeatures {
+            dataBinding true
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Special signing config for system app
+            signingConfig signingConfigs.debug
+        }
+        debug {
+            debuggable true
+            minifyEnabled false
+            shrinkResources false
+        }
+    }
+
+    // JNI libraries configuration
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['src/main/jniLibs']
+        }
+    }
+
+    // Split APK by ABI to reduce size
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'arm64-v8a'
+            universalApk false
+        }
+    }
+
+    // Optimize for Honor X6c performance
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    // Resource optimization
+    aaptOptions {
+        cruncherEnabled = true
+        cruncherProcesses = 4
+    }
+
+    // Enable R8 full mode
+    buildFeatures {
+        buildConfig = true
+    }
+
+    // Set up ADB options for system app deployment
+    aaptOptions {
+        noCompress "tflite", "lite", "vosk"
+    }
+}
+
+// Dependencies optimized for Honor X6c
+dependencies {
+    // Core AndroidX libraries
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.fragment:fragment-ktx:1.6.2'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
+
+    // Material design
+    implementation 'com.google.android.material:material:1.11.0'
+
+    // Vosk STT engine - critical dependency
+    implementation files('libs/vosk-android-0.3.44.aar')
+
+    // Java Native Access for Vosk
+    implementation 'net.java.dev.jna:jna:5.13.0@aar'
+
+    // Networking for LLM fallback
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+
+    // Sensor processing for fall detection
+    implementation 'androidx.sensor:sensor:1.5.0'
+    implementation 'androidx.activity:activity-ktx:1.8.2'
+
+    // Coroutines for background processing
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
+
+    // Security and encryption
+    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+    implementation 'javax.crypto:jce:1.2.2' // For AES encryption
+
+    // Testing dependencies
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+
+    // Special Honor device support
+    compileOnly files('libs/honor-system-api.jar')
+}
+
+// Special tasks for system app deployment
+task copyToSystem(type: Exec) {
+    description "Push APK to system partition"
+    workingDir '.'
+    commandLine 'adb', 'push', 'build/outputs/apk/release/app-release.apk', '/system/priv-app/EgyptianAgent/EgyptianAgent-release.apk'
+    doLast {
+        exec {
+            commandLine 'adb', 'shell', 'chmod', '644', '/system/priv-app/EgyptianAgent/EgyptianAgent-release.apk'
+        }
+    }
+}
+
+task rebootDevice(type: Exec) {
+    description "Reboot device after installation"
+    commandLine 'adb', 'reboot'
+    dependsOn copyToSystem
+}
+
+// Optimization tasks for production
+task optimizeAssets(type: Exec) {
+    description "Optimize audio and model assets"
+    workingDir 'src/main/assets'
+    commandLine 'bash', './optimize_assets.sh'
+}
+
+preBuild.dependsOn optimizeAssets
+
+// Special task for Honor X6c deployment
+task deployToHonorX6c {
+    description "Full deployment to Honor X6c device"
+    dependsOn 'assembleRelease', 'copyToSystem', 'rebootDevice'
+}
