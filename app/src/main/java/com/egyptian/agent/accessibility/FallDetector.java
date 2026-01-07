@@ -64,6 +64,7 @@ public class FallDetector implements SensorEventListener {
             Log.i(TAG, "Fall detection monitoring started");
         } else {
             Log.w(TAG, "Accelerometer not available on this device");
+            CrashLogger.logWarning(context, "Accelerometer not available on this device");
             TTSManager.speak(context, "كاشف السقوط مش متاح على الموبايل ده");
         }
     }
