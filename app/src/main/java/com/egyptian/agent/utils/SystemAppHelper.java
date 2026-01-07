@@ -3,6 +3,7 @@ package com.egyptian.agent.utils;
 import android.content.Context;
 import android.os.PowerManager;
 import android.util.Log;
+import com.egyptian.agent.utils.CrashLogger;
 
 public class SystemAppHelper {
 
