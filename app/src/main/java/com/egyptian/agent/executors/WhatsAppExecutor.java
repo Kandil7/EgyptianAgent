@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.util.Log;
 import com.egyptian.agent.core.TTSManager;
 import com.egyptian.agent.stt.EgyptianNormalizer;
+import com.egyptian.agent.utils.CrashLogger;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;

@@ -166,6 +166,7 @@ public class CallExecutor {
             }
         } catch (Exception e) {
             Log.e(TAG, "Error searching contacts", e);
+            CrashLogger.logError(context, e);
         }
 
         return null;
@@ -213,7 +214,7 @@ public class CallExecutor {
             Log.i(TAG, "Call placed to: " + cleanNumber);
         } catch (Exception e) {
             Log.e(TAG, "Call failed", e);
-            // CrashLogger.logError(context, e);
+            CrashLogger.logError(context, e);
             TTSManager.speak(context, "حصل مشكلة في إجراء المكالمة. حاول تاني");
         }
     }
@@ -224,7 +225,7 @@ public class CallExecutor {
 
     private static void handleContactLookupError(Context context, String contactName, Exception error) {
         TTSManager.speak(context, "حصل خطأ في البحث عن " + contactName + ". حاول تاني بعد شوية");
-        // CrashLogger.logError(context, error);
+        CrashLogger.logError(context, error);
     }
 
     private static void handleContactNotFound(Context context, String contactName) {
@@ -285,7 +286,7 @@ public class CallExecutor {
             // ContactCache.put(context, name, number);
         } catch (Exception e) {
             Log.e(TAG, "Failed to save contact", e);
-            // CrashLogger.logError(context, e);
+            CrashLogger.logError(context, e);
         }
     }
 
@@ -319,6 +320,7 @@ public class CallExecutor {
             }
         } catch (Exception e) {
             Log.e(TAG, "Error searching contacts", e);
+            CrashLogger.logError(context, e);
         }
 
         return null;
