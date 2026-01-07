@@ -8,6 +8,7 @@ import android.util.*;
 import com.egyptian.agent.accessibility.SeniorMode;
 import com.egyptian.agent.executors.EmergencyHandler;
 import com.egyptian.agent.stt.VoskSTTEngine;
+import com.egyptian.agent.utils.CrashLogger;
 import com.egyptian.agent.utils.SystemAppHelper;
 import java.util.*;
 
@@ -67,7 +68,7 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
         } catch (Exception e) {
             Log.e(TAG, "Failed to initialize STT engine", e);
             // In a real implementation, we would have a CrashLogger utility
-            // CrashLogger.logError(this, e);
+            CrashLogger.logError(this, e);
             TTSManager.speak(this, "حصل خطأ في تهيئة المساعد الصوتي");
         }
     }
