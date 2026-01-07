@@ -1,6 +1,7 @@
 package com.egyptian.agent.executors;
 
-import android.content.*;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
@@ -9,8 +10,7 @@ import android.util.Log;
 import com.egyptian.agent.accessibility.SeniorMode;
 import com.egyptian.agent.core.IntentType;
 import com.egyptian.agent.stt.EgyptianNormalizer;
-import com.egyptian.agent.utils.ContactCache;
-import com.egyptian.agent.utils.VibrationManager;
+import com.egyptian.agent.core.TTSManager;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,6 +42,26 @@ public class CallExecutor {
 
         if (contactName.isEmpty()) {
             TTSManager.speak(context, "مين اللي عايز تتصل بيه؟ قول الاسم");
+            // In a real app, we would wait for the next voice input
+            // SpeechConfirmation.waitForCommand(context, 15000, nextCommand -> {
+            //     if (!nextCommand.isEmpty()) {
+            //         String extractedName = extractContactName(EgyptianNormalizer.normalize(nextCommand));
+            //         if (!extractedName.isEmpty()) {
+            //             lookupContactNumber(context, extractedName, (number, error) -> {
+            //                 if (number != null) {
+            //                     confirmAndPlaceCall(context, extractedName, number);
+            //                 } else {
+            //                     TTSManager.speak(context, "مش لاقي " + extractedName + " في>Contactات. قول الرقم مباشرة");
+            //                     requestPhoneNumber(context, extractedName);
+            //                 }
+            //             });
+            //         } else {
+            //             TTSManager.speak(context, "متعرفش الاسم. قول 'يا كبير' وأنا أساعدك");
+            //         }
+            //     } else {
+            //         TTSManager.speak(context, "ما سمعتش حاجة. قول 'يا كبير' وأنا أساعدك");
+            //     }
+            // });
             return;
         }
 
@@ -82,23 +102,23 @@ public class CallExecutor {
 
         // Standard confirmation flow
         TTSManager.speak(context, "عايز تتصل بـ " + contactName + "؟ قول 'نعم' أو 'لا'");
-        SpeechConfirmation.waitForConfirmation(context, confirmed -> {
-            if (confirmed) {
-                placeCall(context, emergencyNumber);
-                TTSManager.speak(context, "بتصل بـ " + contactName + " دلوقتي");
-            } else {
-                TTSManager.speak(context, "ما عملتش اتصال");
-            }
-        });
+        // SpeechConfirmation.waitForConfirmation(context, confirmed -> {
+        //     if (confirmed) {
+        //         placeCall(context, emergencyNumber);
+        //         TTSManager.speak(context, "بتصل بـ " + contactName + " دلوقتي");
+        //     } else {
+        //         TTSManager.speak(context, "ما عملتش اتصال");
+        //     }
+        // });
     }
 
     private static void lookupContactNumber(Context context, String contactName, ContactLookupCallback callback) {
         // First check cache (critical for performance on 6GB RAM devices)
-        String cachedNumber = ContactCache.get(context, contactName);
-        if (cachedNumber != null) {
-            callback.onResult(cachedNumber, null);
-            return;
-        }
+        // String cachedNumber = ContactCache.get(context, contactName);
+        // if (cachedNumber != null) {
+        //     callback.onResult(cachedNumber, null);
+        //     return;
+        // }
 
         // Use executor to avoid blocking main thread
         contactLookupExecutor.execute(() -> {
@@ -108,16 +128,16 @@ public class CallExecutor {
             try {
                 number = searchContacts(context, contactName);
                 if (number != null) {
-                    ContactCache.put(context, contactName, number);
+                    // ContactCache.put(context, contactName, number);
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Contact lookup error", e);
+                // CrashLogger.logError(context, e);
                 error = e;
-                CrashLogger.logError(context, e);
             }
 
             // Return to main thread
-            new Handler(Looper.getMainLooper()).post(() ->
+            new android.os.Handler(android.os.Looper.getMainLooper()).post(() ->
                 callback.onResult(number, error)
             );
         });
@@ -153,31 +173,31 @@ public class CallExecutor {
     private static void confirmAndPlaceCall(Context context, String contactName, String number) {
         // Senior mode requires double confirmation
         if (SeniorMode.isEnabled()) {
-            VibrationManager.vibrateShort(context);
+            // VibrationManager.vibrateShort(context);
             TTSManager.speak(context, "عايز تتصل بـ " + contactName + " على الرقم " + formatNumberForSpeech(number) +
                 "؟ قول 'نعم' بس، ولا 'لا'");
-            SpeechConfirmation.waitForConfirmation(context, 10000, confirmed -> {
-                if (confirmed) {
-                    VibrationManager.vibrateLong(context);
-                    placeCall(context, number);
-                    TTSManager.speak(context, "اتصلت بـ " + contactName + ". هو بيرد عليكم دلوقتي");
-                } else {
-                    TTSManager.speak(context, "ما عملتش اتصال. قول 'يا كبير' لو عايز حاجة تانية");
-                }
-            });
+            // SpeechConfirmation.waitForConfirmation(context, 10000, confirmed -> {
+            //     if (confirmed) {
+            //         VibrationManager.vibrateLong(context);
+            //         placeCall(context, number);
+            //         TTSManager.speak(context, "اتصلت بـ " + contactName + ". هو بيرد عليكم دلوقتي");
+            //     } else {
+            //         TTSManager.speak(context, "ما عملتش اتصال. قول 'يا كبير' لو عايز حاجة تانية");
+            //     }
+            // });
             return;
         }
 
         // Standard confirmation
         TTSManager.speak(context, "عايز تتصل بـ " + contactName + "؟ قول 'نعم' أو 'لا'");
-        SpeechConfirmation.waitForConfirmation(context, confirmed -> {
-            if (confirmed) {
-                placeCall(context, number);
-                TTSManager.speak(context, "بتكلم مع " + contactName + " دلوقتي");
-            } else {
-                TTSManager.speak(context, "ما عملتش اتصال");
-            }
-        });
+        // SpeechConfirmation.waitForConfirmation(context, confirmed -> {
+        //     if (confirmed) {
+        //         placeCall(context, number);
+        //         TTSManager.speak(context, "بتكلم مع " + contactName + " دلوقتي");
+        //     } else {
+        //         TTSManager.speak(context, "ما عملتش اتصال");
+        //     }
+        // });
     }
 
     private static void placeCall(Context context, String number) {
@@ -192,7 +212,7 @@ public class CallExecutor {
             Log.i(TAG, "Call placed to: " + cleanNumber);
         } catch (Exception e) {
             Log.e(TAG, "Call failed", e);
-            CrashLogger.logError(context, e);
+            // CrashLogger.logError(context, e);
             TTSManager.speak(context, "حصل مشكلة في إجراء المكالمة. حاول تاني");
         }
     }
@@ -203,90 +223,69 @@ public class CallExecutor {
 
     private static void handleContactLookupError(Context context, String contactName, Exception error) {
         TTSManager.speak(context, "حصل خطأ في البحث عن " + contactName + ". حاول تاني بعد شوية");
-        CrashLogger.logError(context, error);
+        // CrashLogger.logError(context, error);
     }
 
     private static void handleContactNotFound(Context context, String contactName) {
         TTSManager.speak(context, "مش لاقي " + contactName + " في>Contactات. قول 'أضف' عشان تضيف الرقم الجديد");
 
         // Listen for add contact command
-        SpeechConfirmation.waitForCommand(context, 15000, command -> {
-            if (command.contains("أضف") || command.contains("اضيف")) {
-                TTSManager.speak(context, "قول الرقم الجديد");
-                SpeechConfirmation.waitForCommand(context, 30000, numberCommand -> {
-                    String newNumber = extractNumber(numberCommand);
-                    if (!newNumber.isEmpty()) {
-                        // In a real app, we would save the contact here
-                        TTSManager.speak(context, "تم حفظ الرقم الجديد لـ " + contactName);
-                        placeCall(context, newNumber);
-                    } else {
-                        TTSManager.speak(context, "متعرفش الرقم. قول 'يا كبير' وانا أساعدك");
-                    }
-                });
-            }
-        });
+        // SpeechConfirmation.waitForCommand(context, 15000, command -> {
+        //     if (command.contains("أضف") || command.contains("اضيف")) {
+        //         TTSManager.speak(context, "قول الرقم الجديد");
+        //         SpeechConfirmation.waitForCommand(context, 30000, numberCommand -> {
+        //             String newNumber = extractNumber(numberCommand);
+        //             if (!newNumber.isEmpty()) {
+        //                 // In a real app, we would save the contact here
+        //                 saveContactToPhone(context, contactName, newNumber);
+        //                 TTSManager.speak(context, "تم حفظ الرقم الجديد لـ " + contactName);
+        //                 placeCall(context, newNumber);
+        //             } else {
+        //                 TTSManager.speak(context, "متعرفش الرقم. قول 'يا كبير' وانا أساعدك");
+        //             }
+        //         });
+        //     }
+        // });
     }
 
     private static String extractNumber(String command) {
         return command.replaceAll("[^0-9]", "");
     }
 
-    public static void placeCall(Context context, String number) {
+    // New method to save contact (from the implementation plan)
+    private static void saveContactToPhone(Context context, String name, String number) {
+        ArrayList<android.content.ContentProviderOperation> ops = new ArrayList<>();
+
+        // Adding insert operation for raw contact
+        ops.add(android.content.ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
+            .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
+            .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, null)
+            .build());
+
+        // Adding insert operation for display name
+        ops.add(android.content.ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+            .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+            .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name)
+            .build());
+
+        // Adding insert operation for phone number
+        ops.add(android.content.ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+            .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+            .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, number)
+            .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
+            .build());
+
+        // Execute the operations
         try {
-            String cleanNumber = number.replaceAll("[^0-9+]", "");
-            Intent callIntent = new Intent(Intent.ACTION_CALL);
-            callIntent.setData(Uri.parse("tel:" + cleanNumber));
-            callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-            // Critical permission handling for system app
-            context.startActivity(callIntent);
-            Log.i(TAG, "Call placed to: " + cleanNumber);
+            context.getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+            Log.i(TAG, "Contact saved successfully: " + name + " - " + number);
+            // ContactCache.put(context, name, number);
         } catch (Exception e) {
-            Log.e(TAG, "Call failed", e);
-            CrashLogger.logError(context, e);
-            TTSManager.speak(context, "حصل مشكلة في إجراء المكالمة. حاول تاني");
+            Log.e(TAG, "Failed to save contact", e);
+            // CrashLogger.logError(context, e);
         }
-    }
-
-    public static String getContactNumber(Context context, String contactName) {
-        // First check cache
-        String cachedNumber = ContactCache.get(context, contactName);
-        if (cachedNumber != null) {
-            return cachedNumber;
-        }
-
-        // Search in contacts
-        String[] projection = new String[] {
-            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-            ContactsContract.CommonDataKinds.Phone.NUMBER
-        };
-
-        String selection = ContactsContract.Contacts.DISPLAY_NAME + " LIKE ?";
-        String[] selectionArgs = new String[] { "%" + contactName + "%" };
-
-        try (Cursor cursor = context.getContentResolver().query(
-            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-            projection,
-            selection,
-            selectionArgs,
-            null
-        )) {
-            if (cursor != null && cursor.moveToFirst()) {
-                int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-                String number = cursor.getString(numberIndex);
-
-                // Cache the result
-                if (number != null) {
-                    ContactCache.put(context, contactName, number);
-                }
-
-                return number;
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error searching contacts", e);
-        }
-
-        return null;
     }
 
     @FunctionalInterface

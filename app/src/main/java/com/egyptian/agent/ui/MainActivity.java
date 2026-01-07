@@ -16,6 +16,7 @@ import com.egyptian.agent.R;
 import com.egyptian.agent.accessibility.SeniorMode;
 import com.egyptian.agent.core.TTSManager;
 import com.egyptian.agent.core.VoiceService;
+import com.egyptian.agent.executors.EmergencyHandler;
 import com.egyptian.agent.utils.SystemAppHelper;
 import java.util.ArrayList;
 import java.util.List;
@@ -174,15 +175,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void hideUIElements() {
-        activateSeniorModeButton.setVisibility(View.GONE);
-        startListeningButton.setVisibility(View.GONE);
-        testEmergencyButton.setVisibility(View.GONE);
+        if (activateSeniorModeButton != null) activateSeniorModeButton.setVisibility(View.GONE);
+        if (startListeningButton != null) startListeningButton.setVisibility(View.GONE);
+        if (testEmergencyButton != null) testEmergencyButton.setVisibility(View.GONE);
     }
 
     private void showUIElements() {
-        activateSeniorModeButton.setVisibility(View.VISIBLE);
-        startListeningButton.setVisibility(View.VISIBLE);
-        testEmergencyButton.setVisibility(View.VISIBLE);
+        if (activateSeniorModeButton != null) activateSeniorModeButton.setVisibility(View.VISIBLE);
+        if (startListeningButton != null) startListeningButton.setVisibility(View.VISIBLE);
+        if (testEmergencyButton != null) testEmergencyButton.setVisibility(View.VISIBLE);
     }
 
     private void startListening() {
@@ -198,8 +199,7 @@ public class MainActivity extends AppCompatActivity {
         updateStatus("جاري اختبار وضع الطوارئ...");
 
         // Trigger emergency handler
-        EmergencyHandler emergencyHandler = new EmergencyHandler(this);
-        emergencyHandler.trigger(this, true);
+        EmergencyHandler.trigger(this, true);
 
         updateStatus("وضع الطوارئ تم تنفيذه بنجاح");
     }

@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">الوكيل المصري</string>
-    <string name="app_description">مساعد صوتي مصري 100%</string>
+    <string name="welcome_message">مرحباً بك في الوكيل المصري</string>
+    <string name="activate_senior_mode">تفعيل وضع كبار السن</string>
+    <string name="start_listening">ابدأ الاستماع</string>
+    <string name="test_emergency">اختبار الطوارئ</string>
+    <string name="status_waiting">بيانتظر تفعيل...</string>
+    <string name="status_listening">بيسمع... قول أوامرك</string>
+    <string name="senior_mode_activated">وضع كبار السن تم تفعيله</string>
+    <string name="senior_mode_deactivated">وضع كبار السن تم تعطيله</string>
 </resources>
