@@ -117,14 +117,14 @@ public class SeniorMode {
 
         // Offer to disable senior mode
         TTSManager.speak(context, "عايز تخرج من وضع كبار السن؟ قول 'نعم'");
-        // SpeechConfirmation.waitForConfirmation(context, 15000, confirmed -> {
-        //     if (confirmed) {
-        //         disable(context);
-        //     } else {
-        //         // In a real app, we would explain how to exit senior mode later
-        //         TTSManager.speak(context, "مفيش مشكلة. قول 'يا كبير، خرج من وضع كبار السن' في أي وقت");
-        //     }
-        // });
+        SpeechConfirmation.waitForConfirmation(context, 15000, confirmed -> {
+            if (confirmed) {
+                disable(context);
+            } else {
+                // In a real app, we would explain how to exit senior mode later
+                TTSManager.speak(context, "مفيش مشكلة. قول 'يا كبير، خرج من وضع كبار السن' في أي وقت");
+            }
+        });
     }
 
     public static void handleEmergency(Context context) {

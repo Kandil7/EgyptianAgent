@@ -292,4 +292,34 @@ public class CallExecutor {
     private interface ContactLookupCallback {
         void onResult(String number, Exception error);
     }
+
+    // Public method to get contact number (needed by other classes)
+    public static String getContactNumber(Context context, String contactName) {
+        // Synchronous lookup for use in other classes
+        // This is a simplified version - in production, this should be asynchronous
+        String[] projection = new String[] {
+            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+            ContactsContract.CommonDataKinds.Phone.NUMBER
+        };
+
+        String selection = ContactsContract.Contacts.DISPLAY_NAME + " LIKE ?";
+        String[] selectionArgs = new String[] { "%" + contactName + "%" };
+
+        try (android.database.Cursor cursor = context.getContentResolver().query(
+            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
+            null
+        )) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                return cursor.getString(numberIndex);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error searching contacts", e);
+        }
+
+        return null;
+    }
 }

@@ -111,6 +111,16 @@
             </intent-filter>
         </receiver>
 
+        <!-- Emergency follow-up receiver -->
+        <receiver
+            android:name=".executors.EmergencyFollowupReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.egyptian.agent.action.EMERGENCY_FOLLOWUP" />
+            </intent-filter>
+        </receiver>
+
         <!-- Admin receiver (for device admin privileges) -->
         <receiver
             android:name=".receivers.AdminReceiver"

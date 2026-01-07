@@ -335,8 +335,34 @@ public class WhatsAppExecutor {
 
     private static String getGuardianNumber(Context context) {
         // In a real app, this would retrieve from secure storage
-        // For now, return a placeholder
-        return "01000000000";
+        android.content.SharedPreferences prefs = context.getSharedPreferences("egyptian_agent_prefs", Context.MODE_PRIVATE);
+        String guardianNumber = prefs.getString("guardian_phone_number", "");
+
+        // If not set in preferences, try to get from emergency contacts
+        if (guardianNumber.isEmpty()) {
+            guardianNumber = getFirstEmergencyContact(context);
+        }
+
+        // If still empty, use a default number that can be set by the user
+        if (guardianNumber.isEmpty()) {
+            guardianNumber = prefs.getString("default_guardian_number", "01000000000");
+        }
+
+        return guardianNumber;
+    }
+
+    // Helper method to get first emergency contact
+    private static String getFirstEmergencyContact(Context context) {
+        String[] emergencyKeywords = {"ماما", "ابويا", "اختي", "اخوي", "زوجتي", "زوجي", "ابنتي", "ابني"};
+
+        for (String keyword : emergencyKeywords) {
+            String number = CallExecutor.getContactNumber(context, keyword);
+            if (number != null && !number.isEmpty()) {
+                return number;
+            }
+        }
+
+        return "";
     }
 
     // Placeholder method for getting contact number

@@ -193,6 +193,49 @@ public class MainActivity extends AppCompatActivity {
         startService(serviceIntent);
 
         updateStatus("بيسمع... قول أوامرك");
+
+        // In a real app, we would show visual feedback during listening
+        showListeningAnimation();
+    }
+
+    // New method for visual feedback during listening
+    private void showListeningAnimation() {
+        // Create a pulsing animation for the microphone icon
+        android.view.animation.Animation pulse = new android.view.animation.ScaleAnimation(
+            1f, 1.2f, 1f, 1.2f,
+            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f,
+            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f
+        );
+        pulse.setDuration(600);
+        pulse.setRepeatCount(android.view.animation.Animation.INFINITE);
+        pulse.setRepeatMode(android.view.animation.Animation.REVERSE);
+        pulse.setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator());
+
+        // Find the microphone indicator view (assuming it exists in layout)
+        android.widget.ImageView micIndicator = findViewById(R.id.micIndicator);
+        if (micIndicator != null) {
+            micIndicator.setVisibility(android.view.View.VISIBLE);
+            micIndicator.startAnimation(pulse);
+        }
+
+        // Change status text color during listening (if we have a reference)
+        if (statusTextView != null) {
+            // Using a placeholder color - would need to define in colors.xml in real app
+            statusTextView.setTextColor(android.graphics.Color.parseColor("#FF5722")); // Orange color for listening
+        }
+    }
+
+    // Stop animation when not listening
+    private void stopListeningAnimation() {
+        android.widget.ImageView micIndicator = findViewById(R.id.micIndicator);
+        if (micIndicator != null) {
+            micIndicator.clearAnimation();
+            micIndicator.setVisibility(android.view.View.GONE);
+        }
+        if (statusTextView != null) {
+            // Reset to default color (would need to define in colors.xml in real app)
+            statusTextView.setTextColor(android.graphics.Color.parseColor("#000000")); // Black default
+        }
     }
 
     private void triggerTestEmergency() {
