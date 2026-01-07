@@ -11,6 +11,7 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Locale;
 import com.egyptian.agent.accessibility.SeniorMode;
+import com.egyptian.agent.utils.CrashLogger;
 
 public class WakeWordDetector {
 
@@ -68,7 +69,7 @@ public class WakeWordDetector {
             Log.i(TAG, "Wake word detector initialized successfully");
         } catch (Exception e) {
             Log.e(TAG, "Failed to initialize wake word detector", e);
-            // CrashLogger.logError(context, e);
+            CrashLogger.logError(context, e);
             TTSManager.speak(context, "حصل خطأ في تهيئة كاشف الكلمة التنشيطية");
         }
     }

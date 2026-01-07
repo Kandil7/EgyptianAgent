@@ -276,7 +276,7 @@ public class TTSManager {
                 normalPitch = pitch;
             }
         } else {
-            // CrashLogger.logWarning(context, "TTS not initialized when setting pitch");
+            CrashLogger.logWarning(context, "TTS not initialized when setting pitch");
         }
     }
 
