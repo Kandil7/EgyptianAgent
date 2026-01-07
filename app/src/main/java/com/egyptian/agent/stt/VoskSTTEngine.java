@@ -70,7 +70,7 @@ public class VoskSTTEngine {
 
         } catch (Exception e) {
             Log.e(TAG, "Failed to initialize STT engine", e);
-            // CrashLogger.logError(context, e);
+            CrashLogger.logError(context, e);
             throw new Exception("Failed to initialize speech recognition engine", e);
         }
     }
@@ -124,7 +124,7 @@ public class VoskSTTEngine {
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "Error during audio recording", e);
-                    // CrashLogger.logError(context, e);
+                    CrashLogger.logError(context, e);
                     isListening = false;
                 }
             }
@@ -146,7 +146,7 @@ public class VoskSTTEngine {
             }
         } catch (Exception e) {
             Log.e(TAG, "Error processing audio", e);
-            // CrashLogger.logError(context, e);
+            CrashLogger.logError(context, e);
             if (callback != null) {
                 callback.onError(e);
             }

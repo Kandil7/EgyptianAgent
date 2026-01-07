@@ -11,6 +11,7 @@ import com.egyptian.agent.accessibility.SeniorMode;
 import com.egyptian.agent.core.IntentType;
 import com.egyptian.agent.stt.EgyptianNormalizer;
 import com.egyptian.agent.core.TTSManager;
+import com.egyptian.agent.utils.CrashLogger;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
