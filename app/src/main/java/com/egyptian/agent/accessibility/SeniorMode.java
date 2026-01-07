@@ -1,0 +1,137 @@
+package com.egyptian.agent.accessibility;
+
+import android.content.Context;
+import android.speech.tts.TextToSpeech;
+import android.util.Log;
+import com.egyptian.agent.core.IntentType;
+import com.egyptian.agent.executors.EmergencyHandler;
+import com.egyptian.agent.utils.VibrationManager;
+import java.util.*;
+
+public class SeniorMode {
+
+    private static final String TAG = "SeniorMode";
+    public static boolean isEnabled = false;
+
+    // Simplified command set for seniors
+    private static final Set<String> ALLOWED_COMMANDS = new HashSet<>(Arrays.asList(
+        "اتصل", "كلم", "رن", "يا نجدة", "استغاثة", "الوقت كام",
+        "الساعة كام", "نبهني", "انبهني", "واتساب", "رسالة"
+    ));
+
+    private static final Set<IntentType> ALLOWED_INTENTS = new HashSet<>(Arrays.asList(
+        IntentType.CALL_CONTACT,
+        IntentType.EMERGENCY,
+        IntentType.READ_TIME,
+        IntentType.SET_ALARM,
+        IntentType.SEND_WHATSAPP,
+        IntentType.READ_MISSED_CALLS
+    ));
+
+    private static final float SENIOR_TTS_RATE = 0.75f; // Slower speech
+    private static final float SENIOR_TTS_VOLUME = 1.0f; // Maximum volume
+
+    public static void enable(Context context) {
+        if (isEnabled) return;
+
+        Log.i(TAG, "Enabling Senior Mode");
+        isEnabled = true;
+
+        // Apply senior-specific settings
+        applySeniorTtsSettings(context);
+        startFallDetection(context);
+        EmergencyHandler.enableSeniorMode();
+
+        // Special greeting for seniors
+        TTSManager.speak(context, "تم تفعيل وضع كبار السن. قول 'يا كبير' لأي حاجة.");
+
+        // Vibration confirmation
+        VibrationManager.vibratePattern(context, new long[]{0, 100, 200, 100});
+    }
+
+    public static void disable(Context context) {
+        if (!isEnabled) return;
+
+        Log.i(TAG, "Disabling Senior Mode");
+        isEnabled = false;
+
+        // Restore normal settings
+        restoreNormalTtsSettings(context);
+        stopFallDetection(context);
+        EmergencyHandler.disableSeniorMode();
+
+        TTSManager.speak(context, "تم إيقاف وضع كبار السن");
+        VibrationManager.vibrateShort(context);
+    }
+
+    public static boolean isCommandAllowed(String command) {
+        if (!isEnabled) return true;
+
+        // Always allow emergency commands
+        if (EmergencyHandler.isEmergency(command)) {
+            return true;
+        }
+
+        // Check against allowed commands
+        for (String allowedCommand : ALLOWED_COMMANDS) {
+            if (command.contains(allowedCommand)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean isIntentAllowed(IntentType intent) {
+        if (!isEnabled) return true;
+        return ALLOWED_INTENTS.contains(intent);
+    }
+
+    public static void applySeniorTtsSettings(Context context) {
+        TTSManager.setSpeechRate(context, SENIOR_TTS_RATE);
+        TTSManager.setVolume(context, SENIOR_TTS_VOLUME);
+        TTSManager.setPitch(context, 0.9f); // Slightly lower pitch for clarity
+    }
+
+    public static void restoreNormalTtsSettings(Context context) {
+        TTSManager.setSpeechRate(context, 1.0f);
+        TTSManager.setVolume(context, 0.9f);
+        TTSManager.setPitch(context, 1.0f);
+    }
+
+    private static void startFallDetection(Context context) {
+        FallDetector.start(context);
+    }
+
+    private static void stopFallDetection(Context context) {
+        FallDetector.stop(context);
+    }
+
+    public static void handleRestrictedCommand(Context context, String command) {
+        Log.w(TAG, "Blocked restricted command in senior mode: " + command);
+
+        // Vibrate to alert user
+        VibrationManager.vibrateShort(context);
+
+        // Explain limitations clearly
+        TTSManager.speak(context, "في وضع كبار السن، أنا بس أعرف أوامر بسيطة. قول 'يا كبير' وأنا أعلمك إياهم.");
+
+        // Offer to disable senior mode
+        TTSManager.speak(context, "عايز تخرج من وضع كبار السن؟ قول 'نعم'");
+        SpeechConfirmation.waitForConfirmation(context, 15000, confirmed -> {
+            if (confirmed) {
+                disable(context);
+            }
+        });
+    }
+
+    public static void handleEmergency(Context context) {
+        EmergencyHandler.trigger(context, true);
+
+        // Vibrate continuously until acknowledged
+        VibrationManager.vibrateEmergency(context);
+
+        // Clear, simple instructions
+        TTSManager.speak(context, "يا كبير! لقيت إنك وقعت. بيتصل بالإسعاف دلوقتي! إتقعد مكانك ومتتحركش.");
+    }
+}
