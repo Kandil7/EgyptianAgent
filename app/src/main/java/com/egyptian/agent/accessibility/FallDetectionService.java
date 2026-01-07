@@ -9,6 +9,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.util.Log;
+import com.egyptian.agent.utils.CrashLogger;
 
 public class FallDetectionService extends Service implements SensorEventListener {
 
@@ -40,6 +41,7 @@ public class FallDetectionService extends Service implements SensorEventListener
             sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         } else {
             Log.e(TAG, "Accelerometer not available on this device");
+            CrashLogger.logError(this, new Exception("Accelerometer not available on this device"));
         }
         
         // Start foreground service to keep it running

@@ -192,7 +192,7 @@ public class WhatsAppExecutor {
             Log.i(TAG, "WhatsApp message sent to: " + number);
         } catch (Exception e) {
             Log.e(TAG, "Error sending WhatsApp message", e);
-            // CrashLogger.logError(context, e);
+            CrashLogger.logError(context, e);
             TTSManager.speak(context, "حصل خطأ في إرسال الرسالة. حاول تاني");
         }
     }
@@ -245,7 +245,7 @@ public class WhatsAppExecutor {
             context.startActivity(chooser);
         } catch (Exception e) {
             Log.e(TAG, "Fallback sharing failed", e);
-            // CrashLogger.logError(context, e);
+            CrashLogger.logError(context, e);
         }
     }
 
@@ -303,7 +303,7 @@ public class WhatsAppExecutor {
             Log.i(TAG, "Emergency WhatsApp sent to: " + number);
         } catch (Exception e) {
             Log.e(TAG, "Failed to send emergency WhatsApp", e);
-            // CrashLogger.logError(context, e);
+            CrashLogger.logError(context, e);
             // Don't speak error in emergency situations
         }
     }
@@ -330,7 +330,7 @@ public class WhatsAppExecutor {
             Log.i(TAG, "Logs sent to guardian via WhatsApp");
         } catch (Exception e) {
             Log.e(TAG, "Failed to send logs to guardian", e);
-            // CrashLogger.logError(context, e);
+            CrashLogger.logError(context, e);
         }
     }
 

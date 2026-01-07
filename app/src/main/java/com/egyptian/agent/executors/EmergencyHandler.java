@@ -15,6 +15,7 @@ import android.util.Log;
 import com.egyptian.agent.accessibility.SeniorMode;
 import com.egyptian.agent.core.TTSManager;
 import com.egyptian.agent.core.VibrationManager;
+import com.egyptian.agent.utils.CrashLogger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -205,7 +206,7 @@ public class EmergencyHandler implements SensorEventListener {
                 // But for critical emergencies, we continue to all numbers
             } catch (Exception e) {
                 Log.e(TAG, "Failed to place emergency call to " + number, e);
-                // CrashLogger.logError(context, e);
+                CrashLogger.logError(context, e);
             }
         }
 
@@ -234,7 +235,7 @@ public class EmergencyHandler implements SensorEventListener {
             Log.i(TAG, "Emergency call placed to: " + number);
         } catch (Exception e) {
             Log.e(TAG, "Emergency call failed", e);
-            // CrashLogger.logError(context, e);
+            CrashLogger.logError(context, e);
             TTSManager.speak(context, "حصل مشكلة في إجراء مكالمة الطوارئ. حاول تاني");
         }
     }

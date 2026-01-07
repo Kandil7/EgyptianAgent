@@ -11,6 +11,7 @@ import android.util.Log;
 import com.egyptian.agent.core.TTSManager;
 import com.egyptian.agent.executors.EmergencyHandler;
 import com.egyptian.agent.core.VibrationManager;
+import com.egyptian.agent.utils.CrashLogger;
 
 public class FallDetector implements SensorEventListener {
 

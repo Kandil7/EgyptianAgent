@@ -9,6 +9,7 @@ import android.util.Log;
 import com.egyptian.agent.core.TTSManager;
 import com.egyptian.agent.executors.EmergencyHandler;
 import com.egyptian.agent.core.VibrationManager;
+import com.egyptian.agent.utils.CrashLogger;
 
 public class VolumeButtonReceiver extends BroadcastReceiver {
 
@@ -28,7 +29,7 @@ public class VolumeButtonReceiver extends BroadcastReceiver {
             }
         } catch (Exception e) {
             Log.e(TAG, "Error handling volume button press", e);
-            // CrashLogger.logError(context, e);
+            CrashLogger.logError(context, e);
         }
     }
 
