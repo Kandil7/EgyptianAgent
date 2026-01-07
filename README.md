@@ -1,102 +1,139 @@
-# 🇪🇬 الوكيل المصري - مساعد صوتي متكامل لكبار السن وضعاف البصر
+# Egyptian Agent - Voice Assistant for Seniors
 
-![Egyptian Agent Logo](docs/logo.png)
+## Overview
+The Egyptian Agent is a voice-controlled assistant designed specifically for Egyptian seniors and visually impaired users. It operates completely hands-free using voice commands in Egyptian dialect and runs as a system app on Honor X6c devices.
 
-**مساعد صوتي مصري 100%** يعمل بدون شاشة، مصمم خصيصًا لكبار السن وضعاف البصر على هواتف **Honor X6c** (وغيرها من الأجهزة المتوافقة).
+## Key Features
+- Voice-only interaction - no screen touch required
+- Senior Mode with slower, louder audio and automatic fall detection
+- Smart Emergencies with automatic connection to emergency services
+- Simple commands that understand Egyptian dialect
+- Offline operation for all core features
+- System-level access even when screen is locked
 
-## 🌟 المميزات الرئيسية
+## Target Device
+- **Primary Device**: Honor X6c (MediaTek Helio G81 Ultra, 6GB RAM)
+- **OS Requirements**: Android 12+
+- **Special Requirements**: Bootloader unlocked + Root (Magisk)
 
-- **بدون لمس الشاشة** - كل التفاعل صوتي باللهجة المصرية
-- **وضع كبار السن** - أصوات أبطأ وأعلى + كشف السقوط التلقائي
-- **طوارئ ذكية** - اتصال تلقائي بالنجدة والإسعاف في الحالات الحرجة
-- **أوامر مبسطة** - يفهم اللهجة المصرية اليومية ("رن على ماما"، "فايتة عليا")
-- **يعمل بدون إنترنت** - كل الميزات الأساسية تعمل offline
-- **مستوى نظام** - يعمل حتى الشاشة مقفولة
+## Installation Process
 
-## 📱 المتطلبات
+### 1. Prerequisites
+- Android SDK with build tools
+- ADB (Android Debug Bridge)
+- Device with unlocked bootloader and root access
 
-- **الجهاز المستهدف**: Honor X6c (MediaTek Helio G81 Ultra, 6GB RAM)
-- **نظام التشغيل**: Android 12+
-- **حالة الجهاز**: Bootloader مفتوح + Root (Magisk)
-- **المساحة المطلوبة**: 500MB خالية
-
-## 🚀 التثبيت
-
-### 1. الإعداد الأولي
+### 2. Device Preparation
 ```bash
-# فتح الـ Bootloader
+# Reboot to bootloader
 adb reboot bootloader
+
+# Unlock the bootloader (this will factory reset the device)
 fastboot oem unlock
 
-# تثبيت Magisk للحصول على Root
+# Flash patched boot image with Magisk for root access
 fastboot flash boot magisk_patched.img
 ```
 
-### 2. تثبيت التطبيق كـ System App
+### 3. Build and Install
 ```bash
-# بناء المشروع
-./build.sh --release --target honor-x6c
+# Build the application
+./gradlew assembleRelease
 
-# تثبيت كـ System App
+# Push APK to device
 adb push app/build/outputs/apk/release/EgyptianAgent-release.apk /sdcard/
+
+# Install as system app
 adb shell su -c "mkdir -p /system/priv-app/EgyptianAgent"
 adb shell su -c "cp /sdcard/EgyptianAgent-release.apk /system/priv-app/EgyptianAgent/"
 adb shell su -c "chmod 644 /system/priv-app/EgyptianAgent/EgyptianAgent-release.apk"
 ```
 
-### 3. تطبيق إصلاحات بطارية Honor
+### 4. Apply Honor-Specific Optimizations
 ```bash
+# Push and execute battery optimization fixes
 adb push scripts/honor_battery_fix.sh /sdcard/
 adb shell su -c "sh /sdcard/honor_battery_fix.sh"
 ```
 
-### 4. إعادة التشغيل
+### 5. Reboot Device
 ```bash
 adb reboot
 ```
 
-## 🎯 الاستخدام
+## Usage Instructions
 
-### أوامر أساسية:
-- **"يا صاحبي"** - تفعيل المساعد
-- **"اتصل بأمي"** - الاتصال برقم الأم
-- **"فايتة عليا"** - قراءة المكالمات الفايتة
-- **"نبهني بكرة الصبح"** - ضبط منبه
-- **"نجدة"** - الاتصال بالطوارئ فورًا
+### Basic Commands
+- **"يا صاحبي"** - Activate the assistant
+- **"اتصل بأمي"** - Call mother
+- **"فايتة عليا"** - Read missed calls
+- **"نبهني بكرة الصبح"** - Set alarm for tomorrow morning
+- **"نجدة"** - Connect to emergency services immediately
 
-### وضع كبار السن:
-- **تفعيل الوضع**: قول "يا كبير، شغل وضع كبار السن"
-- **مميزات إضافية**:
-  - كشف السقوط التلقائي
-  - أصوات أبطأ وأعلى
-  - أوامر مبسطة (5 أوامر أساسية فقط)
-  - تأكيد مزدوج لكل إجراء
+### Senior Mode Features
+- **Activate**: Say "يا كبير، شغل وضع كبار السن"
+- **Benefits**:
+  - Slower, clearer speech
+  - Simplified command set
+  - Double confirmation for actions
+  - Automatic fall detection
 
-## 🤝 الدعم الفني
+### Emergency Features
+- **Automatic fall detection** with accelerometer
+- **Triple-volume-button press** for emergency
+- **Direct connection** to emergency services
+- **Location sharing** in emergencies
 
-- **واتساب الدعم**: [+201111111111](https://wa.me/201111111111)
-- **مجموعة فيسبوك**: [الوكيل المصري - المجتمع](https://facebook.com/groups/egyptian.agent)
-- **البريد الإلكتروني**: support@egyptian-agent.dev
+## Testing and Optimization for Honor X6c
 
-## 📄 التوثيق الكامل
+### Performance Testing
+1. **Memory Usage**: Monitor RAM usage during extended operation
+   ```bash
+   adb shell dumpsys meminfo com.egyptian.agent
+   ```
 
-- [الدليل الفني](docs/technical_documentation.md)
-- [دليل المستخدم](docs/user_manual.md)
-- [سياسة الخصوصية](docs/privacy_policy.md)
+2. **Battery Impact**: Test battery drain over 24-hour period
+   ```bash
+   adb shell dumpsys batterystats com.egyptian.agent
+   ```
 
-## 🤖 خطة التطوير المستقبلية
+3. **Wake Lock Verification**: Ensure service stays active
+   ```bash
+   adb shell dumpsys power | grep "Wake Lock"
+   ```
 
-- دعم كامل للـ WhatsApp Business API
-- تكامل مع أنظمة المنزل الذكي
-- تطبيق iOS مع دعم VoiceOver الكامل
-- شراكة مع وزارة التضامن الاجتماعي
+### Egyptian Dialect Recognition Testing
+- Test common Egyptian expressions and variations
+- Verify contact name recognition in various accents
+- Validate time and date expressions understanding
 
-## 📜 الترخيص
+### Accessibility Feature Testing
+- Test voice feedback clarity and volume
+- Verify vibration patterns for different notifications
+- Confirm senior mode functionality
 
-الكود مفتوح المصدر تحت رخصة **MIT**
-© 2026 الوكيل المصري - جميع الحقوق محفوظة
+### Emergency Feature Testing
+- Test fall detection algorithm with various movements
+- Verify emergency contact procedures
+- Check triple-volume-button emergency activation
 
----
+## Known Limitations
+- Requires rooted device for system-level access
+- Optimized specifically for Honor X6c hardware
+- Offline functionality limited by local model size
+- May conflict with other accessibility services
 
-**"أعظم التكنولوجيا هي اللي بتخدم الإنسان، مش العكس"**
-هذا المشروع مخصص لتحسين حياة كبار السن وضعاف البصر في مصر والعالم العربي.
+## Troubleshooting
+- **Assistant not responding**: Ensure microphone permissions are granted
+- **Call functionality not working**: Verify CALL_PHONE permission and contact access
+- **Service stops unexpectedly**: Check battery optimization settings
+- **Poor voice recognition**: Ensure quiet environment and clear pronunciation
+
+## Contributing
+We welcome contributions that improve accessibility, enhance Egyptian dialect understanding, or optimize performance for the target hardware.
+
+## License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+This project aims to bridge the digital divide for elderly Egyptians and visually impaired users, making technology more accessible and human-centered.

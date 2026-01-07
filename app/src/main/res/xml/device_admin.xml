@@ -1,6 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <device-admin xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-policies>
-        <!-- No specific policies needed for this app, but the receiver requires this file -->
+        <!-- Allow the app to reset passwords -->
+        <reset-password />
+        
+        <!-- Allow the app to watch login attempts -->
+        <watch-login />
+        
+        <!-- Allow the app to monitor screen locks -->
+        <force-lock />
+        
+        <!-- Allow the app to wipe data (with user consent) -->
+        <wipe-data />
     </uses-policies>
+    
+    <support-files>
+        <!-- Specify that this admin supports device owner features -->
+        <file-group>
+            <file-name>device_owner_config.xml</file-name>
+        </file-group>
+    </support-files>
 </device-admin>
