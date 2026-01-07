@@ -4,7 +4,9 @@ import android.content.Context;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import com.egyptian.agent.core.IntentType;
+import com.egyptian.agent.core.TTSManager;
 import com.egyptian.agent.executors.EmergencyHandler;
+import com.egyptian.agent.utils.SpeechConfirmation;
 import com.egyptian.agent.utils.VibrationManager;
 import java.util.*;
 

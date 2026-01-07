@@ -231,6 +231,64 @@ public class CallExecutor {
         return command.replaceAll("[^0-9]", "");
     }
 
+    public static void placeCall(Context context, String number) {
+        try {
+            String cleanNumber = number.replaceAll("[^0-9+]", "");
+            Intent callIntent = new Intent(Intent.ACTION_CALL);
+            callIntent.setData(Uri.parse("tel:" + cleanNumber));
+            callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            // Critical permission handling for system app
+            context.startActivity(callIntent);
+            Log.i(TAG, "Call placed to: " + cleanNumber);
+        } catch (Exception e) {
+            Log.e(TAG, "Call failed", e);
+            CrashLogger.logError(context, e);
+            TTSManager.speak(context, "حصل مشكلة في إجراء المكالمة. حاول تاني");
+        }
+    }
+
+    public static String getContactNumber(Context context, String contactName) {
+        // First check cache
+        String cachedNumber = ContactCache.get(context, contactName);
+        if (cachedNumber != null) {
+            return cachedNumber;
+        }
+
+        // Search in contacts
+        String[] projection = new String[] {
+            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+            ContactsContract.CommonDataKinds.Phone.NUMBER
+        };
+
+        String selection = ContactsContract.Contacts.DISPLAY_NAME + " LIKE ?";
+        String[] selectionArgs = new String[] { "%" + contactName + "%" };
+
+        try (Cursor cursor = context.getContentResolver().query(
+            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
+            null
+        )) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                String number = cursor.getString(numberIndex);
+
+                // Cache the result
+                if (number != null) {
+                    ContactCache.put(context, contactName, number);
+                }
+
+                return number;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error searching contacts", e);
+        }
+
+        return null;
+    }
+
     @FunctionalInterface
     private interface ContactLookupCallback {
         void onResult(String number, Exception error);

@@ -2,13 +2,16 @@ package com.egyptian.agent.core;
 
 import android.app.*;
 import android.content.*;
+import android.media.AudioManager;
 import android.os.*;
 import android.speech.tts.*;
 import android.util.*;
 import com.egyptian.agent.accessibility.SeniorMode;
-import com.egyptian.agent.executors.EmergencyHandler;
+import com.egyptian.agent.core.IntentType;
+import com.egyptian.agent.core.IntentRouter;
+import com.egyptian.agent.executors.*;
 import com.egyptian.agent.stt.VoskSTTEngine;
-import com.egyptian.agent.utils.SystemAppHelper;
+import com.egyptian.agent.utils.*;
 import java.util.*;
 
 public class VoiceService extends Service implements AudioManager.OnAudioFocusChangeListener {
@@ -43,7 +46,7 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
         SystemAppHelper.keepAlive(this);
 
         // Auto-start if device rebooted
-        registerBootReceiver();
+        // registerBootReceiver(); // This is handled by the BootReceiver class in the manifest
     }
 
     private void initializeWakeLock() {
@@ -72,8 +75,9 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
     }
 
     private void initializeWakeWord() {
-        wakeWordDetector = new WakeWordDetector(this, audioBuffer -> {
-            if (wakeWordDetector.isWakeWordDetected(audioBuffer)) {
+        wakeWordDetector = new WakeWordDetector(this, new WakeWordDetector.WakeWordCallback() {
+            @Override
+            public void onWakeWordDetected() {
                 handleWakeWordDetected();
             }
         });
@@ -146,6 +150,16 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
             default:
                 handleUnknownCommand(command);
         }
+    }
+
+    private void handleUnknownCommand(String command) {
+        Log.w(TAG, "Unknown command: " + command);
+        TTSManager.speak(this, "مافهمتش الأمر ده. قول 'يا صاحبي' علشان تبدأ تاني.");
+    }
+
+    private void handleSeniorRestrictedCommand(String command) {
+        Log.w(TAG, "Restricted command in senior mode: " + command);
+        SeniorMode.handleRestrictedCommand(this, command);
     }
 
     private void handleEmergencyCommand() {
