@@ -102,7 +102,7 @@ public class WakeWordDetector {
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "Error during audio recording", e);
-                    // CrashLogger.logError(context, e);
+                    CrashLogger.logError(context, e);
                 }
             }
 
@@ -143,7 +143,7 @@ public class WakeWordDetector {
             }
         } catch (Exception e) {
             Log.e(TAG, "Error processing audio", e);
-            // CrashLogger.logError(context, e);
+            CrashLogger.logError(context, e);
         } finally {
             isDetecting = false;
         }

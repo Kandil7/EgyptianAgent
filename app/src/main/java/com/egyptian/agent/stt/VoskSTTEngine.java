@@ -11,6 +11,7 @@ import java.nio.ByteOrder;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import com.egyptian.agent.core.TTSManager;
+import com.egyptian.agent.utils.CrashLogger;
 
 public class VoskSTTEngine {
 
