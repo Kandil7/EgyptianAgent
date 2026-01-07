@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Drawable resources would go here -->
+    <!-- For now, we'll create a placeholder -->
+    <color name="primary_color">#1A237E</color>
+    <color name="primary_dark_color">#151A63</color>
+    <color name="accent_color">#5C6BC0</color>
+</resources>

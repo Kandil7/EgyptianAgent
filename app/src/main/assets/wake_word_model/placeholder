@@ -1,0 +1,5 @@
+# This is a placeholder for the wake word detection model
+# In a real implementation, this would be the actual wake word model
+# The model would be placed in app/src/main/assets/wake_word_model/
+# For now, we'll just create a placeholder file
+PLACEHOLDER FOR WAKE WORD MODEL FILES
