@@ -36,24 +36,24 @@ public class WhatsAppExecutor {
         if (contactName.isEmpty()) {
             TTSManager.speak(context, "لمين عايز تبعت الرسالة؟ قول الاسم");
             // In a real app, we would wait for the next voice input
-            // SpeechConfirmation.waitForCommand(context, 15000, nextCommand -> {
-            //     if (!nextCommand.isEmpty()) {
-            //         String extractedName = EgyptianNormalizer.extractContactName(EgyptianNormalizer.normalize(nextCommand));
-            //         if (!extractedName.isEmpty()) {
-            //             String number = getContactNumber(context, extractedName);
-            //             if (number != null) {
-            //                 handleWhatsAppSend(context, number, extractedName, message.isEmpty() ? " " : message);
-            //             } else {
-            //                 TTSManager.speak(context, "مش لاقي " + extractedName + " في>Contactات. قول الرقم مباشرة");
-            //                 // Wait for number input
-            //             }
-            //         } else {
-            //             TTSManager.speak(context, "متعرفش الاسم. قول 'يا كبير' وأنا أساعدك");
-            //         }
-            //     } else {
-            //         TTSManager.speak(context, "ما سمعتش حاجة. قول 'يا كبير' وأنا أساعدك");
-            //     }
-            // });
+            SpeechConfirmation.waitForCommand(context, 15000, nextCommand -> {
+                if (!nextCommand.isEmpty()) {
+                    String extractedName = EgyptianNormalizer.extractContactName(EgyptianNormalizer.normalize(nextCommand));
+                    if (!extractedName.isEmpty()) {
+                        String number = getContactNumber(context, extractedName);
+                        if (number != null) {
+                            handleWhatsAppSend(context, number, extractedName, message.isEmpty() ? " " : message);
+                        } else {
+                            TTSManager.speak(context, "مش لاقي " + extractedName + " في>Contactات. قول الرقم مباشرة");
+                            // Wait for number input
+                        }
+                    } else {
+                        TTSManager.speak(context, "متعرفش الاسم. قول 'يا كبير' وأنا أساعدك");
+                    }
+                } else {
+                    TTSManager.speak(context, "ما سمعتش حاجة. قول 'يا كبير' وأنا أساعدك");
+                }
+            });
             return;
         }
 
@@ -63,14 +63,14 @@ public class WhatsAppExecutor {
         if (contactNumber == null) {
             TTSManager.speak(context, "مش لاقي " + contactName + " في>Contactات. قول الرقم مباشرة");
             // In a real app, we would wait for number input
-            // SpeechConfirmation.waitForCommand(context, 20000, numberCommand -> {
-            //     String extractedNumber = extractNumberFromVoice(EgyptianNormalizer.normalize(numberCommand));
-            //     if (!extractedNumber.isEmpty()) {
-            //         handleWhatsAppSend(context, extractedNumber, contactName, message.isEmpty() ? " " : message);
-            //     } else {
-            //         TTSManager.speak(context, "متعرفش الرقم. قول 'يا كبير' وانا أساعدك");
-            //     }
-            // });
+            SpeechConfirmation.waitForCommand(context, 20000, numberCommand -> {
+                String extractedNumber = extractNumberFromVoice(EgyptianNormalizer.normalize(numberCommand));
+                if (!extractedNumber.isEmpty()) {
+                    handleWhatsAppSend(context, extractedNumber, contactName, message.isEmpty() ? " " : message);
+                } else {
+                    TTSManager.speak(context, "متعرفش الرقم. قول 'يا كبير' وانا أساعدك");
+                }
+            });
             return;
         }
 
@@ -88,22 +88,22 @@ public class WhatsAppExecutor {
         if (message.isEmpty()) {
             TTSManager.speak(context, "قول الرسالة اللي عايز تبعتها لـ " + contactName);
             // In a real app, we would wait for message input
-            // SpeechConfirmation.waitForCommand(context, 30000, messageCommand -> {
-            //     if (!messageCommand.isEmpty()) {
-            //         String normalizedMessage = EgyptianNormalizer.normalize(messageCommand);
-            //         // Remove command words and keep the actual message
-            //         String actualMessage = normalizedMessage.replaceAll(".*(قول|ارسل|ابعت)\\s+(?:رساله)?\\s*(?:ليه|له|ليها)?", "").trim();
-            //
-            //         if (!actualMessage.isEmpty()) {
-            //             sendWhatsAppMessage(context, number, actualMessage);
-            //             TTSManager.speak(context, "الرسالة اتبعتت لـ " + contactName);
-            //         } else {
-            //             TTSManager.speak(context, "متعرفش المحتوى. قول 'يا كبير' وانا أساعدك");
-            //         }
-            //     } else {
-            //         TTSManager.speak(context, "ما سمعتش المحتوى. قول 'يا كبير' وأنا أساعدك");
-            //     }
-            // });
+            SpeechConfirmation.waitForCommand(context, 30000, messageCommand -> {
+                if (!messageCommand.isEmpty()) {
+                    String normalizedMessage = EgyptianNormalizer.normalize(messageCommand);
+                    // Remove command words and keep the actual message
+                    String actualMessage = normalizedMessage.replaceAll(".*(قول|ارسل|ابعت)\\s+(?:رساله)?\\s*(?:ليه|له|ليها)?", "").trim();
+
+                    if (!actualMessage.isEmpty()) {
+                        sendWhatsAppMessage(context, number, actualMessage);
+                        TTSManager.speak(context, "الرسالة اتبعتت لـ " + contactName);
+                    } else {
+                        TTSManager.speak(context, "متعرفش المحتوى. قول 'يا كبير' وانا أساعدك");
+                    }
+                } else {
+                    TTSManager.speak(context, "ما سمعتش المحتوى. قول 'يا كبير' وأنا أساعدك");
+                }
+            });
             return;
         }
 
@@ -260,6 +260,29 @@ public class WhatsAppExecutor {
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
+    }
+
+    // New method to extract number with Egyptian dialect support
+    private String extractNumberFromVoice(String command) {
+        // Handle Egyptian ways of saying numbers
+        String normalized = EgyptianNormalizer.normalize(command);
+
+        // Extract digits (including Egyptian Arabic numerals)
+        String digitsOnly = normalized.replaceAll("[^0-9٠-٩]", "");
+
+        // Convert Arabic-Indic numerals to Western numerals
+        StringBuilder westernDigits = new StringBuilder();
+        for (char c : digitsOnly.toCharArray()) {
+            if (c >= '٠' && c <= '٩') {
+                westernDigits.append((char) (c - '٠' + '0'));
+            } else {
+                westernDigits.append(c);
+            }
+        }
+
+        String result = westernDigits.toString();
+        Log.d(TAG, "Extracted number from voice: " + result);
+        return result;
     }
 
     /**

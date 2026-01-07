@@ -124,6 +124,9 @@ dependencies {
     implementation 'androidx.security:security-crypto:1.1.0-alpha06'
     implementation 'javax.crypto:jce:1.2.2' // For AES encryption
 
+    // WorkManager for background tasks
+    implementation 'androidx.work:work-runtime:2.8.1'
+
     // Testing dependencies
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

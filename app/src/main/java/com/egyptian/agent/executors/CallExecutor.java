@@ -43,25 +43,25 @@ public class CallExecutor {
         if (contactName.isEmpty()) {
             TTSManager.speak(context, "مين اللي عايز تتصل بيه؟ قول الاسم");
             // In a real app, we would wait for the next voice input
-            // SpeechConfirmation.waitForCommand(context, 15000, nextCommand -> {
-            //     if (!nextCommand.isEmpty()) {
-            //         String extractedName = extractContactName(EgyptianNormalizer.normalize(nextCommand));
-            //         if (!extractedName.isEmpty()) {
-            //             lookupContactNumber(context, extractedName, (number, error) -> {
-            //                 if (number != null) {
-            //                     confirmAndPlaceCall(context, extractedName, number);
-            //                 } else {
-            //                     TTSManager.speak(context, "مش لاقي " + extractedName + " في>Contactات. قول الرقم مباشرة");
-            //                     requestPhoneNumber(context, extractedName);
-            //                 }
-            //             });
-            //         } else {
-            //             TTSManager.speak(context, "متعرفش الاسم. قول 'يا كبير' وأنا أساعدك");
-            //         }
-            //     } else {
-            //         TTSManager.speak(context, "ما سمعتش حاجة. قول 'يا كبير' وأنا أساعدك");
-            //     }
-            // });
+            SpeechConfirmation.waitForCommand(context, 15000, nextCommand -> {
+                if (!nextCommand.isEmpty()) {
+                    String extractedName = extractContactName(EgyptianNormalizer.normalize(nextCommand));
+                    if (!extractedName.isEmpty()) {
+                        lookupContactNumber(context, extractedName, (number, error) -> {
+                            if (number != null) {
+                                confirmAndPlaceCall(context, extractedName, number);
+                            } else {
+                                TTSManager.speak(context, "مش لاقي " + extractedName + " في>Contactات. قول الرقم مباشرة");
+                                requestPhoneNumber(context, extractedName);
+                            }
+                        });
+                    } else {
+                        TTSManager.speak(context, "متعرفش الاسم. قول 'يا كبير' وأنا أساعدك");
+                    }
+                } else {
+                    TTSManager.speak(context, "ما سمعتش حاجة. قول 'يا كبير' وأنا أساعدك");
+                }
+            });
             return;
         }
 
@@ -230,22 +230,22 @@ public class CallExecutor {
         TTSManager.speak(context, "مش لاقي " + contactName + " في>Contactات. قول 'أضف' عشان تضيف الرقم الجديد");
 
         // Listen for add contact command
-        // SpeechConfirmation.waitForCommand(context, 15000, command -> {
-        //     if (command.contains("أضف") || command.contains("اضيف")) {
-        //         TTSManager.speak(context, "قول الرقم الجديد");
-        //         SpeechConfirmation.waitForCommand(context, 30000, numberCommand -> {
-        //             String newNumber = extractNumber(numberCommand);
-        //             if (!newNumber.isEmpty()) {
-        //                 // In a real app, we would save the contact here
-        //                 saveContactToPhone(context, contactName, newNumber);
-        //                 TTSManager.speak(context, "تم حفظ الرقم الجديد لـ " + contactName);
-        //                 placeCall(context, newNumber);
-        //             } else {
-        //                 TTSManager.speak(context, "متعرفش الرقم. قول 'يا كبير' وانا أساعدك");
-        //             }
-        //         });
-        //     }
-        // });
+        SpeechConfirmation.waitForCommand(context, 15000, command -> {
+            if (command.contains("أضف") || command.contains("اضيف")) {
+                TTSManager.speak(context, "قول الرقم الجديد");
+                SpeechConfirmation.waitForCommand(context, 30000, numberCommand -> {
+                    String newNumber = extractNumber(numberCommand);
+                    if (!newNumber.isEmpty()) {
+                        // In a real app, we would save the contact here
+                        saveContactToPhone(context, contactName, newNumber);
+                        TTSManager.speak(context, "تم حفظ الرقم الجديد لـ " + contactName);
+                        placeCall(context, newNumber);
+                    } else {
+                        TTSManager.speak(context, "متعرفش الرقم. قول 'يا كبير' وانا أساعدك");
+                    }
+                });
+            }
+        });
     }
 
     private static String extractNumber(String command) {
