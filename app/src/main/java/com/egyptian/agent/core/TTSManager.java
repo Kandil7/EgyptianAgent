@@ -179,7 +179,7 @@ public class TTSManager {
 
                 if (result == TextToSpeech.ERROR) {
                     Log.e(TAG, "TTS speak failed for text: " + text);
-                    // CrashLogger.logError(context, new Exception("TTS speak failed"));
+                    CrashLogger.logError(context, new Exception("TTS speak failed"));
                 }
             }
         });
@@ -258,7 +258,7 @@ public class TTSManager {
                 normalSpeechRate = rate;
             }
         } else {
-            // CrashLogger.logWarning(context, "TTS not initialized when setting speech rate");
+            CrashLogger.logWarning(context, "TTS not initialized when setting speech rate");
         }
     }
 
