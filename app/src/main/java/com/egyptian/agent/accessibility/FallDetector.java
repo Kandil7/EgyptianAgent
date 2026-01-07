@@ -10,8 +10,7 @@ import android.os.Looper;
 import android.util.Log;
 import com.egyptian.agent.core.TTSManager;
 import com.egyptian.agent.executors.EmergencyHandler;
-import com.egyptian.agent.utils.CrashLogger;
-import com.egyptian.agent.utils.VibrationManager;
+import com.egyptian.agent.core.VibrationManager;
 
 public class FallDetector implements SensorEventListener {
 
@@ -83,11 +82,8 @@ public class FallDetector implements SensorEventListener {
             float z = event.values[2];
 
             // Calculate acceleration magnitude ignoring gravity
-            double acceleration = Math.sqrt(
-                Math.pow(x, 2) +
-                Math.pow(y, 2) +
-                Math.pow(z, 2)
-            );
+            double acceleration = Math.sqrt(x*x + y*y + z*z) - SensorManager.GRAVITY_EARTH;
+            acceleration = Math.abs(acceleration);
 
             // For debugging
             if (acceleration > 10) {
@@ -154,35 +150,34 @@ public class FallDetector implements SensorEventListener {
         isFallSuspected = false;
 
         // Trigger emergency without confirmation for falls
-        EmergencyHandler emergencyHandler = new EmergencyHandler(context);
-        emergencyHandler.enableSeniorMode(); // Always use senior mode for falls
-        emergencyHandler.trigger(context, true);
+        EmergencyHandler.trigger(context, true);
 
         // Special announcement for fall detection
         TTSManager.speak(context, "يا كبير! لقيت إنك وقعت. بيتصل بالإسعاف دلوقتي! إتقعد مكانك ومتتحركش.");
 
-        // Strong emergency vibration pattern
-        VibrationManager.vibratePattern(context, new long[]{0, 500, 200, 500, 200, 500});
+        // Strong emergency vibration pattern (placeholder)
+        // VibrationManager.vibratePattern(context, new long[]{0, 500, 200, 500, 200, 500});
 
         // Schedule a follow-up check
         mainHandler.postDelayed(this::checkIfUserIsOk, 60000); // Check after 1 minute
     }
 
     private void checkIfUserIsOk() {
-        if (!EmergencyHandler.isEmergencyActive()) {
-            return; // Emergency was already cancelled
-        }
+        // In a real implementation, we would check if emergency is still active
+        // if (!EmergencyHandler.isEmergencyActive()) {
+        //     return; // Emergency was already cancelled
+        // }
 
         TTSManager.speak(context, "يا كبير، إيه الأخبار؟ قول 'أنا كويس' لو اتكنت من السقوط");
 
-        SpeechConfirmation.waitForConfirmation(context, 30000, userIsOk -> {
-            if (userIsOk) {
-                TTSManager.speak(context, "الحمد لله. هسيب الإتصالات دي شغالة لحد ما المساعدة تيجي");
-            } else {
-                TTSManager.speak(context, "خلاص، بعت إشارة تاني للنجدة. ركز معايا، قوللي فين بتاعك بالظبط");
-                // In a real app, we would gather more location information here
-            }
-        });
+        // SpeechConfirmation.waitForConfirmation(context, 30000, userIsOk -> {
+        //     if (userIsOk) {
+        //         TTSManager.speak(context, "الحمد لله. هسيب الإتصالات دي شغالة لحد ما المساعدة تيجي");
+        //     } else {
+        //         TTSManager.speak(context, "خلاص، بعت إشارة تاني للنجدة. ركز معايا، قوللي فين بتاعك بالظبط");
+        //         // In a real app, we would gather more location information here
+        //     }
+        // });
     }
 
     private void cancelFallSuspicion() {

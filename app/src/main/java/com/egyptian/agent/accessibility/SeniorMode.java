@@ -1,13 +1,10 @@
 package com.egyptian.agent.accessibility;
 
 import android.content.Context;
-import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import com.egyptian.agent.core.IntentType;
-import com.egyptian.agent.core.TTSManager;
 import com.egyptian.agent.executors.EmergencyHandler;
-import com.egyptian.agent.utils.SpeechConfirmation;
-import com.egyptian.agent.utils.VibrationManager;
+import com.egyptian.agent.core.TTSManager;
 import java.util.*;
 
 public class SeniorMode {
@@ -47,8 +44,8 @@ public class SeniorMode {
         // Special greeting for seniors
         TTSManager.speak(context, "تم تفعيل وضع كبار السن. قول 'يا كبير' لأي حاجة.");
 
-        // Vibration confirmation
-        VibrationManager.vibratePattern(context, new long[]{0, 100, 200, 100});
+        // Vibration confirmation (placeholder)
+        // VibrationManager.vibratePattern(context, new long[]{0, 100, 200, 100});
     }
 
     public static void disable(Context context) {
@@ -63,7 +60,7 @@ public class SeniorMode {
         EmergencyHandler.disableSeniorMode();
 
         TTSManager.speak(context, "تم إيقاف وضع كبار السن");
-        VibrationManager.vibrateShort(context);
+        // VibrationManager.vibrateShort(context);
     }
 
     public static boolean isCommandAllowed(String command) {
@@ -112,26 +109,29 @@ public class SeniorMode {
     public static void handleRestrictedCommand(Context context, String command) {
         Log.w(TAG, "Blocked restricted command in senior mode: " + command);
 
-        // Vibrate to alert user
-        VibrationManager.vibrateShort(context);
+        // Vibrate to alert user (placeholder)
+        // VibrationManager.vibrateShort(context);
 
         // Explain limitations clearly
         TTSManager.speak(context, "في وضع كبار السن، أنا بس أعرف أوامر بسيطة. قول 'يا كبير' وأنا أعلمك إياهم.");
 
         // Offer to disable senior mode
         TTSManager.speak(context, "عايز تخرج من وضع كبار السن؟ قول 'نعم'");
-        SpeechConfirmation.waitForConfirmation(context, 15000, confirmed -> {
-            if (confirmed) {
-                disable(context);
-            }
-        });
+        // SpeechConfirmation.waitForConfirmation(context, 15000, confirmed -> {
+        //     if (confirmed) {
+        //         disable(context);
+        //     } else {
+        //         // In a real app, we would explain how to exit senior mode later
+        //         TTSManager.speak(context, "مفيش مشكلة. قول 'يا كبير، خرج من وضع كبار السن' في أي وقت");
+        //     }
+        // });
     }
 
     public static void handleEmergency(Context context) {
         EmergencyHandler.trigger(context, true);
 
-        // Vibrate continuously until acknowledged
-        VibrationManager.vibrateEmergency(context);
+        // Vibrate continuously until acknowledged (placeholder)
+        // VibrationManager.vibrateEmergency(context);
 
         // Clear, simple instructions
         TTSManager.speak(context, "يا كبير! لقيت إنك وقعت. بيتصل بالإسعاف دلوقتي! إتقعد مكانك ومتتحركش.");

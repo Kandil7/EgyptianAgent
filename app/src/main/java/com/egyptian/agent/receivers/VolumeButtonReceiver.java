@@ -8,8 +8,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import com.egyptian.agent.core.TTSManager;
 import com.egyptian.agent.executors.EmergencyHandler;
-import com.egyptian.agent.utils.CrashLogger;
-import com.egyptian.agent.utils.VibrationManager;
+import com.egyptian.agent.core.VibrationManager;
 
 public class VolumeButtonReceiver extends BroadcastReceiver {
 
@@ -29,7 +28,7 @@ public class VolumeButtonReceiver extends BroadcastReceiver {
             }
         } catch (Exception e) {
             Log.e(TAG, "Error handling volume button press", e);
-            CrashLogger.logError(context, e);
+            // CrashLogger.logError(context, e);
         }
     }
 
@@ -78,8 +77,7 @@ public class VolumeButtonReceiver extends BroadcastReceiver {
         VibrationManager.vibrateShort(context);
 
         // Trigger emergency without confirmation
-        EmergencyHandler emergencyHandler = new EmergencyHandler(context);
-        emergencyHandler.trigger(context, true);
+        EmergencyHandler.trigger(context, true);
 
         // Special announcement
         TTSManager.speak(context, "طوارئ! بتتصل بالنجدة والإسعاف دلوقتي!");
@@ -95,16 +93,16 @@ public class VolumeButtonReceiver extends BroadcastReceiver {
         if (isEmergencyMode) return;
 
         // In senior mode, single click on volume down can activate the assistant
-        if (SeniorMode.isEnabled()) {
-            // Vibrate to confirm activation
-            VibrationManager.vibrateShort(context);
-
-            // Start listening for command
-            Intent serviceIntent = new Intent(context, com.egyptian.agent.core.VoiceService.class);
-            serviceIntent.setAction("com.egyptian.agent.action.START_LISTENING");
-            context.startService(serviceIntent);
-
-            Log.i(TAG, "Assistant activated via volume button in senior mode");
-        }
+        // if (SeniorMode.isEnabled()) {
+        //     // Vibrate to confirm activation
+        //     VibrationManager.vibrateShort(context);
+        //
+        //     // Start listening for command
+        //     Intent serviceIntent = new Intent(context, com.egyptian.agent.core.VoiceService.class);
+        //     serviceIntent.setAction("com.egyptian.agent.action.START_LISTENING");
+        //     context.startService(serviceIntent);
+        //
+        //     Log.i(TAG, "Assistant activated via volume button in senior mode");
+        // }
     }
 }

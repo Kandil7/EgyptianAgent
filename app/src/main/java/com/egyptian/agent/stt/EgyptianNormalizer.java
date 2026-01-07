@@ -86,6 +86,7 @@ public class EgyptianNormalizer {
         TIME_EXPRESSIONS.put("الصبح", "الصباح");
         TIME_EXPRESSIONS.put("الفجر", "الصباح الباكر");
         TIME_EXPRESSIONS.put("الضهر", "الظهر");
+        TIME_EXPRESSIONS.put("العشية", "المساء");
         TIME_EXPRESSIONS.put("الليل", "الليل");
         TIME_EXPRESSIONS.put("بعد ساعة", "بعد ساعة");
         TIME_EXPRESSIONS.put("بعد ساعتين", "بعد ساعتين");
@@ -249,7 +250,7 @@ public class EgyptianNormalizer {
         List<String> patterns = Arrays.asList(
             "اتصل\\s+ب\\s*([\\w\\s]+?)(?:\\s+|$)",
             "كلم\\s+([\\w\\s]+?)(?:\\s+|$)",
-            "رن\\s+ على\\s+([\\w\\s]+?)(?:\\s+|$)",
+            "رن\\s+على\\s+([\\w\\s]+?)(?:\\s+|$)",
             "ابعت\\s+رساله\\s+ل\\s*([\\w\\s]+?)(?:\\s+|$)"
         );
 
