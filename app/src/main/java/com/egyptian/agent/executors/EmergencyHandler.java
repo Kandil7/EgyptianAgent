@@ -183,7 +183,7 @@ public class EmergencyHandler implements SensorEventListener {
     /**
      * Execute emergency calls to all contacts
      */
-    private static void executeEmergencyCalls(Context context, List<String> contacts) {
+    public static void executeEmergencyCalls(Context context, List<String> contacts) {
         Log.i(TAG, "Executing emergency calls to " + contacts.size() + " contacts");
 
         TTSManager.speak(context, "بتصل بأرقام الطوارئ دلوقتي. إتقعد مكانك ومتتحركش.");
@@ -263,12 +263,45 @@ public class EmergencyHandler implements SensorEventListener {
      */
     private static void scheduleFollowupCalls(Context context, List<String> contacts) {
         // In a real app, this would use AlarmManager or WorkManager
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            // if (!isCallActive && isEmergencyActive) {
-                TTSManager.speak(context, "بتحاول نتصل بأرقام الطوارئ تاني");
-                executeEmergencyCalls(context, contacts);
-            // }
-        }, 120000); // 2 minutes
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            // For Android 8.0+, use WorkManager for reliability
+            androidx.work.PeriodicWorkRequest followupWork = new androidx.work.PeriodicWorkRequest.Builder(
+                EmergencyFollowupWorker.class, 2, java.util.concurrent.TimeUnit.MINUTES)
+                .addTag("emergency_followup")
+                .setInputData(new androidx.work.Data.Builder()
+                    .putStringArrayList("contacts", new ArrayList<>(contacts))
+                    .build())
+                .build();
+
+            androidx.work.WorkManager.getInstance(context).enqueue(followupWork);
+        } else {
+            // For older Android versions, use AlarmManager
+            android.app.AlarmManager alarmManager = (android.app.AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            Intent intent = new Intent(context, EmergencyFollowupReceiver.class);
+            intent.setAction("com.egyptian.agent.action.EMERGENCY_FOLLOWUP");
+            intent.putStringArrayListExtra("contacts", new ArrayList<>(contacts));
+
+            android.app.PendingIntent pendingIntent = android.app.PendingIntent.getBroadcast(
+                context, 0, intent, android.app.PendingIntent.FLAG_UPDATE_CURRENT | android.app.PendingIntent.FLAG_IMMUTABLE);
+
+            if (alarmManager != null) {
+                alarmManager.setRepeating(
+                    android.app.AlarmManager.RTC_WAKEUP,
+                    System.currentTimeMillis() + 120000, // 2 minutes
+                    120000, // 2 minutes interval
+                    pendingIntent
+                );
+            }
+        }
+
+        Log.i(TAG, "Scheduled follow-up calls for emergency contacts");
+    }
+
+    /**
+     * Check if emergency is currently active
+     */
+    public static boolean isEmergencyActive() {
+        return isEmergencyActive;
     }
 
     /**
