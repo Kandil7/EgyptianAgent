@@ -11,6 +11,7 @@ import android.util.Log;
 import com.egyptian.agent.core.TTSManager;
 import com.egyptian.agent.executors.EmergencyHandler;
 import com.egyptian.agent.core.VibrationManager;
+import com.egyptian.agent.utils.CrashLogger;
 
 public class FallDetector implements SensorEventListener {
 
@@ -63,6 +64,7 @@ public class FallDetector implements SensorEventListener {
             Log.i(TAG, "Fall detection monitoring started");
         } else {
             Log.w(TAG, "Accelerometer not available on this device");
+            CrashLogger.logWarning(context, "Accelerometer not available on this device");
             TTSManager.speak(context, "كاشف السقوط مش متاح على الموبايل ده");
         }
     }
@@ -163,19 +165,122 @@ public class FallDetector implements SensorEventListener {
     }
 
     private void checkIfUserIsOk() {
-        // In a real implementation, we would check if emergency is still active
-        // if (!EmergencyHandler.isEmergencyActive()) {
-        //     return; // Emergency was already cancelled
-        // }
+        // Check if emergency is still active
+        if (!isEmergencyActive()) {
+            return; // Emergency was already cancelled
+        }
 
-        TTSManager.speak(context, "يا كبير، إيه الأخبار؟ قول 'أنا كويس' لو اتكنت من السقوط");
+        TTSManager.speak(context, "يا كبير، إيه الأخبار؟ قول 'أنا كويس' لو جات سليمه من السقوط");
 
-        // SpeechConfirmation.waitForConfirmation(context, 30000, userIsOk -> {
-        //     if (userIsOk) {
-        //         TTSManager.speak(context, "الحمد لله. هسيب الإتصالات دي شغالة لحد ما المساعدة تيجي");
-        //     } else {
-        //         TTSManager.speak(context, "خلاص، بعت إشارة تاني للنجدة. ركز معايا، قوللي فين بتاعك بالظبط");
-        //         // In a real app, we would gather more location information here
+        SpeechConfirmation.waitForConfirmation(context, 30000, userIsOk -> {
+            if (userIsOk) {
+                TTSManager.speak(context, "الحمد لله. هسيب الإتصالات دي شغالة لحد ما المساعدة تيجي");
+                // Cancel the emergency state
+                cancelEmergency();
+            } else {
+                TTSManager.speak(context, "خلاص، بعت إشارة تاني للنجدة. ركز معايا، قوللي فين  المكان بتاعك بالظبط");
+                // Gather more location information here
+                requestLocationDetails();
+            }
+        });
+    }
+
+    /**
+     * Checks if an emergency is currently active
+     */
+    private boolean isEmergencyActive() {
+        // Check the current emergency state by checking if the emergency service is running
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        if (manager != null) {
+            for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+                if ("com.egyptian.agent.executors.EmergencyHandler".equals(service.service.getClassName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Cancels the current emergency state
+     */
+    private void cancelEmergency() {
+        // Update the emergency state
+        Log.i(TAG, "Emergency cancelled by user confirmation");
+
+        // Cancel any pending emergency actions
+        if (mainHandler != null) {
+            mainHandler.removeCallbacksAndMessages(null); // Remove all pending callbacks
+        }
+    }
+
+    /**
+     * Requests more location details from the user
+     */
+    private void requestLocationDetails() {
+        TTSManager.speak(context, "قوللي فينك؟ فين الشارع؟ اسم العمارة؟ ممكن تقولي الكود البريدي؟");
+
+        // Wait for user to provide location details
+        SpeechConfirmation.waitForCommand(context, 45000, locationDetails -> {
+            Log.i(TAG, "User provided location details: " + locationDetails);
+            TTSManager.speak(context, "تم تسجيل التفاصيل. بعتها لجهات الطوارئ.");
+
+            // Send the details to emergency services
+            sendLocationDetailsToEmergencyServices(locationDetails);
+        });
+    }
+
+    /**
+     * Sends location details to emergency services
+     */
+    private void sendLocationDetailsToEmergencyServices(String locationDetails) {
+        // For now, we'll log it and send to configured emergency contacts
+        Log.i(TAG, "Sending location details to emergency services: " + locationDetails);
+
+        // Get current location if available
+        String currentLocation = getCurrentLocation();
+        String fullDetails = locationDetails + (currentLocation != null ? " - Current location: " + currentLocation : "");
+
+        // Send to emergency contacts
+        com.egyptian.agent.executors.EmergencyHandler.sendLocationDetailsToEmergencyContacts(context, fullDetails);
+    }
+
+    /**
+     * Gets current location if available
+     */
+    private String getCurrentLocation() {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "Location permission not granted");
+            return null;
+        }
+
+        try {
+            android.location.LocationManager locationManager =
+                (android.location.LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+
+            // Get last known location
+            android.location.Location location = locationManager.getLastKnownLocation(
+                android.location.LocationManager.GPS_PROVIDER);
+
+            if (location != null) {
+                return String.format("%.4f, %.4f", location.getLatitude(), location.getLongitude());
+            } else {
+                // Try network provider as fallback
+                location = locationManager.getLastKnownLocation(
+                    android.location.LocationManager.NETWORK_PROVIDER);
+
+                if (location != null) {
+                    return String.format("%.4f, %.4f", location.getLatitude(), location.getLongitude());
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting location", e);
+            com.egyptian.agent.utils.CrashLogger.logError(context, e);
+        }
+
+        return null;
+    }
         //     }
         // });
     }

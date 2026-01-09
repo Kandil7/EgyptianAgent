@@ -1,391 +1,367 @@
 package com.egyptian.agent.executors;
 
+import android.Manifest;
 import android.content.Context;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.os.Handler;
-import android.os.Looper;
-import android.telephony.PhoneStateListener;
-import android.telephony.TelephonyManager;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.net.Uri;
+import android.os.Build;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.provider.Settings;
 import android.util.Log;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import com.egyptian.agent.accessibility.SeniorMode;
 import com.egyptian.agent.core.TTSManager;
-import com.egyptian.agent.core.VibrationManager;
+import com.egyptian.agent.utils.VibrationManager;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class EmergencyHandler implements SensorEventListener {
-
+/**
+ * Handles emergency situations with appropriate responses
+ */
+public class EmergencyHandler {
     private static final String TAG = "EmergencyHandler";
-    private static final int FALL_DETECTION_THRESHOLD = 20; // m/s²
-    private static final int FALL_CONFIRMATION_TIME = 5000; // 5 seconds
-    private static final int EMERGENCY_CALL_TIMEOUT = 30000; // 30 seconds
-
-    private final Context context;
-    private final SensorManager sensorManager;
-    private final Sensor accelerometer;
-    private boolean isFallDetected = false;
-    private long fallDetectionTime = 0;
-    private boolean isEmergencyActive = false;
-    private boolean isSeniorModeEnabled = false;
-
-    // Emergency contacts for different scenarios
-    private static final List<String> POLICE_NUMBERS = Arrays.asList("122", "121", "0225757114"); // 122 for general police, 121 for emergency police
-    private static final List<String> AMBULANCE_NUMBERS = Arrays.asList("123", "0225757115"); // 123 for ambulance
-    private static final List<String> FIRE_NUMBERS = Arrays.asList("180", "0225757116"); // 180 for fire department
-
-    // User-defined emergency contacts (would be stored in preferences in real app)
-    private final List<String> userEmergencyContacts = new ArrayList<>();
-
-    // Media player for emergency sounds
-    private MediaPlayer emergencyMediaPlayer;
-
-    // Phone state listener to detect if call is answered
-    private final TelephonyManager telephonyManager;
-    private boolean isCallActive = false;
-
-    public EmergencyHandler(Context context) {
-        this.context = context;
-        this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-        this.accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        this.telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-
-        // Initialize user emergency contacts (in real app, this would be loaded from preferences)
-        initializeUserEmergencyContacts();
-
-        // Register phone state listener
-        registerPhoneStateListener();
-    }
-
-    private void initializeUserEmergencyContacts() {
-        // In a real app, these would be loaded from user preferences
-        userEmergencyContacts.add("01000000000"); // Example contact 1
-        userEmergencyContacts.add("01111111111"); // Example contact 2
-    }
-
-    private void registerPhoneStateListener() {
-        telephonyManager.listen(new PhoneStateListener() {
-            @Override
-            public void onCallStateChanged(int state, String phoneNumber) {
-                super.onCallStateChanged(state, phoneNumber);
-                switch (state) {
-                    case TelephonyManager.CALL_STATE_RINGING:
-                    case TelephonyManager.CALL_STATE_OFFHOOK:
-                        isCallActive = true;
-                        break;
-                    case TelephonyManager.CALL_STATE_IDLE:
-                        isCallActive = false;
-                        break;
-                }
-            }
-        }, PhoneStateListener.LISTEN_CALL_STATE);
-    }
+    private static final String PREFS_NAME = "emergency_prefs";
+    private static final String EMERGENCY_CONTACTS_KEY = "emergency_contacts";
+    private static boolean seniorModeEnabled = false;
 
     /**
-     * Check if the command contains emergency keywords
+     * Checks if the given command indicates an emergency
      */
     public static boolean isEmergency(String command) {
-        String normalized = command.toLowerCase();
-        return normalized.contains("نجدة") ||
-               normalized.contains("استغاثة") ||
-               normalized.contains("طوارئ") ||
-               normalized.contains("مش قادر") ||
-               normalized.contains("حد يجي") ||
-               normalized.contains("إسعاف") ||
-               normalized.contains("شرطة") ||
-               normalized.contains("حرقان") ||
-               normalized.contains("طلق ناري");
+        String lowerCmd = command.toLowerCase();
+        
+        // Check for emergency keywords in Arabic and Egyptian dialect
+        return lowerCmd.contains(" emergencies") || 
+               lowerCmd.contains("emergency") || 
+               lowerCmd.contains("ngda") || 
+               lowerCmd.contains("estghatha") || 
+               lowerCmd.contains("tawari") || 
+               lowerCmd.contains("help") || 
+               lowerCmd.contains("help me") || 
+               lowerCmd.contains("need help") || 
+               lowerCmd.contains("escaf") ||  // ambulance
+               lowerCmd.contains("police") || 
+               lowerCmd.contains("nafar") ||  // police in Egyptian dialect
+               lowerCmd.contains("nar") ||    // fire in Egyptian dialect
+               lowerCmd.contains("fire") || 
+               lowerCmd.contains("burning") || 
+               lowerCmd.contains("fall") || 
+               lowerCmd.contains("fell") || 
+               lowerCmd.contains("fallen") || 
+               lowerCmd.contains("wq3t") ||   // fell in Arabic
+               lowerCmd.contains("wq3") ||    // fall in Arabic
+               lowerCmd.contains("injur") ||  // injury related
+               lowerCmd.contains("darar");    // harm in Arabic
     }
 
     /**
-     * Trigger emergency response
+     * Triggers emergency response
      */
     public static void trigger(Context context) {
         trigger(context, false);
     }
 
     /**
-     * Trigger emergency response with option to force without confirmation
+     * Triggers emergency response
+     * @param context Application context
+     * @param fromFall True if emergency was triggered by fall detection
      */
-    public static void trigger(Context context, boolean force) {
-        if (isEmergencyActive) {
-            Log.w(TAG, "Emergency already in progress");
+    public static void trigger(Context context, boolean fromFall) {
+        Log.e(TAG, "EMERGENCY TRIGGERED" + (fromFall ? " (from fall detection)" : ""));
+        
+        // Play emergency sound
+        playEmergencySound(context);
+        
+        // Vibrate intensely
+        VibrationManager.vibrateEmergency(context);
+        
+        // Speak emergency message
+        if (fromFall) {
+            TTSManager.speak(context, "تم اكتشاف سقوط! يتم الاتصال بجهات الطوارئ الآن!");
+        } else {
+            TTSManager.speak(context, "حالة طوارئ! يتم الاتصال بجهات الطوارئ الآن!");
+        }
+        
+        // Get emergency contacts
+        List<String> emergencyContacts = getEmergencyContacts(context);
+        
+        if (!emergencyContacts.isEmpty()) {
+            // Call the first emergency contact
+            String firstContact = emergencyContacts.get(0);
+            callEmergencyContact(context, firstContact);
+            
+            // Send SMS to all emergency contacts with location
+            sendSMSToEmergencyContacts(context, emergencyContacts, fromFall);
+            
+            // If senior mode is enabled, also send notification to guardians
+            if (seniorModeEnabled) {
+                notifyGuardians(context, fromFall);
+            }
+        } else {
+            // If no emergency contacts are set, call default emergency numbers
+            callDefaultEmergencyNumbers(context);
+        }
+    }
+
+    /**
+     * Plays emergency sound
+     */
+    private static void playEmergencySound(Context context) {
+        try {
+            // Play emergency sound using MediaPlayer
+            android.media.MediaPlayer mediaPlayer = android.media.MediaPlayer.create(context, R.raw.emergency_alert);
+            if (mediaPlayer != null) {
+                mediaPlayer.start();
+            } else {
+                // If resource not available, use system alert
+                android.media.AudioManager audioManager = (android.media.AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+                int maxVolume = audioManager.getStreamMaxVolume(android.media.AudioManager.STREAM_ALARM);
+                audioManager.setStreamVolume(android.media.AudioManager.STREAM_ALARM, maxVolume, 0);
+
+                // Create a short beep as emergency signal
+                android.media.ToneGenerator toneG = new android.media.ToneGenerator(android.media.AudioManager.STREAM_ALARM, maxVolume);
+                toneG.startTone(android.media.ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 2000); // 2 sec
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error playing emergency sound", e);
+        }
+    }
+
+    /**
+     * Gets configured emergency contacts
+     */
+    private static List<String> getEmergencyContacts(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String contactsStr = prefs.getString(EMERGENCY_CONTACTS_KEY, "");
+        
+        List<String> contacts = new ArrayList<>();
+        if (!contactsStr.isEmpty()) {
+            // Split by comma and trim spaces
+            String[] contactArray = contactsStr.split(",");
+            for (String contact : contactArray) {
+                contacts.add(contact.trim());
+            }
+        }
+        
+        // If no contacts are set, add default ones for demo purposes
+        if (contacts.isEmpty()) {
+            contacts.add("123"); // Emergency
+            contacts.add("122"); // Police
+            contacts.add("1234567890"); // Sample contact
+        }
+        
+        return contacts;
+    }
+
+    /**
+     * Calls an emergency contact
+     */
+    private static void callEmergencyContact(Context context, String contactNumber) {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) 
+            != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "Missing CALL_PHONE permission");
+            TTSManager.speak(context, "محتاج إذن لإجراء مكالمات الطوارئ");
             return;
         }
 
-        Log.i(TAG, "Emergency triggered. Force mode: " + force);
-        isEmergencyActive = true;
-
-        // Start emergency audio feedback
-        playEmergencyAlert();
-
-        // Vibrate in emergency pattern
-        VibrationManager.vibrateEmergency(context);
-
-        // Determine emergency type and contacts to call
-        List<String> emergencyContacts = determineEmergencyContacts(context);
-
-        // In senior mode or force mode, make calls immediately without confirmation
-        if (isSeniorModeEnabled || force) {
-            executeEmergencyCalls(context, emergencyContacts);
-        } else {
-            // Ask for confirmation in normal mode
-            TTSManager.speak(context, "ده إجراء طوارئ! قول 'نعم' لو الموضوع خطير فعلاً");
-            // SpeechConfirmation.waitForConfirmation(context, 10000, confirmed -> {
-            //     if (confirmed) {
-            //         executeEmergencyCalls(context, emergencyContacts);
-            //     } else {
-            //         cancelEmergency();
-            //         TTSManager.speak(context, "تم إلغاء وضع الطوارئ");
-            //     }
-            // });
-        }
-    }
-
-    /**
-     * Determine which emergency contacts to call based on context
-     */
-    private static List<String> determineEmergencyContacts(Context context) {
-        List<String> contacts = new ArrayList<>();
-
-        // In senior mode, prioritize user-defined contacts and ambulance
-        if (SeniorMode.isEnabled()) {
-            contacts.addAll(getUserEmergencyContacts(context));
-            contacts.addAll(AMBULANCE_NUMBERS);
-            return contacts;
-        }
-
-        // In normal mode, determine based on command context
-        // For now, include all emergency services
-        contacts.addAll(POLICE_NUMBERS);
-        contacts.addAll(AMBULANCE_NUMBERS);
-        contacts.addAll(getUserEmergencyContacts(context));
-
-        return contacts;
-    }
-
-    /**
-     * Get user-defined emergency contacts
-     */
-    private static List<String> getUserEmergencyContacts(Context context) {
-        // In a real app, this would load from preferences
-        List<String> contacts = new ArrayList<>();
-        contacts.add("01000000000"); // Placeholder
-        contacts.add("01111111111"); // Placeholder
-        return contacts;
-    }
-
-    /**
-     * Execute emergency calls to all contacts
-     */
-    private static void executeEmergencyCalls(Context context, List<String> contacts) {
-        Log.i(TAG, "Executing emergency calls to " + contacts.size() + " contacts");
-
-        TTSManager.speak(context, "بتصل بأرقام الطوارئ دلوقتي. إتقعد مكانك ومتتحركش.");
-
-        for (String number : contacts) {
-            try {
-                // Clean the number
-                String cleanNumber = number.replaceAll("[^0-9+]", "");
-
-                // Place the call
-                placeCall(context, cleanNumber);
-
-                Log.i(TAG, "Emergency call placed to: " + cleanNumber);
-
-                // Wait for call to be answered or timeout
-                waitForCallResponse();
-
-                // If call was answered, we might want to stop calling other numbers
-                // But for critical emergencies, we continue to all numbers
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to place emergency call to " + number, e);
-                // CrashLogger.logError(context, e);
-            }
-        }
-
-        // After all calls, provide status update
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (!isCallActive) {
-                TTSManager.speak(context, "أرقام الطوارئ محدش رد. إحنا مستمرين في المحاولة كل دقيقتين.");
-                scheduleFollowupCalls(context, contacts);
-            } else {
-                TTSManager.speak(context, "أحدهم رد على المكالمة. المساعدة جاية.");
-            }
-        }, EMERGENCY_CALL_TIMEOUT);
-    }
-
-    /**
-     * Place an emergency call
-     */
-    private static void placeCall(Context context, String number) {
         try {
-            android.content.Intent callIntent = new android.content.Intent(android.content.Intent.ACTION_CALL);
-            callIntent.setData(android.net.Uri.parse("tel:" + number));
-            callIntent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+            String cleanNumber = contactNumber.replaceAll("[^0-9+]", "");
+            Intent callIntent = new Intent(Intent.ACTION_CALL);
+            callIntent.setData(Uri.parse("tel:" + cleanNumber));
+            callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-            // Critical permission handling for system app
             context.startActivity(callIntent);
-            Log.i(TAG, "Emergency call placed to: " + number);
+            Log.i(TAG, "Emergency call placed to: " + cleanNumber);
         } catch (Exception e) {
             Log.e(TAG, "Emergency call failed", e);
-            // CrashLogger.logError(context, e);
-            TTSManager.speak(context, "حصل مشكلة في إجراء مكالمة الطوارئ. حاول تاني");
+            TTSManager.speak(context, "فشل في الاتصال بجهة الطوارئ. جاري المحاولة مرة أخرى...");
+            
+            // Try calling default emergency number
+            callDefaultEmergencyNumbers(context);
         }
     }
 
     /**
-     * Wait for call response (answered or not)
+     * Calls default emergency numbers
      */
-    private static void waitForCallResponse() {
-        long startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - startTime < 15000) { // Wait up to 15 seconds
-            // In a real implementation, we would check the call state
-            // if (isCallActive) {
-            //     return; // Call was answered
-            // }
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
-    }
+    private static void callDefaultEmergencyNumbers(Context context) {
+        // Cycle through default emergency numbers
+        String[] defaultNumbers = {"122", "123", "180"}; // Police, Ambulance, Fire
 
-    /**
-     * Schedule follow-up calls if no one answered
-     */
-    private static void scheduleFollowupCalls(Context context, List<String> contacts) {
-        // In a real app, this would use AlarmManager or WorkManager
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            // if (!isCallActive && isEmergencyActive) {
-                TTSManager.speak(context, "بتحاول نتصل بأرقام الطوارئ تاني");
-                executeEmergencyCalls(context, contacts);
-            // }
-        }, 120000); // 2 minutes
-    }
-
-    /**
-     * Cancel emergency procedures
-     */
-    public static void cancelEmergency() {
-        Log.i(TAG, "Cancelling emergency procedures");
-        isEmergencyActive = false;
-
-        stopEmergencyAudio();
-
-        // Stop any ongoing vibrations
-        VibrationManager.cancelVibration(context);
-    }
-
-    /**
-     * Play emergency alert sound
-     */
-    private static void playEmergencyAlert() {
-        // This is a placeholder - in a real app, we would play an actual sound
-        // Could use MediaPlayer to play emergency alert from resources
-    }
-
-    /**
-     * Stop emergency alert sound
-     */
-    private static void stopEmergencyAudio() {
-        // Stop media player if it exists
-    }
-
-    /**
-     * Start fall detection monitoring
-     */
-    public static void startFallDetection(Context context) {
-        // This would typically be handled by the FallDetector class
-        // This method is kept for compatibility
-    }
-
-    /**
-     * Stop fall detection monitoring
-     */
-    public static void stopFallDetection(Context context) {
-        // This would typically be handled by the FallDetector class
-        // This method is kept for compatibility
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            float x = event.values[0];
-            float y = event.values[1];
-            float z = event.values[2];
-
-            // Calculate acceleration magnitude
-            double acceleration = Math.sqrt(x*x + y*y + z*z);
-
-            // Check for fall pattern (sudden high acceleration followed by no movement)
-            if (acceleration > FALL_DETECTION_THRESHOLD) {
-                if (!isFallDetected) {
-                    Log.w(TAG, "Potential fall detected! Acceleration: " + acceleration);
-                    isFallDetected = true;
-                    fallDetectionTime = System.currentTimeMillis();
-
-                    // Schedule confirmation check after 5 seconds
-                    new Handler(Looper.getMainLooper()).postDelayed(this::confirmFall, FALL_CONFIRMATION_TIME);
+        for (String number : defaultNumbers) {
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE)
+                == PackageManager.PERMISSION_GRANTED) {
+                try {
+                    Intent callIntent = new Intent(Intent.ACTION_CALL);
+                    callIntent.setData(Uri.parse("tel:" + number));
+                    callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(callIntent);
+                    Log.i(TAG, "Called emergency number: " + number);
+                    break; // Call first available number
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to call emergency number: " + number, e);
+                    continue; // Try next number
                 }
             }
         }
-    }
 
-    private void confirmFall() {
-        if (isFallDetected && (System.currentTimeMillis() - fallDetectionTime) >= FALL_CONFIRMATION_TIME) {
-            Log.e(TAG, "Fall confirmed! Triggering emergency response");
-            isFallDetected = false;
-
-            // Trigger emergency without confirmation in fall scenarios
-            trigger(context, true);
-
-            // Special message for fall detection
-            TTSManager.speak(context, "يا كبير! لقيت إنك وقعت. بيتصل بالإسعاف دلوقتي! إتقعد مكانك ومتتحركش.");
-        }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Not used
+        TTSManager.speak(context, "جارٍ الاتصال بجهات الطوارئ...");
     }
 
     /**
-     * Enable senior mode specific behaviors
+     * Sends SMS to emergency contacts
+     */
+    private static void sendSMSToEmergencyContacts(Context context, List<String> contacts, boolean fromFall) {
+        // Check for SMS permission
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS)
+            != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "Missing SEND_SMS permission");
+            return;
+        }
+
+        // Get current location if available
+        String location = getCurrentLocation(context);
+        String locationText = location != null ? " الموقع: " + location : "";
+
+        String message = fromFall ?
+            "تنبيه طوارئ: تم اكتشاف سقوط لمستخدم الوكيل المصري!" + locationText :
+            "تنبيه طوارئ: تم تفعيل زر الطوارئ من مستخدم الوكيل المصري!" + locationText;
+
+        // Send SMS to each contact
+        for (String contact : contacts) {
+            try {
+                android.telephony.SmsManager smsManager = android.telephony.SmsManager.getDefault();
+                smsManager.sendTextMessage(contact, null, message, null, null);
+                Log.d(TAG, "SMS sent to " + contact + ": " + message);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to send SMS to " + contact, e);
+                CrashLogger.logError(context, e);
+            }
+        }
+    }
+
+    /**
+     * Gets current location
+     */
+    private static String getCurrentLocation(Context context) {
+        // Check for location permission
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "Location permission not granted");
+            return null;
+        }
+
+        try {
+            android.location.LocationManager locationManager =
+                (android.location.LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+
+            // Get last known location
+            android.location.Location location = locationManager.getLastKnownLocation(
+                android.location.LocationManager.GPS_PROVIDER);
+
+            if (location != null) {
+                return String.format("%.4f, %.4f", location.getLatitude(), location.getLongitude());
+            } else {
+                // Try network provider as fallback
+                location = locationManager.getLastKnownLocation(
+                    android.location.LocationManager.NETWORK_PROVIDER);
+
+                if (location != null) {
+                    return String.format("%.4f, %.4f", location.getLatitude(), location.getLongitude());
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting location", e);
+            CrashLogger.logError(context, e);
+        }
+
+        return null;
+    }
+
+    /**
+     * Notifies guardians (used in senior mode)
+     */
+    private static void notifyGuardians(Context context, boolean fromFall) {
+        // Get guardian phone number from senior mode config
+        String guardianNumber = com.egyptian.agent.accessibility.SeniorModeManager.getInstance(context).getGuardianPhoneNumber();
+
+        if (guardianNumber == null || guardianNumber.isEmpty()) {
+            Log.w(TAG, "No guardian phone number configured");
+            return;
+        }
+
+        // Check for SMS permission
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS)
+            != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "Missing SEND_SMS permission for guardian notification");
+            return;
+        }
+
+        // Get current location if available
+        String location = getCurrentLocation(context);
+        String locationText = location != null ? " الموقع: " + location : "";
+
+        String message = fromFall ?
+            "تنبيه طوارئ: تم اكتشاف سقوط لوالدك/والدتك!" + locationText :
+            "تنبيه طوارئ: تم تفعيل زر الطوارئ من والدك/والدتك!" + locationText;
+
+        try {
+            android.telephony.SmsManager smsManager = android.telephony.SmsManager.getDefault();
+            smsManager.sendTextMessage(guardianNumber, null, message, null, null);
+            Log.d(TAG, "Guardian notification sent to " + guardianNumber + ": " + message);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to send guardian notification to " + guardianNumber, e);
+            CrashLogger.logError(context, e);
+        }
+    }
+
+    /**
+     * Enables senior mode for emergency handling
      */
     public static void enableSeniorMode() {
-        isSeniorModeEnabled = true;
-        Log.i(TAG, "Senior mode enabled for emergency handling");
+        seniorModeEnabled = true;
+        Log.d(TAG, "Senior mode enabled for emergency handler");
     }
 
     /**
-     * Disable senior mode specific behaviors
+     * Disables senior mode for emergency handling
      */
     public static void disableSeniorMode() {
-        isSeniorModeEnabled = false;
-        Log.i(TAG, "Senior mode disabled for emergency handling");
+        seniorModeEnabled = false;
+        Log.d(TAG, "Senior mode disabled for emergency handler");
     }
 
     /**
-     * Cleanup resources
+     * Sends location details to emergency contacts
      */
-    public void destroy() {
-        stopFallDetection(context);
-        cancelEmergency();
+    public static void sendLocationDetailsToEmergencyContacts(Context context, String locationDetails) {
+        // Get emergency contacts
+        List<String> emergencyContacts = getEmergencyContacts(context);
 
-        if (emergencyMediaPlayer != null) {
-            emergencyMediaPlayer.release();
-            emergencyMediaPlayer = null;
+        // Check for SMS permission
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS)
+            != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "Missing SEND_SMS permission");
+            return;
         }
 
-        // Unregister phone state listener
-        telephonyManager.listen(null, PhoneStateListener.LISTEN_NONE);
+        String message = "Emergency location details: " + locationDetails;
+
+        // Send SMS to each contact
+        for (String contact : emergencyContacts) {
+            try {
+                android.telephony.SmsManager smsManager = android.telephony.SmsManager.getDefault();
+                smsManager.sendTextMessage(contact, null, message, null, null);
+                Log.d(TAG, "Location details sent to " + contact + ": " + message);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to send location details to " + contact, e);
+                CrashLogger.logError(context, e);
+            }
+        }
     }
 }

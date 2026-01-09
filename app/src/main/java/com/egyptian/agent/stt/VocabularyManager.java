@@ -2,117 +2,123 @@ package com.egyptian.agent.stt;
 
 import android.util.Log;
 import org.vosk.Recognizer;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class VocabularyManager {
-    
     private static final String TAG = "VocabularyManager";
     
-    // Custom vocabulary for Egyptian dialect
+    // Egyptian dialect specific vocabulary
     private static final Map<String, String> EGYPTIAN_VOCABULARY = new HashMap<>();
     
     static {
         // Initialize Egyptian dialect vocabulary
-        initializeVocabulary();
+        initializeEgyptianVocabulary();
     }
     
-    private static void initializeVocabulary() {
-        // Common Egyptian names
-        EGYPTIAN_VOCABULARY.put("محمد", "محمد");
-        EGYPTIAN_VOCABULARY.put("محمود", "محمود");
-        EGYPTIAN_VOCABULARY.put("أحمد", "أحمد");
-        EGYPTIAN_VOCABULARY.put("على", "على");
-        EGYPTIAN_VOCABULARY.put("على", "على");
-        EGYPTIAN_VOCABULARY.put("مريم", "مريم");
-        EGYPTIAN_VOCABULARY.put("فاطمة", "فاطمة");
-        EGYPTIAN_VOCABULARY.put("نور", "نور");
-        EGYPTIAN_VOCABULARY.put("سارة", "سارة");
-        
-        // Common Egyptian family terms
-        EGYPTIAN_VOCABULARY.put("ماما", "ماما");
-        EGYPTIAN_VOCABULARY.put("بابا", "بابا");
-        EGYPTIAN_VOCABULARY.put("أمي", "أمي");
-        EGYPTIAN_VOCABULARY.put("أبي", "أبي");
-        EGYPTIAN_VOCABULARY.put("أختي", "أختي");
-        EGYPTIAN_VOCABULARY.put("أخوي", "أخوي");
-        EGYPTIAN_VOCABULARY.put("مراتي", "مراتي");
-        EGYPTIAN_VOCABULARY.put("جوزي", "جوزي");
-        EGYPTIAN_VOCABULARY.put("بنتي", "بنتي");
-        EGYPTIAN_VOCABULARY.put("ابني", "ابني");
-        
-        // Common Egyptian places
-        EGYPTIAN_VOCABULARY.put("التحرير", "التحرير");
-        EGYPTIAN_VOCABULARY.put("الظاهر", "الظاهر");
-        EGYPTIAN_VOCABULARY.put("السيدة", "السيدة");
-        EGYPTIAN_VOCABULARY.put("العباسية", "العباسية");
-        EGYPTIAN_VOCABULARY.put("الدقي", "الدقي");
-        EGYPTIAN_VOCABULARY.put("الجزيرة", "الجزيرة");
-        
-        // Common Egyptian expressions
-        EGYPTIAN_VOCABULARY.put("يا كبير", "يا كبير");
-        EGYPTIAN_VOCABULARY.put("يا صاحبي", "يا صاحبي");
-        EGYPTIAN_VOCABULARY.put("يصاحبي", "يصاحبي");
-        EGYPTIAN_VOCABULARY.put("ياصاحبي", "ياصاحبي");
-        EGYPTIAN_VOCABULARY.put("ياعم", "ياعم");
-        EGYPTIAN_VOCABULARY.put("يا عم", "يا عم");
-        
-        // Emergency terms
-        EGYPTIAN_VOCABULARY.put("نجدة", "نجدة");
-        EGYPTIAN_VOCABULARY.put("استغاثة", "استغاثة");
-        EGYPTIAN_VOCABULARY.put("طوارئ", "طوارئ");
-        EGYPTIAN_VOCABULARY.put("إسعاف", "إسعاف");
-        EGYPTIAN_VOCABULARY.put("شرطة", "شرطة");
-        EGYPTIAN_VOCABULARY.put("نار", "نار");
-        EGYPTIAN_VOCABULARY.put("حريق", "حريق");
+    private static void initializeEgyptianVocabulary() {
+        // Common Egyptian dialect words and phrases
+        EGYPTIAN_VOCABULARY.put("بكره", "بكرة");
+        EGYPTIAN_VOCABULARY.put("امبارح", "أمس");
+        EGYPTIAN_VOCABULARY.put("النهارده", "اليوم");
+        EGYPTIAN_VOCABULARY.put("دلوقتي", "الآن");
+        EGYPTIAN_VOCABULARY.put("فين", "أين");
+        EGYPTIAN_VOCABULARY.put("ازاي", "كيف");
+        EGYPTIAN_VOCABULARY.put("أكيد", "بالتأكيد");
+        EGYPTIAN_VOCABULARY.put("مفيش", "لا يوجد");
+        EGYPTIAN_VOCABULARY.put("زي الفل", "تمامًا");
+        EGYPTIAN_VOCABULARY.put("بلاش", "لا");
+        EGYPTIAN_VOCABULARY.put("إيه", "ماذا");
+        EGYPTIAN_VOCABULARY.put("إيه الاخبار", "ما الأخبار");
+        EGYPTIAN_VOCABULARY.put("عايز", "أريد");
+        EGYPTIAN_VOCABULARY.put("عاوز", "أريد");
+        EGYPTIAN_VOCABULARY.put("معلش", "عفوًا");
+        EGYPTIAN_VOCABULARY.put(" ana ", "أنا ");
+        EGYPTIAN_VOCABULARY.put(" ana ", "أنا ");
+        EGYPTIAN_VOCABULARY.put("yesta2n", "يتأكد");
+        EGYPTIAN_VOCABULARY.put("yeghyr", "يغير");
+        EGYPTIAN_VOCABULARY.put("yefhem", "يفهم");
+        EGYPTIAN_VOCABULARY.put("yeghayer", "يغير");
+        EGYPTIAN_VOCABULARY.put("yesta2n", "يتأكد");
+        EGYPTIAN_VOCABULARY.put("yeghyr", "يغير");
+        EGYPTIAN_VOCABULARY.put("yefhem", "يفهم");
+        EGYPTIAN_VOCABULARY.put("yeghayer", "يغير");
     }
     
     /**
-     * Load custom vocabulary into the recognizer
+     * Loads custom vocabulary into the recognizer
      * @param recognizer The Vosk recognizer to load vocabulary into
      */
     public static void loadCustomWords(Recognizer recognizer) {
         try {
-            // Build vocabulary string for Vosk
-            StringBuilder vocabBuilder = new StringBuilder();
-            vocabBuilder.append("[");
+            // Build a grammar string for Vosk
+            StringBuilder grammar = new StringBuilder("[");
             
             boolean first = true;
             for (String word : EGYPTIAN_VOCABULARY.keySet()) {
                 if (!first) {
-                    vocabBuilder.append(", ");
+                    grammar.append(", ");
                 }
-                vocabBuilder.append("\"").append(word).append("\"");
+                grammar.append("\"").append(word).append("\"");
                 first = false;
             }
             
-            vocabBuilder.append("]");
-            String vocabString = vocabBuilder.toString();
+            // Add common Egyptian phrases
+            String[] commonPhrases = {
+                "يا كبير", "يا صاحبي", "اتصل بأمي", "اتصل بأبي", 
+                "ابعت واتساب", "قول لأحمد", "قول لباسم", "قول لمحمد",
+                "نّبهني", "انبهني", "الساعة كام", "الوقت كام",
+                "كلم ماما", "كلم بابا", "рен على", "ابعتلي رسالة"
+            };
             
-            // Set the custom vocabulary
-            recognizer.setWords(true); // Enable word-level timing
-            Log.i(TAG, "Custom vocabulary loaded into recognizer: " + vocabString);
+            for (String phrase : commonPhrases) {
+                grammar.append(", \"").append(phrase).append("\"");
+            }
+            
+            grammar.append("]");
+            
+            // Set the grammar for the recognizer
+            recognizer.setGrammar(grammar.toString());
+            
+            Log.i(TAG, "Custom Egyptian vocabulary loaded into recognizer");
         } catch (Exception e) {
             Log.e(TAG, "Error loading custom vocabulary", e);
         }
     }
     
     /**
-     * Add a custom word to the vocabulary
-     * @param word The word to add
+     * Adds a new word to the vocabulary
+     * @param dialectWord The Egyptian dialect word
+     * @param standardWord The standard Arabic equivalent
      */
-    public static void addCustomWord(String word) {
-        if (word != null && !word.trim().isEmpty()) {
-            EGYPTIAN_VOCABULARY.put(word.trim().toLowerCase(), word.trim());
-            Log.d(TAG, "Added custom word: " + word);
-        }
+    public static void addWord(String dialectWord, String standardWord) {
+        EGYPTIAN_VOCABULARY.put(dialectWord, standardWord);
     }
     
     /**
-     * Get the full vocabulary map
-     * @return The vocabulary map
+     * Gets the standard Arabic equivalent of an Egyptian dialect word
+     * @param dialectWord The Egyptian dialect word
+     * @return The standard Arabic equivalent, or the original word if not found
      */
-    public static Map<String, String> getVocabulary() {
+    public static String getStandardWord(String dialectWord) {
+        return EGYPTIAN_VOCABULARY.getOrDefault(dialectWord, dialectWord);
+    }
+    
+    /**
+     * Checks if a word is in the Egyptian vocabulary
+     * @param word The word to check
+     * @return true if the word is in the vocabulary, false otherwise
+     */
+    public static boolean isEgyptianWord(String word) {
+        return EGYPTIAN_VOCABULARY.containsKey(word);
+    }
+    
+    /**
+     * Gets all Egyptian vocabulary
+     * @return A copy of the Egyptian vocabulary map
+     */
+    public static Map<String, String> getAllVocabulary() {
         return new HashMap<>(EGYPTIAN_VOCABULARY);
     }
 }

@@ -5,12 +5,13 @@ import android.util.Log;
 import com.egyptian.agent.core.IntentType;
 import com.egyptian.agent.executors.EmergencyHandler;
 import com.egyptian.agent.core.TTSManager;
+import com.egyptian.agent.utils.PreferencesHelper;
 import java.util.*;
 
 public class SeniorMode {
 
     private static final String TAG = "SeniorMode";
-    public static boolean isEnabled = false;
+    private static Boolean isEnabled = null;
 
     // Simplified command set for seniors
     private static final Set<String> ALLOWED_COMMANDS = new HashSet<>(Arrays.asList(
@@ -31,10 +32,11 @@ public class SeniorMode {
     private static final float SENIOR_TTS_VOLUME = 1.0f; // Maximum volume
 
     public static void enable(Context context) {
-        if (isEnabled) return;
+        if (isEnabled(context)) return;
 
         Log.i(TAG, "Enabling Senior Mode");
         isEnabled = true;
+        PreferencesHelper.getInstance(context).setSeniorModeEnabled(true);
 
         // Apply senior-specific settings
         applySeniorTtsSettings(context);
@@ -49,10 +51,11 @@ public class SeniorMode {
     }
 
     public static void disable(Context context) {
-        if (!isEnabled) return;
+        if (!isEnabled(context)) return;
 
         Log.i(TAG, "Disabling Senior Mode");
         isEnabled = false;
+        PreferencesHelper.getInstance(context).setSeniorModeEnabled(false);
 
         // Restore normal settings
         restoreNormalTtsSettings(context);
@@ -63,8 +66,26 @@ public class SeniorMode {
         // VibrationManager.vibrateShort(context);
     }
 
-    public static boolean isCommandAllowed(String command) {
-        if (!isEnabled) return true;
+    public static boolean isEnabled(Context context) {
+        if (isEnabled == null) {
+            // Initialize from preferences
+            isEnabled = PreferencesHelper.getInstance(context).isSeniorModeEnabled();
+        }
+        return isEnabled;
+    }
+
+    // Overload for backward compatibility
+    public static boolean isEnabled() {
+        return isEnabled != null ? isEnabled : false;
+    }
+
+    // Method to initialize from context
+    public static void initialize(Context context) {
+        isEnabled = PreferencesHelper.getInstance(context).isSeniorModeEnabled();
+    }
+
+    public static boolean isCommandAllowed(Context context, String command) {
+        if (!isEnabled(context)) return true;
 
         // Always allow emergency commands
         if (EmergencyHandler.isEmergency(command)) {
@@ -81,8 +102,8 @@ public class SeniorMode {
         return false;
     }
 
-    public static boolean isIntentAllowed(IntentType intent) {
-        if (!isEnabled) return true;
+    public static boolean isIntentAllowed(Context context, IntentType intent) {
+        if (!isEnabled(context)) return true;
         return ALLOWED_INTENTS.contains(intent);
     }
 
@@ -117,14 +138,14 @@ public class SeniorMode {
 
         // Offer to disable senior mode
         TTSManager.speak(context, "عايز تخرج من وضع كبار السن؟ قول 'نعم'");
-        // SpeechConfirmation.waitForConfirmation(context, 15000, confirmed -> {
-        //     if (confirmed) {
-        //         disable(context);
-        //     } else {
-        //         // In a real app, we would explain how to exit senior mode later
-        //         TTSManager.speak(context, "مفيش مشكلة. قول 'يا كبير، خرج من وضع كبار السن' في أي وقت");
-        //     }
-        // });
+        SpeechConfirmation.waitForConfirmation(context, 15000, confirmed -> {
+            if (confirmed) {
+                disable(context);
+            } else {
+                // In a real app, we would explain how to exit senior mode later
+                TTSManager.speak(context, "مفيش مشكلة. قول 'يا كبير، خرج من وضع كبار السن' في أي وقت");
+            }
+        });
     }
 
     public static void handleEmergency(Context context) {

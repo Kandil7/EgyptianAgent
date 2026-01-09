@@ -1,0 +1,24 @@
+{
+  "model": "openphone-3b",
+  "model_path": "model/openphone-3b",
+  "tokenizer": "openphone-3b-tokenizer",
+  "tensor_parallel_size": 1,
+  "dtype": "float16",
+  "quantization": "gptq",
+  "max_model_len": 2048,
+  "gpu_memory_utilization": 0.6,
+  "device": "cuda",
+  "enforce_eager": true,
+  "kv_cache_dtype": "auto",
+  "enable_prefix_caching": false,
+  "max_num_batched_tokens": 4096,
+  "max_num_seqs": 256,
+  "use_v2_block_manager": true,
+  "seed": 0,
+  "honor_x6c_optimizations": {
+    "enable_memory_efficient_attention": false,
+    "enable_flash_attention": false,
+    "max_attention_memory_usage": 0.7,
+    "cpu_offload_memory_usage": 0.2
+  }
+}

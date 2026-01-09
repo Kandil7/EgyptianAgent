@@ -3,8 +3,10 @@ package com.egyptian.agent.stt;
 import android.util.Log;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -292,5 +294,101 @@ public class EgyptianNormalizer {
         }
 
         return "";
+    }
+
+    /**
+     * Enhances text with Egyptian dialect context before sending to model
+     * @param text Input text
+     * @return Enhanced text with Egyptian context
+     */
+    public static String enhanceWithEgyptianContext(String text) {
+        // Add Egyptian dialect specific enhancements
+        String enhanced = text;
+
+        // Map common Egyptian expressions to more standard forms for the model
+        enhanced = enhanced.replaceAll("بكره", "بكرة");
+        enhanced = enhanced.replaceAll("عنده", "عندده");
+        enhanced = enhanced.replaceAll("فيه", "فيه");
+        enhanced = enhanced.replaceAll("ليه", "ليه");
+        enhanced = enhanced.replaceAll("إيه", "إيه");
+
+        // Add context markers for Egyptian dialect
+        if (text.contains("يا كبير") || text.contains("يا صاحبي")) {
+            enhanced = "[EGYPTIAN_DIALECT_CONTEXT] " + enhanced;
+        }
+
+        return enhanced;
+    }
+
+    /**
+     * Applies post-processing rules to the result
+     * @param result IntentResult to apply rules to
+     */
+    public static void applyPostProcessingRules(IntentResult result) {
+        // Apply Egyptian-specific post-processing
+        String contact = result.getEntity("contact", "");
+        if (!contact.isEmpty()) {
+            // Normalize Egyptian contact names
+            result.setEntity("contact", normalizeContactName(contact));
+        }
+
+        // Apply other post-processing rules as needed
+    }
+
+    /**
+     * Normalizes Egyptian contact names
+     * @param contactName Original contact name
+     * @return Normalized contact name
+     */
+    public static String normalizeContactName(String contactName) {
+        // Common Egyptian nicknames and their normalized forms
+        Map<String, String> nicknameMap = new HashMap<>();
+        nicknameMap.put("ماما", "أمّي");
+        nicknameMap.put("بابا", "أبي");
+        nicknameMap.put("مama", "أمّي");
+        nicknameMap.put("baba", "أبي");
+        nicknameMap.put("دكتور", "الدكتور");
+        nicknameMap.put("دكتورة", "الدكتورة");
+
+        String normalized = contactName.toLowerCase();
+        if (nicknameMap.containsKey(normalized)) {
+            return nicknameMap.get(normalized);
+        }
+
+        // Add "ال" prefix to common titles
+        if (normalized.startsWith("دكتور") || normalized.startsWith("استاذ") ||
+            normalized.startsWith("مهندس")) {
+            return "ال" + contactName;
+        }
+
+        return contactName;
+    }
+
+    /**
+     * Checks if a word is known to the system
+     * @param word Word to check
+     * @return True if known, false otherwise
+     */
+    public static boolean isKnownWord(String word) {
+        // Check against known Egyptian dialect words
+        Set<String> knownWords = new HashSet<>();
+        knownWords.add("بكرة");
+        knownWords.add("امبارح");
+        knownWords.add("النهارده");
+        knownWords.add("دلوقتي");
+        knownWords.add("فين");
+        knownWords.add("ازاي");
+        knownWords.add("يا كبير");
+        knownWords.add("يا صاحبي");
+        knownWords.add("اتصل");
+        knownWords.add("كلم");
+        knownWords.add("رن");
+        knownWords.add("ابعت");
+        knownWords.add("واتساب");
+        knownWords.add("انبهني");
+        knownWords.add("نبهني");
+        knownWords.add(" thinker");
+
+        return knownWords.contains(word.toLowerCase());
     }
 }

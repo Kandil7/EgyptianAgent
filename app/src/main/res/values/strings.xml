@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">الوكيل المصري</string>
-    <string name="admin_label">Egyptian Agent Admin</string>
-    <string name="admin_description">Allows Egyptian Agent to provide enhanced accessibility features</string>
+    <string name="app_description">المساعد الصوتي لمصر</string>
+    <string name="voice_service_channel_name">خدمة الصوت</string>
+    <string name="voice_service_channel_description">خدمة التعرف على الأوامر الصوتية</string>
 </resources>

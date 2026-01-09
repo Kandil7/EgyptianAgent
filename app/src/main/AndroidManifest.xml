@@ -39,6 +39,10 @@
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
         tools:ignore="ProtectedPermissions" />
 
+    <!-- Permissions for OpenPhone model processing -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- Hardware features -->
     <uses-feature android:name="android.hardware.microphone" android:required="true" />
     <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="false" />
@@ -53,6 +57,7 @@
         android:theme="@style/AppTheme"
         android:sharedUserId="android.uid.system"
         android:usesCleartextTraffic="true"
+        android:requestLegacyExternalStorage="true"
         tools:targetApi="q">
 
         <!-- Main activity -->
@@ -68,6 +73,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Integration test activity -->
+        <activity
+            android:name=".hybrid.IntegrationTestActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
 
         <!-- Voice service (critical component) -->
         <service
@@ -111,6 +122,26 @@
             </intent-filter>
         </receiver>
 
+        <!-- Emergency follow-up receiver -->
+        <receiver
+            android:name=".executors.EmergencyFollowupReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.egyptian.agent.action.EMERGENCY_FOLLOWUP" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Medication reminder receiver -->
+        <receiver
+            android:name=".accessibility.MedicationReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
         <!-- Admin receiver (for device admin privileges) -->
         <receiver
             android:name=".receivers.AdminReceiver"
@@ -123,6 +154,14 @@
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
             </intent-filter>
         </receiver>
+
+        <!-- Model loading service for OpenPhone -->
+        <service
+            android:name=".hybrid.ModelLoadingService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync">
+        </service>
 
         <!-- Notification channels -->
         <meta-data

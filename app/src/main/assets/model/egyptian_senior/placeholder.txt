@@ -1,0 +1,2 @@
+Placeholder for Egyptian dialect Vosk model files
+The actual model files would be stored here in a production environment

@@ -7,70 +7,87 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ContactCache {
-    
     private static final String TAG = "ContactCache";
     private static final String PREF_NAME = "contact_cache";
-    private static Map<String, String> cache = new HashMap<>();
+    private static final int MAX_CACHE_SIZE = 100;
     
-    public static void initialize(Context context) {
-        // Load cached contacts from SharedPreferences
-        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        Map<String, ?> allEntries = prefs.getAll();
-        
-        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
-            if (entry.getValue() instanceof String) {
-                cache.put(entry.getKey(), (String) entry.getValue());
-            }
-        }
-        
-        Log.d(TAG, "Loaded " + cache.size() + " contacts from cache");
-    }
+    private static Map<String, String> memoryCache = new HashMap<>();
     
+    /**
+     * Get a contact number from cache
+     * @param context Application context
+     * @param contactName Name of the contact
+     * @return Contact number if found, null otherwise
+     */
     public static String get(Context context, String contactName) {
-        String number = cache.get(contactName.toLowerCase());
+        // First check memory cache
+        String number = memoryCache.get(contactName);
         if (number != null) {
-            Log.d(TAG, "Cache hit for: " + contactName);
-        } else {
-            Log.d(TAG, "Cache miss for: " + contactName);
+            Log.d(TAG, "Contact found in memory cache: " + contactName);
+            return number;
         }
+        
+        // Then check persistent cache
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        number = prefs.getString(contactName, null);
+        
+        if (number != null) {
+            Log.d(TAG, "Contact found in persistent cache: " + contactName);
+            // Add to memory cache for faster access
+            memoryCache.put(contactName, number);
+        }
+        
         return number;
     }
     
+    /**
+     * Put a contact number in cache
+     * @param context Application context
+     * @param contactName Name of the contact
+     * @param number Number to cache
+     */
     public static void put(Context context, String contactName, String number) {
-        String key = contactName.toLowerCase();
-        cache.put(key, number);
+        // Add to memory cache
+        memoryCache.put(contactName, number);
         
-        // Persist to SharedPreferences
+        // Limit memory cache size
+        if (memoryCache.size() > MAX_CACHE_SIZE) {
+            // Simple eviction policy - remove first entry
+            String firstKey = memoryCache.keySet().iterator().next();
+            memoryCache.remove(firstKey);
+        }
+        
+        // Add to persistent cache
         SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(key, number);
+        editor.putString(contactName, number);
         editor.apply();
         
-        Log.d(TAG, "Cached contact: " + contactName + " -> " + number);
+        Log.d(TAG, "Contact cached: " + contactName + " -> " + number);
     }
     
+    /**
+     * Clear the contact cache
+     * @param context Application context
+     */
+    public static void clear() {
+        memoryCache.clear();
+        Log.d(TAG, "Contact memory cache cleared");
+    }
+    
+    /**
+     * Remove a specific contact from cache
+     * @param context Application context
+     * @param contactName Name of the contact to remove
+     */
     public static void remove(Context context, String contactName) {
-        String key = contactName.toLowerCase();
-        cache.remove(key);
+        memoryCache.remove(contactName);
         
-        // Remove from SharedPreferences
         SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.remove(key);
+        editor.remove(contactName);
         editor.apply();
         
-        Log.d(TAG, "Removed from cache: " + contactName);
-    }
-    
-    public static void clear(Context context) {
-        cache.clear();
-        
-        // Clear SharedPreferences
-        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.clear();
-        editor.apply();
-        
-        Log.d(TAG, "Cleared contact cache");
+        Log.d(TAG, "Contact removed from cache: " + contactName);
     }
 }

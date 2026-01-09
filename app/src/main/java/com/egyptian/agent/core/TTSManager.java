@@ -7,6 +7,7 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
 import com.egyptian.agent.accessibility.SeniorMode;
+import com.egyptian.agent.utils.CrashLogger;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
@@ -50,7 +51,7 @@ public class TTSManager {
                 if (result == TextToSpeech.LANG_MISSING_DATA ||
                     result == TextToSpeech.LANG_NOT_SUPPORTED) {
                     Log.e(TAG, "Arabic language not supported");
-                    // CrashLogger.logError(context, new Exception("Arabic TTS not supported"));
+                    CrashLogger.logError(context, new Exception("Arabic TTS not supported"));
                 } else {
                     // Set default parameters
                     tts.setSpeechRate(normalSpeechRate);
@@ -60,7 +61,7 @@ public class TTSManager {
                 }
             } else {
                 Log.e(TAG, "TTS initialization failed");
-                // CrashLogger.logError(context, new Exception("TTS initialization failed"));
+                CrashLogger.logError(context, new Exception("TTS initialization failed"));
             }
         });
 
@@ -113,7 +114,7 @@ public class TTSManager {
             // This is a simplified version for compatibility
         } catch (Exception e) {
             Log.w(TAG, "Failed to set audio attributes", e);
-            // CrashLogger.logWarning(context, "TTS audio attributes setup failed");
+            CrashLogger.logWarning(context, "TTS audio attributes setup failed");
         }
     }
 
@@ -178,7 +179,7 @@ public class TTSManager {
 
                 if (result == TextToSpeech.ERROR) {
                     Log.e(TAG, "TTS speak failed for text: " + text);
-                    // CrashLogger.logError(context, new Exception("TTS speak failed"));
+                    CrashLogger.logError(context, new Exception("TTS speak failed"));
                 }
             }
         });
@@ -257,7 +258,7 @@ public class TTSManager {
                 normalSpeechRate = rate;
             }
         } else {
-            // CrashLogger.logWarning(context, "TTS not initialized when setting speech rate");
+            CrashLogger.logWarning(context, "TTS not initialized when setting speech rate");
         }
     }
 
@@ -275,7 +276,7 @@ public class TTSManager {
                 normalPitch = pitch;
             }
         } else {
-            // CrashLogger.logWarning(context, "TTS not initialized when setting pitch");
+            CrashLogger.logWarning(context, "TTS not initialized when setting pitch");
         }
     }
 

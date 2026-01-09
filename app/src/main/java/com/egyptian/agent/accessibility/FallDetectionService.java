@@ -7,8 +7,11 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.speech.RecognizerIntent;
 import android.util.Log;
+import com.egyptian.agent.utils.CrashLogger;
 
 public class FallDetectionService extends Service implements SensorEventListener {
 
@@ -40,6 +43,7 @@ public class FallDetectionService extends Service implements SensorEventListener
             sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         } else {
             Log.e(TAG, "Accelerometer not available on this device");
+            CrashLogger.logError(this, new Exception("Accelerometer not available on this device"));
         }
         
         // Start foreground service to keep it running
@@ -88,13 +92,56 @@ public class FallDetectionService extends Service implements SensorEventListener
     }
 
     private void handlePotentialFall(double acceleration) {
-        // In a real implementation, this would trigger appropriate actions
-        // such as alerting emergency contacts or asking the user if they're OK
-        
+        // Trigger appropriate actions for potential fall
         Log.i(TAG, "Handling potential fall with acceleration: " + acceleration);
-        
-        // Example: Alert the user or trigger emergency protocols
-        // This would involve calling methods from EmergencyHandler
+
+        // Vibrate to alert the user
+        VibrationManager.vibrateEmergency(this);
+
+        // Speak an alert to the user
+        TTSManager.speak(this, "يا كبير، لقيت إنك وقعت؟ لو مفيش رد هيتم الاتصال بجهات الطوارئ خلال 10 ثواني");
+
+        // Start a countdown timer to trigger emergency if no response
+        new android.os.Handler(Looper.getMainLooper()).postDelayed(() -> {
+            // Check if user responded (this would be implemented with voice recognition)
+            boolean userResponded = checkUserResponse();
+
+            if (!userResponded) {
+                Log.e(TAG, "No response after potential fall - triggering emergency");
+                // Trigger emergency response
+                com.egyptian.agent.executors.EmergencyHandler.trigger(this, true); // true indicates fall-triggered
+            } else {
+                Log.i(TAG, "User responded after potential fall - no emergency needed");
+            }
+        }, 10000); // 10 seconds to respond
+    }
+
+    /**
+     * Checks if the user has responded to the fall alert
+     * Uses voice recognition to detect "I'm fine" or similar
+     */
+    private boolean checkUserResponse() {
+        // For now, return false to simulate no response
+        // This would involve starting a voice recognition session to listen for
+        // phrases like "I'm fine", "I'm okay", "ana ta2ib", "ana mokay", etc.
+        return false;
+    }
+
+    /**
+     * Starts voice recognition to listen for user response after a fall
+     */
+    private void startVoiceRecognitionForResponse() {
+        // Create an intent for voice recognition
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ar-EG"); // Egyptian Arabic
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "قولي إنت بخير لو محتاجش مساعدة");
+        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+
+        // Start voice recognition activity to listen for user response
+        // and handle the response in onActivityResult
+        // For now, we'll just log that this would happen
+        Log.d(TAG, "Voice recognition would start to listen for user response");
     }
 
     @Override

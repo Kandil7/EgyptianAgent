@@ -164,12 +164,62 @@ public class CrashLogger {
     private void checkAndRotateLogFile(File logFile) {
         if (logFile.length() > MAX_LOG_SIZE) {
             // In a real app, we would compress and archive old logs
-            // For now, just truncate the file
-            try {
-                logFile.delete();
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to rotate log file", e);
+            File logsDir = logFile.getParentFile();
+            if (logsDir != null) {
+                compressAndArchiveOldLogs(logsDir);
             }
+        }
+    }
+
+    // In a real app, we would compress and archive old logs
+    private void compressAndArchiveOldLogs(File logsDir) {
+        try {
+            // Create archive directory
+            File archiveDir = new File(logsDir, "archive");
+            if (!archiveDir.exists()) {
+                archiveDir.mkdirs();
+            }
+
+            // Get current date for filename
+            String dateStr = new java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault()).format(new java.util.Date());
+
+            // Compress current log
+            File currentLogFile = new File(logsDir, "current_log.txt");
+            if (currentLogFile.exists() && currentLogFile.length() > 0) {
+                File zipFile = new File(archiveDir, "logs_" + dateStr + ".zip");
+
+                try (java.io.FileOutputStream fos = new java.io.FileOutputStream(zipFile);
+                     java.util.zip.ZipOutputStream zipOut = new java.util.zip.ZipOutputStream(fos)) {
+
+                    java.util.zip.ZipEntry zipEntry = new java.util.zip.ZipEntry("current_log.txt");
+                    zipOut.putNextEntry(zipEntry);
+
+                    byte[] bytes = new byte[1024];
+                    try (java.io.FileInputStream fis = new java.io.FileInputStream(currentLogFile)) {
+                        int length;
+                        while ((length = fis.read(bytes)) >= 0) {
+                            zipOut.write(bytes, 0, length);
+                        }
+                    }
+                    zipOut.closeEntry();
+                }
+
+                Log.i(TAG, "Log file compressed and archived: " + zipFile.getAbsolutePath());
+
+                // Clear current log after archiving
+                currentLogFile.delete();
+            }
+
+            // Keep only last 7 archive files (one week)
+            File[] archiveFiles = archiveDir.listFiles();
+            if (archiveFiles != null && archiveFiles.length > 7) {
+                java.util.Arrays.sort(archiveFiles, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
+                for (int i = 7; i < archiveFiles.length; i++) {
+                    archiveFiles[i].delete();
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to compress and archive logs", e);
         }
     }
 
