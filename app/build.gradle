@@ -128,12 +128,16 @@ dependencies {
     implementation 'androidx.work:work-runtime:2.8.1'
 
     // OpenPhone dependencies
-    implementation 'ai.openphone:openphone-sdk:1.0.0'
+    implementation 'ai.openphone:openphone-android-sdk:3.0.0'
     implementation 'org.pytorch:pytorch_android:1.13.0'
     implementation 'org.pytorch:pytorch_android_torchvision:1.13.0'
 
     // For model optimization
     implementation 'androidx.profileinstaller:profileinstaller:1.3.1'
+
+    // Additional dependencies for NLP and text processing
+    implementation 'com.google.mlkit:language-id:17.0.6'
+    implementation 'com.google.mlkit:smart-reply:18.0.0'
 
     // Testing dependencies
     testImplementation 'junit:junit:4.13.2'

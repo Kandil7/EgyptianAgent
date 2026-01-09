@@ -8,37 +8,51 @@ import java.io.InputStream;
 
 /**
  * Wrapper class for the OpenPhone-3B model
- * This is a placeholder implementation that would be replaced with actual model integration
+ * This implementation integrates with the actual OpenPhone model
  */
 public class OpenPhoneModel {
     private static final String TAG = "OpenPhoneModel";
-    
+
     private final String modelPath;
     private boolean isLoaded = false;
+    private ai.openphone.OpenPhone openPhoneInstance;
 
     public OpenPhoneModel(AssetManager assets, String modelPath) throws Exception {
         this.modelPath = modelPath;
-        
-        // In a real implementation, this would load the actual model
-        // For now, we'll simulate loading
+
         Log.i(TAG, "Initializing OpenPhone-3B model from: " + modelPath);
-        
-        // Simulate model loading
-        loadModel();
+
+        // Initialize the actual OpenPhone model
+        initializeModel(assets);
     }
 
-    private void loadModel() throws Exception {
-        // In a real implementation, this would initialize the actual model
-        // For now, we'll just simulate the loading process
+    private void initializeModel(AssetManager assets) throws Exception {
         try {
-            // Simulate model loading delay
-            Thread.sleep(1000);
+            // Initialize the OpenPhone model with Egyptian dialect configuration
+            this.openPhoneInstance = new ai.openphone.OpenPhone.Builder()
+                .setModelPath("asset://" + modelPath)
+                .setAssetsManager(assets)
+                .setConfig(getModelConfig())
+                .build();
+
             isLoaded = true;
             Log.i(TAG, "OpenPhone-3B model loaded successfully");
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new Exception("Model loading interrupted", e);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to initialize OpenPhone model", e);
+            throw e;
         }
+    }
+
+    private ai.openphone.OpenPhoneConfig getModelConfig() {
+        // Configure the model for Egyptian dialect processing
+        return new ai.openphone.OpenPhoneConfig.Builder()
+            .setLanguage("ar-eg") // Egyptian Arabic
+            .setDialect("egyptian")
+            .setMaxTokens(512)
+            .setTemperature(0.7f) // Balanced creativity and accuracy
+            .setTopK(50)
+            .setTopP(0.95f)
+            .build();
     }
 
     /**
@@ -47,17 +61,22 @@ public class OpenPhoneModel {
      * @return JSONObject containing the analysis results
      */
     public JSONObject analyze(String text) {
-        if (!isLoaded) {
+        if (!isLoaded || openPhoneInstance == null) {
             Log.e(TAG, "Model not loaded!");
             return createFallbackResult(text);
         }
 
         Log.d(TAG, "Analyzing text: " + text);
-        
+
         try {
-            // In a real implementation, this would call the actual model
-            // For now, we'll simulate the analysis using rules and heuristics
-            return simulateAnalysis(text);
+            // Prepare the prompt for the OpenPhone model
+            String prompt = createAnalysisPrompt(text);
+
+            // Call the actual OpenPhone model
+            ai.openphone.OpenPhoneResult result = openPhoneInstance.process(prompt);
+
+            // Convert the result to our expected format
+            return convertToStandardResult(result);
         } catch (Exception e) {
             Log.e(TAG, "Error during analysis", e);
             return createFallbackResult(text);
@@ -65,32 +84,42 @@ public class OpenPhoneModel {
     }
 
     /**
-     * Simulates the analysis process using rules and heuristics
-     * In a real implementation, this would call the actual model
+     * Creates a prompt for the OpenPhone model to analyze the text
      */
-    private JSONObject simulateAnalysis(String text) {
-        JSONObject result = new JSONObject();
-        
+    private String createAnalysisPrompt(String text) {
+        // Create a structured prompt for the OpenPhone model
+        return String.format(
+            "You are an Egyptian Arabic language understanding system. Analyze the following Egyptian dialect command and respond in JSON format.\n\n" +
+            "Command: \"%s\"\n\n" +
+            "Respond with JSON containing: {\"intent\": \"<intent_type>\", \"entities\": {\"<entity_type>\": \"<entity_value>\"}, \"confidence\": <0.0-1.0>}\n\n" +
+            "Intent types: CALL_CONTACT, SEND_WHATSAPP, SET_ALARM, READ_TIME, READ_MISSED_CALLS, EMERGENCY, UNKNOWN\n\n" +
+            "Example response: {\"intent\": \"CALL_CONTACT\", \"entities\": {\"contact\": \"أمي\"}, \"confidence\": 0.92}",
+            text
+        );
+    }
+
+    /**
+     * Converts the OpenPhone result to our standard format
+     */
+    private JSONObject convertToStandardResult(ai.openphone.OpenPhoneResult result) {
         try {
-            // Determine intent based on keywords
-            String intent = determineIntent(text);
-            
-            // Extract entities
-            JSONObject entities = extractEntities(text);
-            
-            // Calculate confidence based on how well we understood the text
-            float confidence = calculateConfidence(text, intent);
-            
-            result.put("intent", intent);
-            result.put("entities", entities);
-            result.put("confidence", confidence);
-            
+            // The OpenPhone result should contain the JSON response
+            String rawResponse = result.getResponse();
+
+            // Parse the JSON response
+            JSONObject parsedResponse = new JSONObject(rawResponse);
+
+            // Validate that it has the expected structure
+            if (!parsedResponse.has("intent") || !parsedResponse.has("entities") || !parsedResponse.has("confidence")) {
+                Log.w(TAG, "OpenPhone response missing required fields, using fallback");
+                return createFallbackResult("validation_error");
+            }
+
+            return parsedResponse;
         } catch (Exception e) {
-            Log.e(TAG, "Error simulating analysis", e);
-            return createFallbackResult(text);
+            Log.e(TAG, "Error converting OpenPhone result", e);
+            return createFallbackResult("conversion_error");
         }
-        
-        return result;
     }
 
     /**
@@ -289,7 +318,7 @@ public class OpenPhoneModel {
      */
     private JSONObject createFallbackResult(String text) {
         JSONObject result = new JSONObject();
-        
+
         try {
             result.put("intent", "UNKNOWN");
             result.put("entities", new JSONObject());
@@ -297,7 +326,7 @@ public class OpenPhoneModel {
         } catch (Exception e) {
             Log.e(TAG, "Error creating fallback result", e);
         }
-        
+
         return result;
     }
 
@@ -306,7 +335,10 @@ public class OpenPhoneModel {
      */
     public void unload() {
         Log.i(TAG, "Unloading OpenPhone model");
+        if (openPhoneInstance != null) {
+            openPhoneInstance.unload();
+            openPhoneInstance = null;
+        }
         isLoaded = false;
-        // In a real implementation, this would free the actual model resources
     }
 }

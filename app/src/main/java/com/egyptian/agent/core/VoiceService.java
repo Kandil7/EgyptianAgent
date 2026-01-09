@@ -90,8 +90,9 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
     }
 
     private void initializeWakeWord() {
-        wakeWordDetector = new WakeWordDetector(this, () -> {
-            if (isWakeWordDetected()) {
+        wakeWordDetector = new WakeWordDetector(this, new WakeWordDetector.WakeWordCallback() {
+            @Override
+            public void onWakeWordDetected() {
                 handleWakeWordDetected();
             }
         });
@@ -247,10 +248,6 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
         restartWakeWordListening();
     }
 
-    private boolean isWakeWordDetected() {
-        // This would be implemented in the actual WakeWordDetector
-        return true; // Placeholder
-    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {

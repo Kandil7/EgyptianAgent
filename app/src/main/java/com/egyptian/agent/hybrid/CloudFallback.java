@@ -65,28 +65,96 @@ public class CloudFallback {
      */
     private IntentResult callCloudService(String text) throws Exception {
         MediaType JSON = MediaType.get("application/json; charset=utf-8");
-        
+
         // Prepare request body
         JSONObject requestBody = new JSONObject();
         requestBody.put("text", text);
         requestBody.put("dialect", "egyptian");
         requestBody.put("version", "3.0");
-        
+        requestBody.put("timestamp", System.currentTimeMillis());
+        requestBody.put("device_info", getDeviceInfo());
+
         RequestBody body = RequestBody.create(requestBody.toString(), JSON);
         Request request = new Request.Builder()
             .url(CLOUD_ENDPOINT)
             .post(body)
+            .addHeader("Authorization", "Bearer " + getApiToken()) // In production, use proper auth
+            .addHeader("Content-Type", "application/json")
             .build();
 
         try (Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 Log.e(TAG, "Cloud service returned error: " + response.code());
-                return createFallbackResult(text);
+                // Try with a backup endpoint if the primary fails
+                return callBackupService(requestBody);
             }
-            
+
             String responseBody = response.body().string();
             return parseCloudResponse(responseBody);
+        } catch (IOException e) {
+            Log.e(TAG, "Network error during cloud service call", e);
+            // Try with backup service on network errors
+            return callBackupService(requestBody);
         }
+    }
+
+    /**
+     * Calls a backup service endpoint if the primary fails
+     */
+    private IntentResult callBackupService(JSONObject requestBody) {
+        try {
+            String backupEndpoint = CLOUD_ENDPOINT.replace("api.", "backup-api.");
+            MediaType JSON = MediaType.get("application/json; charset=utf-8");
+
+            RequestBody body = RequestBody.create(requestBody.toString(), JSON);
+            Request request = new Request.Builder()
+                .url(backupEndpoint)
+                .post(body)
+                .addHeader("Authorization", "Bearer " + getApiToken())
+                .addHeader("Content-Type", "application/json")
+                .build();
+
+            try (Response response = httpClient.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    Log.e(TAG, "Backup cloud service also failed: " + response.code());
+                    return createFallbackResult(requestBody.optString("text", "fallback"));
+                }
+
+                String responseBody = response.body().string();
+                return parseCloudResponse(responseBody);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Backup service also failed", e);
+            return createFallbackResult(requestBody.optString("text", "fallback"));
+        }
+    }
+
+    /**
+     * Gets device information for the request
+     */
+    private JSONObject getDeviceInfo() {
+        JSONObject deviceInfo = new JSONObject();
+        try {
+            deviceInfo.put("model", android.os.Build.MODEL);
+            deviceInfo.put("manufacturer", android.os.Build.MANUFACTURER);
+            deviceInfo.put("sdk_version", android.os.Build.VERSION.SDK_INT);
+            deviceInfo.put("device_id", android.provider.Settings.Secure.getString(
+                context.getContentResolver(),
+                android.provider.Settings.Secure.ANDROID_ID
+            ));
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting device info", e);
+        }
+        return deviceInfo;
+    }
+
+    /**
+     * Gets API token for authentication (in production, this would be securely stored)
+     */
+    private String getApiToken() {
+        // In a real implementation, this would retrieve a securely stored token
+        // For now, return a placeholder
+        return "placeholder_token";
     }
 
     /**
