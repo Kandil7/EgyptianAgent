@@ -127,8 +127,7 @@ dependencies {
     // WorkManager for background tasks
     implementation 'androidx.work:work-runtime:2.8.1'
 
-    // OpenPhone dependencies
-    implementation 'ai.openphone:openphone-android-sdk:3.0.0'
+    // OpenPhone dependencies - using local implementation
     implementation 'org.pytorch:pytorch_android:1.13.0'
     implementation 'org.pytorch:pytorch_android_torchvision:1.13.0'
 

@@ -1,14 +1,14 @@
 package com.egyptian.agent.ui;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -16,259 +16,171 @@ import com.egyptian.agent.R;
 import com.egyptian.agent.accessibility.SeniorMode;
 import com.egyptian.agent.core.TTSManager;
 import com.egyptian.agent.core.VoiceService;
-import com.egyptian.agent.executors.EmergencyHandler;
-import com.egyptian.agent.utils.SystemAppHelper;
+import com.egyptian.agent.utils.CrashLogger;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
+    private static final String[] REQUIRED_PERMISSIONS = {
+        Manifest.permission.RECORD_AUDIO,
+        Manifest.permission.CALL_PHONE,
+        Manifest.permission.READ_CONTACTS,
+        Manifest.permission.BODY_SENSORS,
+        Manifest.permission.VIBRATE,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.SYSTEM_ALERT_WINDOW,
+        Manifest.permission.WAKE_LOCK,
+        Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+    };
+
     private static final int PERMISSION_REQUEST_CODE = 1001;
 
     private TextView statusTextView;
-    private Button activateSeniorModeButton;
-    private Button startListeningButton;
-    private Button testEmergencyButton;
+    private Button startServiceButton;
+    private Button seniorModeButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // Set up the UI
         setContentView(R.layout.activity_main);
-
-        // Initialize UI components
-        initUIComponents();
-
-        // Initialize TTS
-        TTSManager.initialize(this);
-
-        // Request critical permissions
-        requestCriticalPermissions();
-
-        // Apply Honor-specific battery optimizations fix
-        SystemAppHelper.keepAlive(this);
-
-        // Handle intent actions (like enabling senior mode from external trigger)
-        handleIntentActions();
-
-        // Update UI status
-        updateStatus("التطبيق شغال. قول 'يا صاحبي' لتفعيل الـ assistant");
-
-        // Start voice service if not already running
-        startVoiceService();
+        
+        initializeViews();
+        checkAndRequestPermissions();
+        initializeComponents();
     }
 
-    private void initUIComponents() {
+    private void initializeViews() {
         statusTextView = findViewById(R.id.statusTextView);
-        activateSeniorModeButton = findViewById(R.id.activateSeniorModeButton);
-        startListeningButton = findViewById(R.id.startListeningButton);
-        testEmergencyButton = findViewById(R.id.testEmergencyButton);
+        startServiceButton = findViewById(R.id.startServiceButton);
+        seniorModeButton = findViewById(R.id.seniorModeButton);
 
-        // Set up button listeners
-        activateSeniorModeButton.setOnClickListener(v -> toggleSeniorMode());
-        startListeningButton.setOnClickListener(v -> startListening());
-        testEmergencyButton.setOnClickListener(v -> triggerTestEmergency());
+        if (startServiceButton != null) {
+            startServiceButton.setOnClickListener(v -> startVoiceService());
+        }
 
-        // Hide UI elements in senior mode (as it's voice-first)
-        if (SeniorMode.isEnabled()) {
-            hideUIElements();
+        if (seniorModeButton != null) {
+            seniorModeButton.setOnClickListener(v -> toggleSeniorMode());
         }
     }
 
-    private void requestCriticalPermissions() {
+    private void initializeComponents() {
+        // Initialize TTS manager
+        TTSManager.initialize(this);
+
+        // Initialize crash logger
+        CrashLogger.registerGlobalExceptionHandler(this);
+
+        // Update UI based on service status
+        updateServiceStatus();
+    }
+
+    private void checkAndRequestPermissions() {
         List<String> permissionsNeeded = new ArrayList<>();
 
-        // Critical permissions for the app to function
-        String[] criticalPermissions = {
-            Manifest.permission.CALL_PHONE,
-            Manifest.permission.READ_CONTACTS,
-            Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.BODY_SENSORS,
-            Manifest.permission.VIBRATE
-        };
-
-        for (String permission : criticalPermissions) {
+        for (String permission : REQUIRED_PERMISSIONS) {
             if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
                 permissionsNeeded.add(permission);
             }
         }
 
-        // Request permissions if any are missing
         if (!permissionsNeeded.isEmpty()) {
-            ActivityCompat.requestPermissions(this,
+            ActivityCompat.requestPermissions(
+                this,
                 permissionsNeeded.toArray(new String[0]),
-                PERMISSION_REQUEST_CODE);
+                PERMISSION_REQUEST_CODE
+            );
+        } else {
+            // All permissions granted, proceed with initialization
+            onPermissionsGranted();
         }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == PERMISSION_REQUEST_CODE) {
-            boolean allPermissionsGranted = true;
-
+            boolean allGranted = true;
             for (int result : grantResults) {
                 if (result != PackageManager.PERMISSION_GRANTED) {
-                    allPermissionsGranted = false;
+                    allGranted = false;
                     break;
                 }
             }
 
-            if (allPermissionsGranted) {
-                updateStatus("كل الصلاحيات متاحة");
-                startVoiceService();
+            if (allGranted) {
+                onPermissionsGranted();
             } else {
-                updateStatus("مفيش كل الصلاحيات. بعض المميزات مش هتشتغل");
-                // In a real app, we would guide the user to enable permissions
+                onPermissionsDenied();
             }
         }
     }
 
-    private void handleIntentActions() {
-        Intent intent = getIntent();
-        if (intent != null) {
-            if (intent.getBooleanExtra("enable_senior_mode", false)) {
-                enableSeniorMode();
+    private void onPermissionsGranted() {
+        runOnUiThread(() -> {
+            if (statusTextView != null) {
+                statusTextView.setText("جميع الأذونات ممنوحة. جاهز للعمل.");
             }
-        }
+            Toast.makeText(this, "جميع الأذونات ممنوحة", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void onPermissionsDenied() {
+        runOnUiThread(() -> {
+            if (statusTextView != null) {
+                statusTextView.setText("بعض الأذونات مرفوضة. قد لا يعمل التطبيق بشكل صحيح.");
+            }
+            Toast.makeText(this, "بعض الأذونات مطلوبة ليعمل التطبيق", Toast.LENGTH_LONG).show();
+        });
     }
 
     private void startVoiceService() {
-        Intent serviceIntent = new Intent(this, VoiceService.class);
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+        try {
+            Intent serviceIntent = new Intent(this, VoiceService.class);
             startForegroundService(serviceIntent);
-        } else {
-            startService(serviceIntent);
+            
+            Toast.makeText(this, "تم تشغيل خدمة الصوت", Toast.LENGTH_SHORT).show();
+            updateServiceStatus();
+        } catch (Exception e) {
+            Toast.makeText(this, "خطأ في بدء الخدمة: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
     private void toggleSeniorMode() {
         if (SeniorMode.isEnabled()) {
-            disableSeniorMode();
+            SeniorMode.disable(this);
+            seniorModeButton.setText("تشغيل وضع كبار السن");
         } else {
-            enableSeniorMode();
+            SeniorMode.enable(this);
+            seniorModeButton.setText("إيقاف وضع كبار السن");
         }
+        
+        Toast.makeText(this, 
+            SeniorMode.isEnabled() ? "تم تفعيل وضع كبار السن" : "تم إيقاف وضع كبار السن", 
+            Toast.LENGTH_SHORT).show();
     }
 
-    private void enableSeniorMode() {
-        SeniorMode.enable(this);
-        updateStatus("وضع كبار السن تم تفعيله");
-        activateSeniorModeButton.setText("تعطيل وضع كبار السن");
-
-        // Hide UI in senior mode as it's voice-first
-        hideUIElements();
-
-        // Speak confirmation
-        TTSManager.speak(this, "وضع كبار السن نشط. قول 'يا كبير' لأي حاجة");
-    }
-
-    private void disableSeniorMode() {
-        SeniorMode.disable(this);
-        updateStatus("وضع كبار السن تم تعطيله");
-        activateSeniorModeButton.setText("تفعيل وضع كبار السن");
-
-        // Show UI elements again
-        showUIElements();
-
-        TTSManager.speak(this, "وضع كبار السن متوقف");
-    }
-
-    private void hideUIElements() {
-        if (activateSeniorModeButton != null) activateSeniorModeButton.setVisibility(View.GONE);
-        if (startListeningButton != null) startListeningButton.setVisibility(View.GONE);
-        if (testEmergencyButton != null) testEmergencyButton.setVisibility(View.GONE);
-    }
-
-    private void showUIElements() {
-        if (activateSeniorModeButton != null) activateSeniorModeButton.setVisibility(View.VISIBLE);
-        if (startListeningButton != null) startListeningButton.setVisibility(View.VISIBLE);
-        if (testEmergencyButton != null) testEmergencyButton.setVisibility(View.VISIBLE);
-    }
-
-    private void startListening() {
-        // Start voice service with listening command
-        Intent serviceIntent = new Intent(this, VoiceService.class);
-        serviceIntent.setAction("com.egyptian.agent.action.START_LISTENING");
-        startService(serviceIntent);
-
-        updateStatus("بيسمع... قول أوامرك");
-
-        // In a real app, we would show visual feedback during listening
-        showListeningAnimation();
-    }
-
-    // New method for visual feedback during listening
-    private void showListeningAnimation() {
-        // Create a pulsing animation for the microphone icon
-        android.view.animation.Animation pulse = new android.view.animation.ScaleAnimation(
-            1f, 1.2f, 1f, 1.2f,
-            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f,
-            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f
-        );
-        pulse.setDuration(600);
-        pulse.setRepeatCount(android.view.animation.Animation.INFINITE);
-        pulse.setRepeatMode(android.view.animation.Animation.REVERSE);
-        pulse.setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator());
-
-        // Find the microphone indicator view (assuming it exists in layout)
-        android.widget.ImageView micIndicator = findViewById(R.id.micIndicator);
-        if (micIndicator != null) {
-            micIndicator.setVisibility(android.view.View.VISIBLE);
-            micIndicator.startAnimation(pulse);
-        }
-
-        // Change status text color during listening (if we have a reference)
+    private void updateServiceStatus() {
+        // In a real implementation, we would check if the service is actually running
+        // For now, we'll just update the UI
         if (statusTextView != null) {
-            // Using a placeholder color - would need to define in colors.xml in real app
-            statusTextView.setTextColor(android.graphics.Color.parseColor("#FF5722")); // Orange color for listening
+            statusTextView.setText("الوكيل المصري جاهز. قول \"يا كبير\" أو \"يا صاحبي\" لتفعيله.");
         }
-    }
-
-    // Stop animation when not listening
-    private void stopListeningAnimation() {
-        android.widget.ImageView micIndicator = findViewById(R.id.micIndicator);
-        if (micIndicator != null) {
-            micIndicator.clearAnimation();
-            micIndicator.setVisibility(android.view.View.GONE);
-        }
-        if (statusTextView != null) {
-            // Reset to default color (would need to define in colors.xml in real app)
-            statusTextView.setTextColor(android.graphics.Color.parseColor("#000000")); // Black default
-        }
-    }
-
-    private void triggerTestEmergency() {
-        updateStatus("جاري اختبار وضع الطوارئ...");
-
-        // Trigger emergency handler
-        EmergencyHandler.trigger(this, true);
-
-        updateStatus("وضع الطوارئ تم تنفيذه بنجاح");
-    }
-
-    private void updateStatus(String status) {
-        runOnUiThread(() -> {
-            if (statusTextView != null) {
-                statusTextView.setText(status);
-            }
-        });
-        Log.i(TAG, status);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Update UI based on current mode
-        if (SeniorMode.isEnabled()) {
-            hideUIElements();
-        }
+        updateServiceStatus();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Cleanup TTS
+        // Clean up resources
         TTSManager.shutdown();
     }
 }
