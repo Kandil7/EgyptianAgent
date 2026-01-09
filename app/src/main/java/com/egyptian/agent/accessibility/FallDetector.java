@@ -170,13 +170,13 @@ public class FallDetector implements SensorEventListener {
         //     return; // Emergency was already cancelled
         // }
 
-        TTSManager.speak(context, "يا كبير، إيه الأخبار؟ قول 'أنا كويس' لو اتكنت من السقوط");
+        TTSManager.speak(context, "يا كبير، إيه الأخبار؟ قول 'أنا كويس' لو جات سليمه من السقوط");
 
         // SpeechConfirmation.waitForConfirmation(context, 30000, userIsOk -> {
         //     if (userIsOk) {
         //         TTSManager.speak(context, "الحمد لله. هسيب الإتصالات دي شغالة لحد ما المساعدة تيجي");
         //     } else {
-        //         TTSManager.speak(context, "خلاص، بعت إشارة تاني للنجدة. ركز معايا، قوللي فين بتاعك بالظبط");
+        //         TTSManager.speak(context, "خلاص، بعت إشارة تاني للنجدة. ركز معايا، قوللي فين  المكان بتاعك بالظبط");
         //         // In a real app, we would gather more location information here
         //     }
         // });
