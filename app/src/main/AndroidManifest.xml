@@ -121,6 +121,16 @@
             </intent-filter>
         </receiver>
 
+        <!-- Medication reminder receiver -->
+        <receiver
+            android:name=".accessibility.MedicationReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
         <!-- Admin receiver (for device admin privileges) -->
         <receiver
             android:name=".receivers.AdminReceiver"
