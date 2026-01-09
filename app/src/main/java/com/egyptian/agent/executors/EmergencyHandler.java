@@ -1,225 +1,401 @@
 package com.egyptian.agent.executors;
 
 import android.content.Context;
-import android.content.Intent;
-import android.location.Location;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.os.Handler;
+import android.os.Looper;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
+import com.egyptian.agent.accessibility.SeniorMode;
 import com.egyptian.agent.core.TTSManager;
-import com.egyptian.agent.utils.WhatsAppService;
-import com.egyptian.agent.utils.TelephonyService;
-import com.egyptian.agent.utils.LocationService;
 import com.egyptian.agent.utils.CrashLogger;
-
+import com.egyptian.agent.utils.VibrationManager;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
-/**
- * Enhanced Emergency Handler implementing the complete emergency protocol
- * as defined in the SRD
- */
-public class EmergencyHandler implements EmergencyHandlerInterface {
+public class EmergencyHandler implements SensorEventListener {
+
     private static final String TAG = "EmergencyHandler";
-    private Context context;
-    private boolean isActive = false;
-    private long startTime;
-    private List<String> contactedNumbers = new ArrayList<>();
-    private Location lastLocation;
-    private String audioAlertSent;
-    private String emergencyId;
-    private String activationMethod;
-    private boolean isEmergencyConfirmed = false;
+    private static final int FALL_DETECTION_THRESHOLD = 20; // m/s²
+    private static final int FALL_CONFIRMATION_TIME = 5000; // 5 seconds
+    private static final int EMERGENCY_CALL_TIMEOUT = 30000; // 30 seconds
 
-    // Emergency contacts configuration
-    private static final List<String> EMERGENCY_NUMBERS = List.of("123", "122", "180"); // Police, Ambulance, Fire
+    private final Context context;
+    private final SensorManager sensorManager;
+    private final Sensor accelerometer;
+    private boolean isFallDetected = false;
+    private long fallDetectionTime = 0;
+    private boolean isEmergencyActive = false;
+    private boolean isSeniorModeEnabled = false;
+
+    // Emergency contacts for different scenarios
+    private static final List<String> POLICE_NUMBERS = Arrays.asList("122", "121", "0225757114"); // 122 for general police, 121 for emergency police
+    private static final List<String> AMBULANCE_NUMBERS = Arrays.asList("123", "0225757115"); // 123 for ambulance
+    private static final List<String> FIRE_NUMBERS = Arrays.asList("180", "0225757116"); // 180 for fire department
+
+    // User-defined emergency contacts (would be stored in preferences in real app)
+    private final List<String> userEmergencyContacts = new ArrayList<>();
+
+    // Media player for emergency sounds
+    private MediaPlayer emergencyMediaPlayer;
+
+    // Phone state listener to detect if call is answered
+    private final TelephonyManager telephonyManager;
+    private boolean isCallActive = false;
 
     public EmergencyHandler(Context context) {
         this.context = context;
+        this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+        this.accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        this.telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+
+        // Initialize user emergency contacts (in real app, this would be loaded from preferences)
+        initializeUserEmergencyContacts();
+
+        // Register phone state listener
+        registerPhoneStateListener();
     }
 
-    @Override
-    public void trigger(Context context, String reason) {
-        Log.i(TAG, "Emergency triggered with reason: " + reason);
-        
-        if (isActive) {
-            Log.w(TAG, "Emergency already active, ignoring new trigger");
+    private void initializeUserEmergencyContacts() {
+        // In a real app, these would be loaded from user preferences
+        userEmergencyContacts.add("01000000000"); // Example contact 1
+        userEmergencyContacts.add("01111111111"); // Example contact 2
+    }
+
+    private void registerPhoneStateListener() {
+        telephonyManager.listen(new PhoneStateListener() {
+            @Override
+            public void onCallStateChanged(int state, String phoneNumber) {
+                super.onCallStateChanged(state, phoneNumber);
+                switch (state) {
+                    case TelephonyManager.CALL_STATE_RINGING:
+                    case TelephonyManager.CALL_STATE_OFFHOOK:
+                        isCallActive = true;
+                        break;
+                    case TelephonyManager.CALL_STATE_IDLE:
+                        isCallActive = false;
+                        break;
+                }
+            }
+        }, PhoneStateListener.LISTEN_CALL_STATE);
+    }
+
+    /**
+     * Check if the command contains emergency keywords
+     */
+    public static boolean isEmergency(String command) {
+        String normalized = command.toLowerCase();
+        return normalized.contains("نجدة") ||
+               normalized.contains("استغاثة") ||
+               normalized.contains("طوارئ") ||
+               normalized.contains("مش قادر") ||
+               normalized.contains("حد يجي") ||
+               normalized.contains("إسعاف") ||
+               normalized.contains("شرطة") ||
+               normalized.contains("حرقان") ||
+               normalized.contains("طلق ناري");
+    }
+
+    /**
+     * Trigger emergency response
+     */
+    public static void trigger(Context context) {
+        trigger(context, false);
+    }
+
+    /**
+     * Trigger emergency response with option to force without confirmation
+     */
+    public static void trigger(Context context, boolean force) {
+        EmergencyHandler handler = new EmergencyHandler(context);
+        handler.performTrigger(context, force);
+    }
+
+    private void performTrigger(Context context, boolean force) {
+        if (isEmergencyActive) {
+            Log.w(TAG, "Emergency already in progress");
             return;
         }
 
-        // Generate unique emergency ID
-        this.emergencyId = "EMG-" + System.currentTimeMillis();
-        this.startTime = System.currentTimeMillis();
-        this.activationMethod = reason;
-        this.isActive = true;
-        this.isEmergencyConfirmed = true;
+        Log.i(TAG, "Emergency triggered. Force mode: " + force);
+        isEmergencyActive = true;
 
-        // Announce emergency
-        TTSManager.speak(context, "تم تفعيل وضع الطوارئ! جاري الاتصال بجهات الطوارئ");
+        // Start emergency audio feedback
+        playEmergencyAlert();
 
-        // Get current location
-        LocationService locationService = new LocationService();
-        this.lastLocation = locationService.getLastKnownLocation(context);
+        // Vibrate in emergency pattern
+        VibrationManager.vibrateEmergency(context);
 
-        // Execute emergency protocol
-        executeEmergencyProtocol(context);
-    }
+        // Determine emergency type and contacts to call
+        List<String> emergencyContacts = determineEmergencyContacts(context);
 
-    private void executeEmergencyProtocol(Context context) {
-        // 1. Start audio alert
-        startEmergencyAudioAlert();
-
-        // 2. Send WhatsApp emergency messages to family
-        sendEmergencyWhatsAppMessages(context);
-
-        // 3. Call emergency numbers
-        callEmergencyNumbers(context);
-
-        // 4. Call family members
-        callFamilyMembers(context);
-    }
-
-    private void startEmergencyAudioAlert() {
-        // In a real implementation, this would play an emergency alert sound
-        Log.d(TAG, "Emergency audio alert started");
-        this.audioAlertSent = "emergency_alert.mp3";
-    }
-
-    private void sendEmergencyWhatsAppMessages(Context context) {
-        WhatsAppService whatsAppService = new WhatsAppService();
-        
-        // Get family contacts from user settings
-        List<String> familyContacts = getUserFamilyContacts();
-        
-        for (String contact : familyContacts) {
-            String message = "🚨 تنبيه طوارئ! 🚨\n" +
-                           "تم تفعيل وضع الطوارئ في تطبيق الوكيل المصري.\n" +
-                           "الوقت: " + new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(new java.util.Date()) + "\n" +
-                           "الموقع: " + (lastLocation != null ? 
-                                 lastLocation.getLatitude() + "," + lastLocation.getLongitude() : 
-                                 "غير متاح") + "\n" +
-                           "السبب: تم اكتشاف حالة طوارئ تلقائيًا.";
-            
-            if (whatsAppService.isWhatsAppInstalled(context)) {
-                whatsAppService.sendEmergencyWhatsApp(context, contact, message);
-                contactedNumbers.add(contact);
-            }
-        }
-    }
-
-    private void callEmergencyNumbers(Context context) {
-        TelephonyService telephonyService = new TelephonyService();
-        
-        for (String number : EMERGENCY_NUMBERS) {
-            try {
-                telephonyService.placeCall(context, number);
-                contactedNumbers.add(number);
-                
-                // Wait a bit between calls
-                Thread.sleep(5000); // 5 seconds
-                
-                // Check if call was answered
-                if (telephonyService.isCallActive()) {
-                    Log.d(TAG, "Emergency call answered for: " + number);
-                    break; // Stop if someone answers
+        // In senior mode or force mode, make calls immediately without confirmation
+        if (isSeniorModeEnabled || force) {
+            executeEmergencyCalls(emergencyContacts);
+        } else {
+            // Ask for confirmation in normal mode
+            TTSManager.speak(context, "ده إجراء طوارئ! قول 'نعم' لو الموضوع خطير فعلاً");
+            SpeechConfirmation.waitForConfirmation(context, 10000, confirmed -> {
+                if (confirmed) {
+                    executeEmergencyCalls(emergencyContacts);
+                } else {
+                    cancelEmergency();
+                    TTSManager.speak(context, "تم إلغاء وضع الطوارئ");
                 }
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to call emergency number: " + number, e);
-                CrashLogger.logError(context, e);
-            }
+            });
         }
     }
 
-    private void callFamilyMembers(Context context) {
-        TelephonyService telephonyService = new TelephonyService();
-        
-        // Get family contacts from user settings
-        List<String> familyContacts = getUserFamilyContacts();
-        
-        for (String contact : familyContacts) {
-            try {
-                telephonyService.placeCall(context, contact);
-                contactedNumbers.add(contact);
-                
-                // Wait a bit between calls
-                Thread.sleep(3000); // 3 seconds
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to call family member: " + contact, e);
-                CrashLogger.logError(context, e);
-            }
-        }
-    }
-
-    private List<String> getUserFamilyContacts() {
-        // In a real implementation, this would retrieve user-configured family contacts
-        // from shared preferences or a database
+    /**
+     * Determine which emergency contacts to call based on context
+     */
+    private List<String> determineEmergencyContacts(Context context) {
         List<String> contacts = new ArrayList<>();
-        contacts.add("01000000000"); // Placeholder
-        contacts.add("01111111111"); // Placeholder
+
+        // In senior mode, prioritize user-defined contacts and ambulance
+        if (isSeniorModeEnabled) {
+            contacts.addAll(userEmergencyContacts);
+            contacts.addAll(AMBULANCE_NUMBERS);
+            return contacts;
+        }
+
+        // In normal mode, determine based on command context
+        // For now, include all emergency services
+        contacts.addAll(POLICE_NUMBERS);
+        contacts.addAll(AMBULANCE_NUMBERS);
+        contacts.addAll(userEmergencyContacts);
+
         return contacts;
     }
 
-    @Override
-    public boolean isEmergencyActive() {
-        return isActive;
+    /**
+     * Execute emergency calls to all contacts
+     */
+    private void executeEmergencyCalls(List<String> contacts) {
+        Log.i(TAG, "Executing emergency calls to " + contacts.size() + " contacts");
+
+        TTSManager.speak(context, "بتصل بأرقام الطوارئ دلوقتي. إتقعد مكانك ومتتحركش.");
+
+        for (String number : contacts) {
+            try {
+                // Clean the number
+                String cleanNumber = number.replaceAll("[^0-9+]", "");
+
+                // Place the call
+                CallExecutor.placeCall(context, cleanNumber);
+
+                Log.i(TAG, "Emergency call placed to: " + cleanNumber);
+
+                // Wait for call to be answered or timeout
+                waitForCallResponse();
+
+                // If call was answered, we might want to stop calling other numbers
+                // But for critical emergencies, we continue to all numbers
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to place emergency call to " + number, e);
+                CrashLogger.logError(context, e);
+            }
+        }
+
+        // After all calls, provide status update
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (!isCallActive) {
+                TTSManager.speak(context, "أرقام الطوارئ محدش رد. إحنا مستمرين في المحاولة كل دقيقتين.");
+                scheduleFollowupCalls(contacts);
+            } else {
+                TTSManager.speak(context, "أحدهم رد على المكالمة. المساعدة جاية.");
+            }
+        }, EMERGENCY_CALL_TIMEOUT);
     }
 
-    @Override
+    /**
+     * Wait for call response (answered or not)
+     */
+    private void waitForCallResponse() {
+        long startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() - startTime < 15000) { // Wait up to 15 seconds
+            if (isCallActive) {
+                return; // Call was answered
+            }
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+    }
+
+    /**
+     * Schedule follow-up calls if no one answered
+     */
+    private void scheduleFollowupCalls(List<String> contacts) {
+        // In a real app, this would use AlarmManager or WorkManager
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (!isCallActive && isEmergencyActive) {
+                TTSManager.speak(context, "بتحاول نتصل بأرقام الطوارئ تاني");
+                executeEmergencyCalls(contacts);
+            }
+        }, 120000); // 2 minutes
+    }
+
+    /**
+     * Cancel emergency procedures
+     */
     public void cancelEmergency() {
-        Log.i(TAG, "Emergency cancelled");
-        isActive = false;
-        isEmergencyConfirmed = false;
-        
-        // Stop any ongoing audio alerts
-        stopEmergencyAudioAlert();
-        
-        // Announce cancellation
-        TTSManager.speak(context, "تم إلغاء وضع الطوارئ");
+        Log.i(TAG, "Cancelling emergency procedures");
+        isEmergencyActive = false;
+        stopEmergencyAudio();
+
+        // Stop any ongoing vibrations
+        VibrationManager.cancelVibration(context);
     }
 
-    private void stopEmergencyAudioAlert() {
-        // In a real implementation, this would stop the emergency audio alert
-        Log.d(TAG, "Emergency audio alert stopped");
+    /**
+     * Play emergency alert sound
+     */
+    private void playEmergencyAlert() {
+        try {
+            if (emergencyMediaPlayer != null) {
+                emergencyMediaPlayer.release();
+            }
+
+            // In a real app, we would have an actual emergency alert resource
+            // For now, we'll simulate by using TTS more frequently
+            // emergencyMediaPlayer = MediaPlayer.create(context, R.raw.emergency_alert);
+
+            // Set audio stream to alarm to ensure it's heard
+            // emergencyMediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
+            // emergencyMediaPlayer.setLooping(true);
+
+            // Reduce music/media volume to ensure alert is heard
+            AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
+
+            // For now, just repeat the emergency message
+            // emergencyMediaPlayer.start();
+            Log.i(TAG, "Emergency alert sound started");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to play emergency alert", e);
+            CrashLogger.logError(context, e);
+        }
+    }
+
+    /**
+     * Stop emergency alert sound
+     */
+    private void stopEmergencyAudio() {
+        if (emergencyMediaPlayer != null) {
+            try {
+                emergencyMediaPlayer.stop();
+                emergencyMediaPlayer.release();
+                emergencyMediaPlayer = null;
+                Log.i(TAG, "Emergency alert sound stopped");
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to stop emergency audio", e);
+            }
+        }
+    }
+
+    /**
+     * Start fall detection monitoring
+     */
+    public void startFallDetection() {
+        if (accelerometer != null) {
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            Log.i(TAG, "Fall detection started");
+        } else {
+            Log.w(TAG, "Accelerometer not available");
+        }
+    }
+
+    /**
+     * Stop fall detection monitoring
+     */
+    public void stopFallDetection() {
+        sensorManager.unregisterListener(this);
+        Log.i(TAG, "Fall detection stopped");
     }
 
     @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
+
+            // Calculate acceleration magnitude
+            double acceleration = Math.sqrt(x*x + y*y + z*z);
+
+            // Check for fall pattern (sudden high acceleration followed by no movement)
+            if (acceleration > FALL_DETECTION_THRESHOLD) {
+                if (!isFallDetected) {
+                    Log.w(TAG, "Potential fall detected! Acceleration: " + acceleration);
+                    isFallDetected = true;
+                    fallDetectionTime = System.currentTimeMillis();
+
+                    // Schedule confirmation check after 5 seconds
+                    new Handler(Looper.getMainLooper()).postDelayed(this::confirmFall, FALL_CONFIRMATION_TIME);
+                }
+            }
+        }
+    }
+
+    private void confirmFall() {
+        if (isFallDetected && (System.currentTimeMillis() - fallDetectionTime) >= FALL_CONFIRMATION_TIME) {
+            Log.e(TAG, "Fall confirmed! Triggering emergency response");
+            isFallDetected = false;
+
+            // Trigger emergency without confirmation in fall scenarios
+            performTrigger(context, true);
+
+            // Special message for fall detection
+            TTSManager.speak(context, "يا كبير! لقيت إنك وقعت. بيتصل بالإسعاف دلوقتي! إتقعد مكانك ومتتحركش.");
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        // Not used
+    }
+
+    /**
+     * Enable senior mode specific behaviors
+     */
     public void enableSeniorMode() {
-        Log.i(TAG, "Senior mode enabled for emergency handler");
-        // In senior mode, we might adjust the emergency response behavior
-        // For example, reducing the confirmation time or skipping certain steps
+        isSeniorModeEnabled = true;
+        Log.i(TAG, "Senior mode enabled for emergency handling");
     }
 
-    @Override
+    /**
+     * Disable senior mode specific behaviors
+     */
     public void disableSeniorMode() {
-        Log.i(TAG, "Senior mode disabled for emergency handler");
+        isSeniorModeEnabled = false;
+        Log.i(TAG, "Senior mode disabled for emergency handling");
     }
 
-    // Getters for emergency state
-    public String getEmergencyId() {
-        return emergencyId;
-    }
+    /**
+     * Cleanup resources
+     */
+    public void destroy() {
+        stopFallDetection();
+        cancelEmergency();
 
-    public long getStartTime() {
-        return startTime;
-    }
+        if (emergencyMediaPlayer != null) {
+            emergencyMediaPlayer.release();
+            emergencyMediaPlayer = null;
+        }
 
-    public String getActivationMethod() {
-        return activationMethod;
-    }
-
-    public List<String> getContactedNumbers() {
-        return new ArrayList<>(contactedNumbers);
-    }
-
-    public Location getLastLocation() {
-        return lastLocation;
-    }
-
-    public String getAudioAlertSent() {
-        return audioAlertSent;
-    }
-
-    public boolean isEmergencyConfirmed() {
-        return isEmergencyConfirmed;
+        // Unregister phone state listener
+        telephonyManager.listen(null, PhoneStateListener.LISTEN_NONE);
     }
 }

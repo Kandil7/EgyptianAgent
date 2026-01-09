@@ -8,6 +8,7 @@ import android.util.Log;
 import com.egyptian.agent.core.TTSManager;
 import com.egyptian.agent.stt.EgyptianNormalizer;
 import com.egyptian.agent.utils.CrashLogger;
+import com.egyptian.agent.utils.VibrationManager;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -37,41 +38,15 @@ public class WhatsAppExecutor {
         if (contactName.isEmpty()) {
             TTSManager.speak(context, "لمين عايز تبعت الرسالة؟ قول الاسم");
             // In a real app, we would wait for the next voice input
-            SpeechConfirmation.waitForCommand(context, 15000, nextCommand -> {
-                if (!nextCommand.isEmpty()) {
-                    String extractedName = EgyptianNormalizer.extractContactName(EgyptianNormalizer.normalize(nextCommand));
-                    if (!extractedName.isEmpty()) {
-                        String number = getContactNumber(context, extractedName);
-                        if (number != null) {
-                            handleWhatsAppSend(context, number, extractedName, message.isEmpty() ? " " : message);
-                        } else {
-                            TTSManager.speak(context, "مش لاقي " + extractedName + " في>Contactات. قول الرقم مباشرة");
-                            // Wait for number input
-                        }
-                    } else {
-                        TTSManager.speak(context, "متعرفش الاسم. قول 'يا كبير' وأنا أساعدك");
-                    }
-                } else {
-                    TTSManager.speak(context, "ما سمعتش حاجة. قول 'يا كبير' وأنا أساعدك");
-                }
-            });
             return;
         }
 
         // Get contact number (simplified for this example)
-        String contactNumber = getContactNumber(context, contactName);
+        String contactNumber = CallExecutor.getContactNumber(context, contactName);
 
         if (contactNumber == null) {
-            TTSManager.speak(context, "مش لاقي " + contactName + " في>Contactات. قول الرقم مباشرة");
+            TTSManager.speak(context, "مش لاقي " + contactName + " في<Contactات. قول الرقم مباشرة");
             // In a real app, we would wait for number input
-            SpeechConfirmation.waitForCommand(context, 20000, numberCommand -> {
-                String extractedNumber = extractNumberFromVoice(EgyptianNormalizer.normalize(numberCommand));
-                if (!extractedNumber.isEmpty()) {
-                    handleWhatsAppSend(context, extractedNumber, contactName, message.isEmpty() ? " " : message);
-                } else {
-                    TTSManager.speak(context, "متعرفش الرقم. قول 'يا كبير' وانا أساعدك");
-                }
-            });
             return;
         }
 
@@ -89,50 +64,37 @@ public class WhatsAppExecutor {
         if (message.isEmpty()) {
             TTSManager.speak(context, "قول الرسالة اللي عايز تبعتها لـ " + contactName);
             // In a real app, we would wait for message input
-            SpeechConfirmation.waitForCommand(context, 30000, messageCommand -> {
-                if (!messageCommand.isEmpty()) {
-                    String normalizedMessage = EgyptianNormalizer.normalize(messageCommand);
-                    // Remove command words and keep the actual message
-                    String actualMessage = normalizedMessage.replaceAll(".*(قول|ارسل|ابعت)\\s+(?:رساله)?\\s*(?:ليه|له|ليها)?", "").trim();
+            return;
+        }
 
-                    if (!actualMessage.isEmpty()) {
-                        sendWhatsAppMessage(context, number, actualMessage);
-                        TTSManager.speak(context, "الرسالة اتبعتت لـ " + contactName);
-                    } else {
-                        TTSManager.speak(context, "متعرفش المحتوى. قول 'يا كبير' وانا أساعدك");
-                    }
+        // Clean the phone number (remove spaces, dashes, plus signs except leading +)
+        String cleanNumber = number.replaceAll("[^+\\d]", "");
+
+        // Senior mode requires double confirmation
+        if (SeniorMode.isEnabled()) {
+            VibrationManager.vibrateShort(context);
+            TTSManager.speak(context, "عايز تبعت الرسالة دي لـ " + contactName + "؟ قول 'نعم' بس، ولا 'لا'");
+            SpeechConfirmation.waitForConfirmation(context, 10000, confirmed -> {
+                if (confirmed) {
+                    sendWhatsAppMessage(context, cleanNumber, message);
+                    TTSManager.speak(context, "الرسالة اتبعتت لـ " + contactName);
                 } else {
-                    TTSManager.speak(context, "ما سمعتش المحتوى. قول 'يا كبير' وأنا أساعدك");
+                    TTSManager.speak(context, "ما بعتش الرسالة");
                 }
             });
             return;
         }
 
-        // Senior mode requires double confirmation
-        // if (SeniorMode.isEnabled()) {
-        //     VibrationManager.vibrateShort(context);
-        //     TTSManager.speak(context, "عايز تبعت الرسالة دي لـ " + contactName + "؟ قول 'نعم' بس، ولا 'لا'");
-        //     SpeechConfirmation.waitForConfirmation(context, 10000, confirmed -> {
-        //         if (confirmed) {
-        //             sendWhatsAppMessage(context, number, message);
-        //             TTSManager.speak(context, "الرسالة اتبعتت لـ " + contactName);
-        //         } else {
-        //             TTSManager.speak(context, "ما بعتش الرسالة");
-        //         }
-        //     });
-        //     return;
-        // }
-
         // Standard confirmation for normal mode
         TTSManager.speak(context, "عايز تبعت الرسالة دي لـ " + contactName + "؟ قول 'نعم' أو 'لا'");
-        // SpeechConfirmation.waitForConfirmation(context, confirmed -> {
-        //     if (confirmed) {
-        //         sendWhatsAppMessage(context, number, message);
-        //         TTSManager.speak(context, "الرسالة اتبعتت لـ " + contactName);
-        //     } else {
-        //         TTSManager.speak(context, "ما بعتش الرسالة");
-        //     }
-        // });
+        SpeechConfirmation.waitForConfirmation(context, confirmed -> {
+            if (confirmed) {
+                sendWhatsAppMessage(context, cleanNumber, message);
+                TTSManager.speak(context, "الرسالة اتبعتت لـ " + contactName);
+            } else {
+                TTSManager.speak(context, "ما بعتش الرسالة");
+            }
+        });
     }
 
     /**
@@ -263,29 +225,6 @@ public class WhatsAppExecutor {
         }
     }
 
-    // New method to extract number with Egyptian dialect support
-    private String extractNumberFromVoice(String command) {
-        // Handle Egyptian ways of saying numbers
-        String normalized = EgyptianNormalizer.normalize(command);
-
-        // Extract digits (including Egyptian Arabic numerals)
-        String digitsOnly = normalized.replaceAll("[^0-9٠-٩]", "");
-
-        // Convert Arabic-Indic numerals to Western numerals
-        StringBuilder westernDigits = new StringBuilder();
-        for (char c : digitsOnly.toCharArray()) {
-            if (c >= '٠' && c <= '٩') {
-                westernDigits.append((char) (c - '٠' + '0'));
-            } else {
-                westernDigits.append(c);
-            }
-        }
-
-        String result = westernDigits.toString();
-        Log.d(TAG, "Extracted number from voice: " + result);
-        return result;
-    }
-
     /**
      * Send emergency WhatsApp message with location and alert
      */
@@ -336,40 +275,7 @@ public class WhatsAppExecutor {
 
     private static String getGuardianNumber(Context context) {
         // In a real app, this would retrieve from secure storage
-        android.content.SharedPreferences prefs = context.getSharedPreferences("egyptian_agent_prefs", Context.MODE_PRIVATE);
-        String guardianNumber = prefs.getString("guardian_phone_number", "");
-
-        // If not set in preferences, try to get from emergency contacts
-        if (guardianNumber.isEmpty()) {
-            guardianNumber = getFirstEmergencyContact(context);
-        }
-
-        // If still empty, use a default number that can be set by the user
-        if (guardianNumber.isEmpty()) {
-            guardianNumber = prefs.getString("default_guardian_number", "01000000000");
-        }
-
-        return guardianNumber;
-    }
-
-    // Helper method to get first emergency contact
-    private static String getFirstEmergencyContact(Context context) {
-        String[] emergencyKeywords = {"ماما", "ابويا", "اختي", "اخوي", "زوجتي", "زوجي", "ابنتي", "ابني"};
-
-        for (String keyword : emergencyKeywords) {
-            String number = CallExecutor.getContactNumber(context, keyword);
-            if (number != null && !number.isEmpty()) {
-                return number;
-            }
-        }
-
-        return "";
-    }
-
-    // Placeholder method for getting contact number
-    public static String getContactNumber(Context context, String contactName) {
-        // In a real implementation, this would look up the contact in the phone's contacts
-        // For this example, we'll return a placeholder
-        return "01000000000"; // Placeholder number
+        // For now, return a placeholder
+        return "01000000000";
     }
 }
