@@ -3,169 +3,163 @@ package com.egyptian.agent.hybrid;
 import android.content.Context;
 import android.util.Log;
 import com.egyptian.agent.nlp.IntentResult;
-import com.egyptian.agent.nlp.IntentType;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import com.egyptian.agent.stt.EgyptianNormalizer;
+import com.egyptian.agent.utils.CrashLogger;
+import okhttp3.*;
+import org.json.JSONObject;
+import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
+/**
+ * Fallback implementation that uses cloud-based processing when local model is unavailable
+ */
 public class CloudFallback {
     private static final String TAG = "CloudFallback";
+    private static final String CLOUD_ENDPOINT = "https://api.egyptian-agent.dev/process";
+    private static final int TIMEOUT_MS = 10000; // 10 seconds
+    
     private final Context context;
-    private final ExecutorService executorService;
-    private final String fallbackEndpoint;
-
+    private final OkHttpClient httpClient;
+    
     public CloudFallback(Context context) {
         this.context = context;
-        this.executorService = Executors.newSingleThreadExecutor();
-        // In a real implementation, this would be the actual API endpoint
-        this.fallbackEndpoint = "https://api.egyptian-agent.com/v1/process";
+        this.httpClient = new OkHttpClient.Builder()
+            .connectTimeout(TIMEOUT_MS, java.util.concurrent.TimeUnit.MILLISECONDS)
+            .readTimeout(TIMEOUT_MS, java.util.concurrent.TimeUnit.MILLISECONDS)
+            .writeTimeout(TIMEOUT_MS, java.util.concurrent.TimeUnit.MILLISECONDS)
+            .build();
     }
 
+    /**
+     * Analyzes text using cloud-based processing
+     * @param text The input text to analyze
+     * @param callback Callback to receive the result
+     */
     public void analyzeText(String text, HybridOrchestrator.IntentCallback callback) {
-        executorService.execute(() -> {
+        Log.d(TAG, "Using cloud fallback for text: " + text);
+        
+        // In senior mode, warn about cloud processing
+        if (com.egyptian.agent.accessibility.SeniorMode.isEnabled()) {
+            com.egyptian.agent.core.TTSManager.speak(context, "بيستخدم الإنترنت لمعالجة الأمر");
+        }
+        
+        // Process in background thread
+        CompletableFuture.supplyAsync(() -> {
             try {
-                // In a real implementation, this would make an API call to the cloud service
-                // For now, we'll simulate the cloud processing
-                IntentResult result = simulateCloudAnalysis(text);
-                callback.onIntentDetected(result);
+                return callCloudService(text);
             } catch (Exception e) {
-                Log.e(TAG, "Error in cloud fallback analysis", e);
-                
-                // Return a fallback result
-                IntentResult fallbackResult = new IntentResult();
-                fallbackResult.setIntentType(IntentType.UNKNOWN);
-                callback.onIntentDetected(fallbackResult);
+                Log.e(TAG, "Cloud service call failed", e);
+                CrashLogger.logError(context, e);
+                return createFallbackResult(text);
             }
+        }).thenAccept(result -> {
+            // Return to main thread for callback
+            new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                callback.onIntentDetected(result);
+            });
         });
     }
 
-    private IntentResult simulateCloudAnalysis(String text) {
-        // Simulate cloud-based analysis
-        // In a real implementation, this would call an actual cloud API
+    /**
+     * Makes the actual call to the cloud service
+     */
+    private IntentResult callCloudService(String text) throws Exception {
+        MediaType JSON = MediaType.get("application/json; charset=utf-8");
+        
+        // Prepare request body
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("text", text);
+        requestBody.put("dialect", "egyptian");
+        requestBody.put("version", "3.0");
+        
+        RequestBody body = RequestBody.create(requestBody.toString(), JSON);
+        Request request = new Request.Builder()
+            .url(CLOUD_ENDPOINT)
+            .post(body)
+            .build();
+
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                Log.e(TAG, "Cloud service returned error: " + response.code());
+                return createFallbackResult(text);
+            }
+            
+            String responseBody = response.body().string();
+            return parseCloudResponse(responseBody);
+        }
+    }
+
+    /**
+     * Parses the response from the cloud service
+     */
+    private IntentResult parseCloudResponse(String jsonResponse) {
         try {
-            Thread.sleep(500); // Simulate network delay
+            JSONObject responseObj = new JSONObject(jsonResponse);
             
             IntentResult result = new IntentResult();
             
-            // Basic intent detection similar to local model but with cloud capabilities
-            String intentStr = detectIntent(text);
-            result.setIntentType(IntentType.valueOf(intentStr));
+            // Parse intent
+            String intentStr = responseObj.optString("intent", "UNKNOWN");
+            result.setIntentType(IntentType.fromOpenPhoneString(intentStr));
             
-            // Extract entities
-            extractEntities(text, result);
+            // Parse entities
+            JSONObject entities = responseObj.optJSONObject("entities");
+            if (entities != null) {
+                for (String key : entities.keySet()) {
+                    String value = entities.optString(key, "");
+                    result.setEntity(key, value);
+                }
+            }
             
-            // Set confidence (typically higher for cloud models)
-            result.setConfidence(0.85f);
+            // Parse confidence
+            float confidence = responseObj.optFloat("confidence", 0.7f);
+            result.setConfidence(confidence);
             
-            Log.d(TAG, "Cloud fallback analysis completed for: " + text);
+            // Apply Egyptian post-processing
+            EgyptianNormalizer.applyPostProcessingRules(result);
+            
             return result;
         } catch (Exception e) {
-            Log.e(TAG, "Error in cloud analysis simulation", e);
-            IntentResult result = new IntentResult();
-            result.setIntentType(IntentType.UNKNOWN);
-            result.setConfidence(0.1f);
-            return result;
+            Log.e(TAG, "Error parsing cloud response", e);
+            return createFallbackResult("fallback");
         }
     }
 
-    private String detectIntent(String text) {
-        // Similar to local model but potentially with more sophisticated processing
-        text = text.toLowerCase();
+    /**
+     * Creates a fallback result when cloud processing fails
+     */
+    private IntentResult createFallbackResult(String text) {
+        Log.w(TAG, "Creating fallback result for: " + text);
         
+        IntentResult result = new IntentResult();
+        result.setIntentType(IntentType.UNKNOWN);
+        result.setConfidence(0.3f); // Lower confidence for fallback
+        
+        // Try basic local processing as a last resort
         if (text.contains("اتصل") || text.contains("كلم") || text.contains("رن")) {
-            return "CALL_CONTACT";
+            result.setIntentType(IntentType.CALL_CONTACT);
+            result.setConfidence(0.5f);
         } else if (text.contains("واتساب") || text.contains("ابعت") || text.contains("رساله")) {
-            return "SEND_WHATSAPP";
-        } else if (text.contains("نبهني") || text.contains("انبهني") || text.contains("ذكرني")) {
-            return "SET_ALARM";
-        } else if (text.contains("فايتة") || text.contains("فايتات")) {
-            return "READ_MISSED_CALLS";
-        } else if (text.contains("الساعه") || text.contains("الوقت") || text.contains("كام")) {
-            return "READ_TIME";
-        } else if (text.contains(" emergencies") || text.contains("ngeda") || text.contains("estegatha") || text.contains("tor2")) {
-            return "EMERGENCY";
-        } else if (text.contains("كبار") || text.contains("كبير")) {
-            return "ENABLE_SENIOR_MODE";
-        } else if (text.contains("薬") || text.contains("tablet") || text.contains("medicine")) {
-            return "MEDICATION_REMINDER";
-        } else {
-            return "UNKNOWN";
-        }
-    }
-
-    private void extractEntities(String text, IntentResult result) {
-        // Extract entities similar to local model
-        String contactName = extractContactName(text);
-        if (!contactName.isEmpty()) {
-            result.setEntity("contact", contactName);
+            result.setIntentType(IntentType.SEND_WHATSAPP);
+            result.setConfidence(0.5f);
+        } else if (text.contains("انبهني") || text.contains("نبهني") || text.contains("ذكرني")) {
+            result.setIntentType(IntentType.SET_ALARM);
+            result.setConfidence(0.5f);
+        } else if (text.contains("الوقت") || text.contains("الساعه") || text.contains("كام")) {
+            result.setIntentType(IntentType.READ_TIME);
+            result.setConfidence(0.7f);
         }
         
-        String time = extractTime(text);
-        if (!time.isEmpty()) {
-            result.setEntity("time", time);
-        }
-        
-        String message = extractMessage(text);
-        if (!message.isEmpty()) {
-            result.setEntity("message", message);
-        }
+        return result;
     }
 
-    private String extractContactName(String text) {
-        String[] keywords = {"اتصل", "كلم", "رن", "ابعت", "قول"};
-        for (String keyword : keywords) {
-            if (text.contains(keyword)) {
-                int startIndex = text.indexOf(keyword) + keyword.length();
-                String remaining = text.substring(startIndex).trim();
-                
-                String[] words = remaining.split("\\s+");
-                if (words.length > 0) {
-                    String name = words[0];
-                    name = name.replaceAll("^(ال|دكتور|دكتوره|استاذ|استاذه)\\s*", "");
-                    return name;
-                }
-            }
-        }
-        return "";
-    }
-
-    private String extractTime(String text) {
-        if (text.contains("بكرة")) {
-            return "tomorrow";
-        } else if (text.contains("الصبح")) {
-            return "morning";
-        } else if (text.contains("الليل")) {
-            return "night";
-        } else if (text.contains("بعد") && text.contains("ساع")) {
-            return "later";
-        }
-        return "";
-    }
-
-    private String extractMessage(String text) {
-        String[] keywords = {"قول", "انه", "اكتب", "ابعت"};
-        for (String keyword : keywords) {
-            int index = text.indexOf(keyword);
-            if (index != -1) {
-                String remaining = text.substring(index + keyword.length()).trim();
-                int endIndex = remaining.indexOf('.');
-                if (endIndex == -1) {
-                    endIndex = remaining.indexOf('!');
-                    if (endIndex == -1) {
-                        endIndex = remaining.indexOf('?');
-                        if (endIndex == -1) {
-                            endIndex = remaining.length();
-                        }
-                    }
-                }
-                return remaining.substring(0, endIndex).trim();
-            }
-        }
-        return "";
-    }
-
+    /**
+     * Cleans up resources
+     */
     public void destroy() {
-        if (executorService != null) {
-            executorService.shutdownNow();
+        if (httpClient != null) {
+            httpClient.dispatcher().executorService().shutdown();
+            httpClient.connectionPool().evictAll();
         }
     }
 }

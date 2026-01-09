@@ -13,28 +13,26 @@ import java.util.concurrent.Executors;
 
 public class OpenPhoneIntegration {
     private static final String TAG = "OpenPhoneIntegration";
-    private static final int MODEL_LOAD_TIMEOUT = 30000; // 30 seconds
+    private static final int MODEL_LOAD_TIMEOUT = 30000; // 30 ثانية
     private static final float MIN_CONFIDENCE_THRESHOLD = 0.65f;
 
     private OpenPhoneModel localModel;
     private ExecutorService inferenceExecutor;
     private boolean isModelLoaded = false;
     private long lastInferenceTime = 0;
-    private Context context;
 
     public OpenPhoneIntegration(Context context) {
-        this.context = context;
         inferenceExecutor = Executors.newSingleThreadExecutor();
 
-        // Load model in background
+        // تحميل النموذج في الخلفية
         new Thread(() -> {
             try {
                 Log.i(TAG, "Loading OpenPhone-3B model...");
-                localModel = new OpenPhoneModel(context.getAssets(), "model/openphone-3b");
+                localModel = new OpenPhoneModel(context.getAssets(), "openphone-3b");
                 isModelLoaded = true;
                 Log.i(TAG, "OpenPhone-3B model loaded successfully");
 
-                // Check memory constraints
+                // التحقق من ذاكرة الجهاز
                 MemoryOptimizer.checkMemoryConstraints(context);
 
             } catch (Exception e) {
@@ -46,9 +44,9 @@ public class OpenPhoneIntegration {
     }
 
     /**
-     * Analyzes text using the local OpenPhone model
-     * @param normalizedText the unified text after normalization
-     * @param callback callback with the result
+     * يحلل النص باستخدام نموذج OpenPhone المحلي
+     * @param normalizedText النص المُوحد بعد التطبيع
+     * @param callback رد الاتصال بالنتيجة
      */
     public void analyzeText(String normalizedText, AnalysisCallback callback) {
         if (!isModelLoaded) {
@@ -57,7 +55,7 @@ public class OpenPhoneIntegration {
             return;
         }
 
-        // Check rate limiting
+        // التحقق من حدود الاستخدام
         if (System.currentTimeMillis() - lastInferenceTime < 1000) {
             Log.w(TAG, "Rate limiting active");
             callback.onFallbackRequired("High request frequency");
@@ -68,27 +66,27 @@ public class OpenPhoneIntegration {
             try {
                 lastInferenceTime = System.currentTimeMillis();
 
-                // Apply additional Egyptian rules before sending to model
+                // قبل إرسال النص للنموذج، ن.apply قواعد مصرية إضافية
                 String enhancedText = applyEgyptianEnhancements(normalizedText);
 
-                // Run the model
+                // تشغيل النموذج
                 long startTime = System.currentTimeMillis();
                 JSONObject result = localModel.analyze(enhancedText);
                 long endTime = System.currentTimeMillis();
 
                 Log.i(TAG, String.format("Inference completed in %d ms", endTime - startTime));
 
-                // Check result confidence
+                // التحقق من ثقة النتيجة
                 float confidence = result.optFloat("confidence", 0.0f);
                 if (confidence < MIN_CONFIDENCE_THRESHOLD) {
                     callback.onFallbackRequired("Low confidence: " + confidence);
                     return;
                 }
 
-                // Convert result to unified format
+                // تحويل النتيجة لتنسيق موحد
                 IntentResult intentResult = parseModelResult(result);
 
-                // Apply Egyptian post-processing rules
+                // تطبيق قواعد مصرية على النتيجة
                 applyEgyptianPostProcessing(intentResult);
 
                 callback.onResult(intentResult);
@@ -105,15 +103,15 @@ public class OpenPhoneIntegration {
     }
 
     private String applyEgyptianEnhancements(String text) {
-        // Enhance text with Egyptian context before sending to model
+        // تعزيز النص بقواعد مصرية قبل إرساله للنموذج
         return EgyptianNormalizer.enhanceWithEgyptianContext(text);
     }
 
     private void applyEgyptianPostProcessing(IntentResult result) {
-        // Modify results based on Egyptian rules
+        // تعديل النتائج بناءً على القواعد المصرية
         EgyptianNormalizer.applyPostProcessingRules(result);
 
-        // Special handling for Egyptian contact names
+        // معالجة خاصة لأسماء الأشخاص المصريين
         if (result.getIntentType() == IntentType.CALL_CONTACT ||
             result.getIntentType() == IntentType.SEND_WHATSAPP) {
             String contactName = result.getEntity("contact", "");
@@ -124,14 +122,14 @@ public class OpenPhoneIntegration {
     }
 
     private IntentResult parseModelResult(JSONObject jsonResult) {
-        // Convert OpenPhone result to our intent system
+        // تحويل نتيجة OpenPhone لنظام النوايا الخاص بنا
         IntentResult result = new IntentResult();
 
-        // Determine intent type
+        // تحديد نوع النية
         String intentStr = jsonResult.optString("intent", "UNKNOWN");
         result.setIntentType(IntentType.fromOpenPhoneString(intentStr));
 
-        // Extract entities
+        // استخراج الكيانات
         JSONObject entities = jsonResult.optJSONObject("entities");
         if (entities != null) {
             for (String key : entities.keySet()) {
@@ -140,7 +138,7 @@ public class OpenPhoneIntegration {
             }
         }
 
-        // Set confidence level
+        // تحديد مستوى الثقة
         result.setConfidence(jsonResult.optFloat("confidence", 0.7f));
 
         return result;

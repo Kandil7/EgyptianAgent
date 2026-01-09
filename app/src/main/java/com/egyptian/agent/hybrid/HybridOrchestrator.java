@@ -16,14 +16,13 @@ public class HybridOrchestrator {
     private static final float CLOUD_MODEL_THRESHOLD = 0.9f;
 
     static {
-        // Task complexity scores
-        TASK_COMPLEXITY_SCORES.put("CALL_CONTACT", 0.4f);     // Simple
-        TASK_COMPLEXITY_SCORES.put("READ_TIME", 0.3f);        // Very simple
-        TASK_COMPLEXITY_SCORES.put("SET_ALARM", 0.5f);        // Moderately simple
-        TASK_COMPLEXITY_SCORES.put("SEND_WHATSAPP", 0.6f);    // Moderate
-        TASK_COMPLEXITY_SCORES.put("READ_MISSED_CALLS", 0.4f); // Simple
-        TASK_COMPLEXITY_SCORES.put("READ_EMAILS", 0.8f);      // Complex
-        TASK_COMPLEXITY_SCORES.put("SEARCH_INFO", 0.95f);     // Very complex
+        // درجات تعقيد المهام المختلفة
+        TASK_COMPLEXITY_SCORES.put("CALL_CONTACT", 0.4f);     // بسيطة
+        TASK_COMPLEXITY_SCORES.put("READ_TIME", 0.3f);        // بسيطة جداً
+        TASK_COMPLEXITY_SCORES.put("SET_ALARM", 0.5f);        // متوسطة البساطة
+        TASK_COMPLEXITY_SCORES.put("SEND_WHATSAPP", 0.6f);    // متوسطة
+        TASK_COMPLEXITY_SCORES.put("READ_EMAILS", 0.8f);      // معقدة
+        TASK_COMPLEXITY_SCORES.put("SEARCH_INFO", 0.95f);     // معقدة جداً
     }
 
     private final Context context;
@@ -40,25 +39,25 @@ public class HybridOrchestrator {
     }
 
     /**
-     * Determines whether to use local or cloud model
-     * @param normalizedText the unified text
-     * @param callback callback with intent
+     * يحدد ما إذا كان يجب استخدام النموذج المحلي أو السحابي
+     * @param normalizedText النص المُوحد
+     * @param callback رد الاتصال بالنية
      */
     public void determineIntent(String normalizedText, IntentCallback callback) {
-        // Check local model status
+        // التحقق من حالة النموذج المحلي
         if (!localModel.isReady()) {
             Log.w(TAG, "Local model not ready, using cloud fallback");
             cloudFallback.analyzeText(normalizedText, callback);
             return;
         }
 
-        // Analyze text complexity
+        // تحليل تعقيد النص
         float complexityScore = calculateTextComplexity(normalizedText);
 
-        // Check recent local model performance
+        // التحقق من أداء النموذج المحلي الأخير
         updateModelPreference();
 
-        // Determine path based on rules
+        // تحديد المسار بناءً على القواعد
         if (shouldUseLocalModel(normalizedText, complexityScore)) {
             processWithLocalModel(normalizedText, complexityScore, callback);
         } else {
@@ -67,33 +66,33 @@ public class HybridOrchestrator {
     }
 
     private boolean shouldUseLocalModel(String text, float complexityScore) {
-        // Smart routing rules
-        if (text.contains("ngeda") || text.contains("estegatha") || text.contains("tor2")) {
-            // For emergencies, use the fastest model (local)
+        // قواعد التوجيه الذكية
+        if (text.contains("نجدة") || text.contains("استغاثة") || text.contains("طوارئ")) {
+            // في حالات الطوارئ، نستخدم النموذج الأسرع (المحلي)
             return true;
         }
 
         if (SeniorMode.isEnabled()) {
-            // In senior mode, prefer local model for privacy
+            // في وضع كبار السن، نفضل النموذج المحلي للخصوصية
             return true;
         }
 
         if (!isLocalModelPreferred && complexityScore > LOCAL_MODEL_THRESHOLD) {
-            // If local model is not preferred and task is complex
+            // إذا كان النموذج المحلي غير مفضل والمهمة معقدة
             return false;
         }
 
-        // By default, use local model if complexity is acceptable
+        // بشكل افتراضي، نستخدم النموذج المحلي إذا كان التعقيد مقبول
         return complexityScore <= LOCAL_MODEL_THRESHOLD || isLocalModelPreferred;
     }
 
     private float calculateTextComplexity(String text) {
-        // Calculate text complexity based on multiple factors
+        // حساب تعقيد النص بناءً على عدة عوامل
         float lengthScore = Math.min(text.length() / 100.0f, 1.0f);
         float questionScore = text.contains("?") || text.contains("فين") || text.contains("ازاي") ? 0.3f : 0.0f;
         float unknownWordsScore = 0.0f;
 
-        // Check for unknown words
+        // التحقق من الكلمات غير المعروفة
         for (String word : text.split("\\s+")) {
             if (word.length() > 10 && !EgyptianNormalizer.isKnownWord(word)) {
                 unknownWordsScore += 0.2f;
@@ -112,7 +111,7 @@ public class HybridOrchestrator {
                 localModelSuccessCount++;
                 callback.onIntentDetected(result);
 
-                // Send feedback for model performance
+                // إرسال ملاحظات لأداء النموذج
                 sendModelFeedback(text, result, true);
             }
 
@@ -121,7 +120,7 @@ public class HybridOrchestrator {
                 localModelFailureCount++;
                 Log.w(TAG, "Local model fallback required: " + reason);
 
-                // Try cloud model
+                // المحاولة مع النموذج السحابي
                 processWithCloudModel(text, callback);
             }
         });
@@ -131,9 +130,9 @@ public class HybridOrchestrator {
         Log.i(TAG, "Using cloud model for text: " + text);
 
         cloudFallback.analyzeText(text, result -> {
-            // In senior mode, filter sensitive commands
+            // في وضع كبار السن، نقوم بتصفية الأوامر الحساسة
             if (SeniorMode.isEnabled() && !SeniorMode.isIntentAllowed(result.getIntentType())) {
-                TTSManager.speak(context, "في وضع كبار السن، أنا بس أعرف أوامر محدودة. قول 'يا كبير' وأنا أعلمك إياهم");
+                TTSManager.speak(context, "في وضع كبار السن، أنا بس أعرف أوامر محدودة. قول 'يا كبير' وأعلمك إياهم");
                 result.setIntentType(IntentType.UNKNOWN);
             }
 
@@ -150,14 +149,14 @@ public class HybridOrchestrator {
             Log.i(TAG, String.format("Model preference updated. Success rate: %.2f, Local preferred: %b",
                 successRate, isLocalModelPreferred));
 
-            // Reset counters
+            // إعادة ضبط العدادات
             localModelSuccessCount = 0;
             localModelFailureCount = 0;
         }
     }
 
     private void sendModelFeedback(String text, IntentResult result, boolean wasSuccessful) {
-        // In production, this feedback would be used to improve the model
+        // في الإصدار الإنتاجي، هذه الملاحظات ستُستخدم لتحسين النموذج
         Log.d(TAG, String.format("Feedback: text='%s', intent=%s, success=%b",
             text, result.getIntentType(), wasSuccessful));
     }

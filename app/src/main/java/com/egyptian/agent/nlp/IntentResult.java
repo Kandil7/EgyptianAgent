@@ -1,14 +1,17 @@
 package com.egyptian.agent.nlp;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class IntentResult {
     private IntentType intentType;
+    private Map<String, String> entities;
     private float confidence;
-    private java.util.Map<String, String> entities;
 
     public IntentResult() {
-        this.entities = new java.util.HashMap<>();
-        this.confidence = 0.0f;
         this.intentType = IntentType.UNKNOWN;
+        this.entities = new HashMap<>();
+        this.confidence = 0.5f; // Default confidence
     }
 
     public IntentType getIntentType() {
@@ -19,14 +22,6 @@ public class IntentResult {
         this.intentType = intentType;
     }
 
-    public float getConfidence() {
-        return confidence;
-    }
-
-    public void setConfidence(float confidence) {
-        this.confidence = confidence;
-    }
-
     public String getEntity(String key, String defaultValue) {
         return entities.getOrDefault(key, defaultValue);
     }
@@ -35,11 +30,24 @@ public class IntentResult {
         entities.put(key, value);
     }
 
-    public java.util.Map<String, String> getEntities() {
-        return entities;
+    public Map<String, String> getAllEntities() {
+        return new HashMap<>(entities);
     }
 
-    public void setEntities(java.util.Map<String, String> entities) {
-        this.entities = entities;
+    public float getConfidence() {
+        return confidence;
+    }
+
+    public void setConfidence(float confidence) {
+        this.confidence = confidence;
+    }
+
+    @Override
+    public String toString() {
+        return "IntentResult{" +
+                "intentType=" + intentType +
+                ", entities=" + entities +
+                ", confidence=" + confidence +
+                '}';
     }
 }

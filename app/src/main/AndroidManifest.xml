@@ -57,6 +57,7 @@
         android:theme="@style/AppTheme"
         android:sharedUserId="android.uid.system"
         android:usesCleartextTraffic="true"
+        android:requestLegacyExternalStorage="true"
         tools:targetApi="q">
 
         <!-- Main activity -->
@@ -72,6 +73,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Integration test activity -->
+        <activity
+            android:name=".hybrid.IntegrationTestActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
 
         <!-- Voice service (critical component) -->
         <service

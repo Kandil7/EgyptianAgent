@@ -8,6 +8,9 @@ import android.util.*;
 import com.egyptian.agent.accessibility.SeniorMode;
 import com.egyptian.agent.executors.EmergencyHandler;
 import com.egyptian.agent.stt.VoskSTTEngine;
+import com.egyptian.agent.stt.EgyptianNormalizer;
+import com.egyptian.agent.hybrid.HybridOrchestrator;
+import com.egyptian.agent.nlp.IntentResult;
 import com.egyptian.agent.utils.CrashLogger;
 import com.egyptian.agent.utils.SystemAppHelper;
 import java.util.*;
@@ -20,6 +23,7 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
     private VoskSTTEngine sttEngine;
     private WakeWordDetector wakeWordDetector;
     private AudioManager audioManager;
+    private HybridOrchestrator hybridOrchestrator;
     private boolean isListening = false;
     private boolean isProcessing = false;
     private Handler mainHandler;
@@ -37,6 +41,7 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
         initializeWakeLock();
         initializeAudioManager();
         initializeSTTEngine();
+        initializeHybridOrchestrator(); // Initialize the new orchestrator
         initializeWakeWord();
         initializeForegroundService();
 
@@ -54,6 +59,17 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
             "EgyptianAgent::VoiceWakeLock"
         );
         wakeLock.acquire(10 * 60 * 1000L /*10 minutes*/);
+    }
+
+    private void initializeHybridOrchestrator() {
+        try {
+            hybridOrchestrator = new HybridOrchestrator(this);
+            Log.i(TAG, "Hybrid Orchestrator initialized successfully");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to initialize Hybrid Orchestrator", e);
+            CrashLogger.logError(this, e);
+            TTSManager.speak(this, "حصل مشكلة في تهيئة الذكاء الاصطناعي المتقدم");
+        }
     }
 
     private void initializeAudioManager() {
@@ -130,23 +146,88 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
             return;
         }
 
-        // Process normal command
-        IntentType intent = IntentRouter.detectIntent(command);
-        switch (intent) {
+        // Use the hybrid orchestrator to determine intent
+        if (hybridOrchestrator != null) {
+            // Normalize the command using Egyptian dialect processing
+            String normalizedCommand = EgyptianNormalizer.normalize(command);
+
+            // Use the hybrid orchestrator to determine intent
+            hybridOrchestrator.determineIntent(normalizedCommand, result -> {
+                // Process the result on the main thread
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    processIntentResult(result, command);
+                });
+            });
+        } else {
+            // Fallback to original processing if orchestrator is not available
+            IntentType intent = IntentRouter.detectIntent(command);
+            switch (intent) {
+                case CALL_CONTACT:
+                    // CallExecutor.handleCommand(this, command);
+                    break;
+                case SEND_WHATSAPP:
+                    // WhatsAppExecutor.handleCommand(this, command);
+                    break;
+                case SET_ALARM:
+                    // AlarmExecutor.handleCommand(this, command);
+                    break;
+                case READ_MISSED_CALLS:
+                    // CallLogExecutor.handleCommand(this, command);
+                    break;
+                default:
+                    handleUnknownCommand(command);
+            }
+        }
+    }
+
+    private void processIntentResult(IntentResult result, String originalCommand) {
+        Log.i(TAG, "Processing intent result: " + result.getIntentType() + " with confidence: " + result.getConfidence());
+
+        // Check if confidence is too low
+        if (result.getConfidence() < 0.5) {
+            TTSManager.speak(this, "مش فاهمك كويس. قول الأمر تاني");
+            restartWakeWordListening();
+            return;
+        }
+
+        // Process based on intent type
+        switch (result.getIntentType()) {
             case CALL_CONTACT:
-                // CallExecutor.handleCommand(this, command);
+                String contactName = result.getEntity("contact", "");
+                if (!contactName.isEmpty()) {
+                    TTSManager.speak(this, "بتتصل بـ " + contactName);
+                    // In a real implementation: CallExecutor.handleCommand(this, originalCommand);
+                } else {
+                    TTSManager.speak(this, "مين اللي عايز تتصل بيه؟");
+                }
                 break;
             case SEND_WHATSAPP:
-                // WhatsAppExecutor.handleCommand(this, command);
+                String recipient = result.getEntity("contact", "");
+                String message = result.getEntity("message", "");
+                if (!recipient.isEmpty() && !message.isEmpty()) {
+                    TTSManager.speak(this, "ببعت رسالة لـ " + recipient);
+                    // In a real implementation: WhatsAppExecutor.handleCommand(this, originalCommand);
+                } else {
+                    TTSManager.speak(this, "عايز تبعت رسالة لحد معين؟");
+                }
                 break;
             case SET_ALARM:
-                // AlarmExecutor.handleCommand(this, command);
+                String time = result.getEntity("time", "");
+                if (!time.isEmpty()) {
+                    TTSManager.speak(this, "بأضع تنبيه لـ " + time);
+                    // In a real implementation: AlarmExecutor.handleCommand(this, originalCommand);
+                } else {
+                    TTSManager.speak(this, "متى عايز التنبيه؟");
+                }
                 break;
-            case READ_MISSED_CALLS:
-                // CallLogExecutor.handleCommand(this, command);
+            case READ_TIME:
+                String currentTime = new java.text.SimpleDateFormat("hh:mm a", java.util.Locale.getDefault()).format(new java.util.Date());
+                TTSManager.speak(this, "الساعة " + currentTime);
+                restartWakeWordListening();
                 break;
+            case UNKNOWN:
             default:
-                handleUnknownCommand(command);
+                handleUnknownCommand(originalCommand);
         }
     }
 
@@ -192,6 +273,10 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
 
         if (wakeWordDetector != null) {
             wakeWordDetector.destroy();
+        }
+
+        if (hybridOrchestrator != null) {
+            hybridOrchestrator.destroy();
         }
 
         if (audioManager != null) {
