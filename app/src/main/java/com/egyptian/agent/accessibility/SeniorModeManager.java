@@ -5,6 +5,9 @@ import android.content.SharedPreferences;
 import android.util.Log;
 import com.egyptian.agent.core.TTSManager;
 import com.egyptian.agent.utils.CrashLogger;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +53,7 @@ public class SeniorModeManager {
         config.setSendDailyReports(prefs.getBoolean("send_daily_reports", true));
         
         // Load medications
-        // In a real implementation, medications would be loaded from storage
+        loadMedicationsFromStorage();
     }
     
     public void enable(Context context) {
@@ -178,4 +181,63 @@ public class SeniorModeManager {
     public String getGuardianPhoneNumber() {
         return config.getGuardianPhoneNumber();
     }
+
+    /**
+     * Loads medications from persistent storage
+     */
+    private void loadMedicationsFromStorage() {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String medicationsJson = prefs.getString("medications_list", "[]");
+
+        try {
+            JSONArray jsonArray = new JSONArray(medicationsJson);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject medObj = jsonArray.getJSONObject(i);
+                MedicationReminder reminder = new MedicationReminder(
+                    medObj.getString("name"),
+                    medObj.getString("dosage"),
+                    medObj.getLong("timeInMillis")
+                );
+                config.getMedicationReminders().add(reminder);
+            }
+        } catch (JSONException e) {
+            Log.e(TAG, "Error parsing medications from storage", e);
+        }
+    }
+
+    /**
+     * Saves medications to persistent storage
+     */
+    private void saveMedicationsToStorage() {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+
+        try {
+            JSONArray jsonArray = new JSONArray();
+            for (MedicationReminder reminder : config.getMedicationReminders()) {
+                JSONObject medObj = new JSONObject();
+                medObj.put("name", reminder.getMedicationName());
+                medObj.put("dosage", reminder.getDosage());
+                medObj.put("timeInMillis", reminder.getTimeInMillis());
+                jsonArray.put(medObj);
+            }
+            editor.putString("medications_list", jsonArray.toString());
+        } catch (JSONException e) {
+            Log.e(TAG, "Error serializing medications to storage", e);
+        }
+
+        editor.apply();
+    }
+
+    /**
+     * Gets singleton instance of SeniorModeManager
+     */
+    public static SeniorModeManager getInstance(Context context) {
+        if (instance == null) {
+            instance = new SeniorModeManager(context.getApplicationContext());
+        }
+        return instance;
+    }
+
+    private static SeniorModeManager instance;
 }

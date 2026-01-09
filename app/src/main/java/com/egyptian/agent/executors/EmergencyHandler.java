@@ -112,9 +112,24 @@ public class EmergencyHandler {
      * Plays emergency sound
      */
     private static void playEmergencySound(Context context) {
-        // In a real implementation, this would play an emergency sound
-        // For this demo, we'll just log it
-        Log.d(TAG, "Playing emergency sound");
+        try {
+            // Play emergency sound using MediaPlayer
+            android.media.MediaPlayer mediaPlayer = android.media.MediaPlayer.create(context, R.raw.emergency_alert);
+            if (mediaPlayer != null) {
+                mediaPlayer.start();
+            } else {
+                // If resource not available, use system alert
+                android.media.AudioManager audioManager = (android.media.AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+                int maxVolume = audioManager.getStreamMaxVolume(android.media.AudioManager.STREAM_ALARM);
+                audioManager.setStreamVolume(android.media.AudioManager.STREAM_ALARM, maxVolume, 0);
+
+                // Create a short beep as emergency signal
+                android.media.ToneGenerator toneG = new android.media.ToneGenerator(android.media.AudioManager.STREAM_ALARM, maxVolume);
+                toneG.startTone(android.media.ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 2000); // 2 sec
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error playing emergency sound", e);
+        }
     }
 
     /**
@@ -175,9 +190,26 @@ public class EmergencyHandler {
      * Calls default emergency numbers
      */
     private static void callDefaultEmergencyNumbers(Context context) {
-        // In a real implementation, this would cycle through default emergency numbers
-        // For this demo, we'll just log it
-        Log.d(TAG, "Calling default emergency numbers");
+        // Cycle through default emergency numbers
+        String[] defaultNumbers = {"122", "123", "180"}; // Police, Ambulance, Fire
+
+        for (String number : defaultNumbers) {
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE)
+                == PackageManager.PERMISSION_GRANTED) {
+                try {
+                    Intent callIntent = new Intent(Intent.ACTION_CALL);
+                    callIntent.setData(Uri.parse("tel:" + number));
+                    callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(callIntent);
+                    Log.i(TAG, "Called emergency number: " + number);
+                    break; // Call first available number
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to call emergency number: " + number, e);
+                    continue; // Try next number
+                }
+            }
+        }
+
         TTSManager.speak(context, "جارٍ الاتصال بجهات الطوارئ...");
     }
 
@@ -186,7 +218,7 @@ public class EmergencyHandler {
      */
     private static void sendSMSToEmergencyContacts(Context context, List<String> contacts, boolean fromFall) {
         // Check for SMS permission
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) 
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS)
             != PackageManager.PERMISSION_GRANTED) {
             Log.e(TAG, "Missing SEND_SMS permission");
             return;
@@ -196,14 +228,20 @@ public class EmergencyHandler {
         String location = getCurrentLocation(context);
         String locationText = location != null ? " الموقع: " + location : "";
 
-        String message = fromFall ? 
+        String message = fromFall ?
             "تنبيه طوارئ: تم اكتشاف سقوط لمستخدم الوكيل المصري!" + locationText :
             "تنبيه طوارئ: تم تفعيل زر الطوارئ من مستخدم الوكيل المصري!" + locationText;
 
-        // In a real implementation, this would send SMS to each contact
-        // For this demo, we'll just log it
+        // Send SMS to each contact
         for (String contact : contacts) {
-            Log.d(TAG, "SMS to " + contact + ": " + message);
+            try {
+                android.telephony.SmsManager smsManager = android.telephony.SmsManager.getDefault();
+                smsManager.sendTextMessage(contact, null, message, null, null);
+                Log.d(TAG, "SMS sent to " + contact + ": " + message);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to send SMS to " + contact, e);
+                CrashLogger.logError(context, e);
+            }
         }
     }
 
@@ -211,19 +249,75 @@ public class EmergencyHandler {
      * Gets current location
      */
     private static String getCurrentLocation(Context context) {
-        // In a real implementation, this would get the current location
-        // For this demo, we'll return a placeholder
-        return "القاهرة، مصر";
+        // Check for location permission
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "Location permission not granted");
+            return null;
+        }
+
+        try {
+            android.location.LocationManager locationManager =
+                (android.location.LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+
+            // Get last known location
+            android.location.Location location = locationManager.getLastKnownLocation(
+                android.location.LocationManager.GPS_PROVIDER);
+
+            if (location != null) {
+                return String.format("%.4f, %.4f", location.getLatitude(), location.getLongitude());
+            } else {
+                // Try network provider as fallback
+                location = locationManager.getLastKnownLocation(
+                    android.location.LocationManager.NETWORK_PROVIDER);
+
+                if (location != null) {
+                    return String.format("%.4f, %.4f", location.getLatitude(), location.getLongitude());
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting location", e);
+            CrashLogger.logError(context, e);
+        }
+
+        return null;
     }
 
     /**
      * Notifies guardians (used in senior mode)
      */
     private static void notifyGuardians(Context context, boolean fromFall) {
-        // In a real implementation, this would send notifications to guardians
-        // For this demo, we'll just log it
-        Log.d(TAG, "Notifying guardians" + (fromFall ? " (from fall)" : ""));
-        TTSManager.speak(context, "جارٍ إخطار الأوصياء...");
+        // Get guardian phone number from senior mode config
+        String guardianNumber = com.egyptian.agent.accessibility.SeniorModeManager.getInstance(context).getGuardianPhoneNumber();
+
+        if (guardianNumber == null || guardianNumber.isEmpty()) {
+            Log.w(TAG, "No guardian phone number configured");
+            return;
+        }
+
+        // Check for SMS permission
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS)
+            != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "Missing SEND_SMS permission for guardian notification");
+            return;
+        }
+
+        // Get current location if available
+        String location = getCurrentLocation(context);
+        String locationText = location != null ? " الموقع: " + location : "";
+
+        String message = fromFall ?
+            "تنبيه طوارئ: تم اكتشاف سقوط لوالدك/والدتك!" + locationText :
+            "تنبيه طوارئ: تم تفعيل زر الطوارئ من والدك/والدتك!" + locationText;
+
+        try {
+            android.telephony.SmsManager smsManager = android.telephony.SmsManager.getDefault();
+            smsManager.sendTextMessage(guardianNumber, null, message, null, null);
+            Log.d(TAG, "Guardian notification sent to " + guardianNumber + ": " + message);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to send guardian notification to " + guardianNumber, e);
+            CrashLogger.logError(context, e);
+        }
     }
 
     /**

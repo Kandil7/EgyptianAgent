@@ -48,14 +48,17 @@ public class AlarmExecutor {
             TTSManager.speak(context, "عايز تنبيه بعنوان \"" + parsedCommand.message + 
                 "\" في " + formatTime(parsedCommand.timeInMillis) + "؟ قول 'نعم' بس، ولا 'لا'");
             
-            // In a real implementation, we would wait for user confirmation
-            // For this demo, we'll proceed directly after a simulated wait
-            new android.os.Handler().postDelayed(() -> {
-                VibrationManager.vibrateLong(context);
-                scheduleAlarm(context, parsedCommand);
-                TTSManager.speak(context, "تم ضبط التنبيه بعنوان \"" + parsedCommand.message + 
-                    "\" في " + formatTime(parsedCommand.timeInMillis));
-            }, 3000); // Simulate waiting for confirmation
+            // Wait for user confirmation using speech recognition
+            SpeechConfirmation.waitForConfirmation(context, 10000, confirmed -> {
+                if (confirmed) {
+                    VibrationManager.vibrateLong(context);
+                    scheduleAlarm(context, parsedCommand);
+                    TTSManager.speak(context, "تم ضبط التنبيه بعنوان \"" + parsedCommand.message +
+                        "\" في " + formatTime(parsedCommand.timeInMillis));
+                } else {
+                    TTSManager.speak(context, "ما ضبطتش التنبيه. قول 'يا كبير' لو عايز تضبط تنبيه تاني");
+                }
+            });
             
             return;
         }
@@ -95,27 +98,70 @@ public class AlarmExecutor {
     private static long extractTimeFromCommand(String command) {
         // Look for time patterns like "at 8 am", "at 3:30 pm", etc.
         // Also look for Egyptian dialect patterns
-        
-        // Try to parse specific times
+
+        // Try to parse specific times using regex
         String[] timePatterns = {
-            "الساعة ([0-9]{1,2})",
-            "الساعه ([0-9]{1,2})",
-            "at ([0-9]{1,2})",
-            "at ([0-9]{1,2}):([0-9]{2})"
+            "الساعة\\s*(\\d{1,2})(?::(\\d{2}))?",
+            "الساعه\\s*(\\d{1,2})(?::(\\d{2}))?",
+            "at\\s*(\\d{1,2})(?::(\\d{2}))?",
+            "(\\d{1,2})\\s*o'clock",
+            "(\\d{1,2})\\s*(am|pm)",
+            "(\\d{1,2}):(\\d{2})\\s*(am|pm)"
         };
-        
+
         for (String pattern : timePatterns) {
-            // In a real implementation, we would use regex to extract time
-            // For this demo, we'll use a simplified approach
+            java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern, java.util.regex.Pattern.CASE_INSENSITIVE);
+            java.util.regex.Matcher m = p.matcher(command);
+
+            if (m.find()) {
+                try {
+                    int hour = Integer.parseInt(m.group(1));
+                    int minute = 0;
+
+                    // Handle 12-hour format
+                    if (m.groupCount() >= 2 && m.group(2) != null && !m.group(2).matches("am|pm")) {
+                        minute = Integer.parseInt(m.group(2));
+                    }
+
+                    String period = null;
+                    if (m.groupCount() >= 3 && m.group(3) != null) {
+                        period = m.group(3).toLowerCase();
+                    } else if (m.groupCount() >= 2 && m.group(2) != null && m.group(2).matches("am|pm")) {
+                        period = m.group(2).toLowerCase();
+                    }
+
+                    if (period != null) {
+                        if (period.equals("pm") && hour != 12) {
+                            hour += 12;
+                        } else if (period.equals("am") && hour == 12) {
+                            hour = 0;
+                        }
+                    }
+
+                    Calendar cal = Calendar.getInstance();
+                    cal.set(Calendar.HOUR_OF_DAY, hour);
+                    cal.set(Calendar.MINUTE, minute);
+                    cal.set(Calendar.SECOND, 0);
+
+                    // If time has passed today, set for tomorrow
+                    if (cal.getTimeInMillis() <= System.currentTimeMillis()) {
+                        cal.add(Calendar.DAY_OF_MONTH, 1);
+                    }
+
+                    return cal.getTimeInMillis();
+                } catch (NumberFormatException e) {
+                    Log.e(TAG, "Error parsing time from command: " + command, e);
+                }
+            }
         }
-        
+
         // Try to parse Egyptian time expressions
         if (command.contains("الصبح") || command.contains("sobh") || command.contains("morning")) {
             Calendar cal = Calendar.getInstance();
             cal.set(Calendar.HOUR_OF_DAY, 7); // 7 AM
             cal.set(Calendar.MINUTE, 0);
             cal.set(Calendar.SECOND, 0);
-            
+
             // If it's already past 7 AM today, set for tomorrow
             if (cal.getTimeInMillis() <= System.currentTimeMillis()) {
                 cal.add(Calendar.DAY_OF_MONTH, 1);
@@ -126,7 +172,7 @@ public class AlarmExecutor {
             cal.set(Calendar.HOUR_OF_DAY, 12); // 12 PM
             cal.set(Calendar.MINUTE, 0);
             cal.set(Calendar.SECOND, 0);
-            
+
             // If it's already past 12 PM today, set for tomorrow
             if (cal.getTimeInMillis() <= System.currentTimeMillis()) {
                 cal.add(Calendar.DAY_OF_MONTH, 1);
@@ -137,7 +183,7 @@ public class AlarmExecutor {
             cal.set(Calendar.HOUR_OF_DAY, 18); // 6 PM
             cal.set(Calendar.MINUTE, 0);
             cal.set(Calendar.SECOND, 0);
-            
+
             // If it's already past 6 PM today, set for tomorrow
             if (cal.getTimeInMillis() <= System.currentTimeMillis()) {
                 cal.add(Calendar.DAY_OF_MONTH, 1);
@@ -148,14 +194,14 @@ public class AlarmExecutor {
             cal.set(Calendar.HOUR_OF_DAY, 22); // 10 PM
             cal.set(Calendar.MINUTE, 0);
             cal.set(Calendar.SECOND, 0);
-            
+
             // If it's already past 10 PM today, set for tomorrow
             if (cal.getTimeInMillis() <= System.currentTimeMillis()) {
                 cal.add(Calendar.DAY_OF_MONTH, 1);
             }
             return cal.getTimeInMillis();
         }
-        
+
         return 0;
     }
 

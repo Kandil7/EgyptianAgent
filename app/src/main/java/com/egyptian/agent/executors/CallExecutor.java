@@ -112,9 +112,15 @@ public class CallExecutor {
 
         // Standard confirmation flow
         TTSManager.speak(context, "عايز تتصل بـ " + contactName + "؟ قول 'نعم' أو 'لا'");
-        // In a real implementation, we would wait for user confirmation
-        // For this demo, we'll proceed directly
-        placeCall(context, emergencyNumber);
+        // Wait for user confirmation using speech recognition
+        SpeechConfirmation.waitForConfirmation(context, confirmed -> {
+            if (confirmed) {
+                placeCall(context, emergencyNumber);
+                TTSManager.speak(context, "بتصل بـ " + contactName + " دلوقتي");
+            } else {
+                TTSManager.speak(context, "ما عملتش اتصال");
+            }
+        });
     }
 
     /**
@@ -160,24 +166,47 @@ public class CallExecutor {
             ContactsContract.CommonDataKinds.Phone.NUMBER
         };
 
-        String selection = ContactsContract.Contacts.DISPLAY_NAME + " LIKE ?";
-        String[] selectionArgs = new String[] { "%" + partialName + "%" };
+        // More flexible search to handle Egyptian dialect variations
+        String selection = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " LIKE ? OR " +
+                          ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " LIKE ? OR " +
+                          ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " LIKE ? OR " +
+                          ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " LIKE ?";
+        String[] selectionArgs = new String[] {
+            "%" + partialName + "%",
+            "%" + EgyptianNormalizer.normalize(partialName) + "%",
+            "%" + partialName.toLowerCase() + "%",
+            "%" + partialName.toUpperCase() + "%"
+        };
 
-        try (Cursor cursor = context.getContentResolver().query(
-                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                projection,
-                selection,
-                selectionArgs,
-                null
-        )) {
+        Cursor cursor = null;
+        try {
+            cursor = context.getContentResolver().query(
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                    projection,
+                    selection,
+                    selectionArgs,
+                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC"
+            );
+
             if (cursor != null && cursor.moveToFirst()) {
+                int nameIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
                 int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+
                 if (numberIndex != -1) {
-                    return cursor.getString(numberIndex);
+                    String foundNumber = cursor.getString(numberIndex);
+                    String foundName = cursor.getString(nameIndex);
+
+                    Log.d(TAG, "Found contact: " + foundName + " -> " + foundNumber);
+                    return foundNumber;
                 }
             }
         } catch (Exception e) {
             Log.e(TAG, "Error searching contacts", e);
+            CrashLogger.logError(context, e);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
 
         return null;
@@ -193,13 +222,16 @@ public class CallExecutor {
             TTSManager.speak(context, "عايز تتصل بـ " + contactName + " على الرقم " + 
                 formatNumberForSpeech(number) + "؟ قول 'نعم' بس، ولا 'لا'");
             
-            // In a real implementation, we would wait for user confirmation
-            // For this demo, we'll proceed directly after a simulated wait
-            new android.os.Handler().postDelayed(() -> {
-                VibrationManager.vibrateLong(context);
-                placeCall(context, number);
-                TTSManager.speak(context, "اتصلت بـ " + contactName + ". هو بيرد عليكم دلوقتي");
-            }, 3000); // Simulate waiting for confirmation
+            // Wait for user confirmation using speech recognition
+            SpeechConfirmation.waitForConfirmation(context, 10000, confirmed -> {
+                if (confirmed) {
+                    VibrationManager.vibrateLong(context);
+                    placeCall(context, number);
+                    TTSManager.speak(context, "اتصلت بـ " + contactName + ". هو بيرد عليكم دلوقتي");
+                } else {
+                    TTSManager.speak(context, "ما عملتش اتصال. قول 'يا كبير' لو عايز حاجة تانية");
+                }
+            });
             
             return;
         }

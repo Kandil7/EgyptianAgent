@@ -83,7 +83,6 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
             Log.i(TAG, "Vosk STT Engine initialized successfully");
         } catch (Exception e) {
             Log.e(TAG, "Failed to initialize STT engine", e);
-            // In a real implementation, we would have a CrashLogger utility
             CrashLogger.logError(this, e);
             TTSManager.speak(this, "حصل خطأ في تهيئة المساعد الصوتي");
         }
@@ -197,7 +196,7 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
                 String contactName = result.getEntity("contact", "");
                 if (!contactName.isEmpty()) {
                     TTSManager.speak(this, "بتتصل بـ " + contactName);
-                    // In a real implementation: CallExecutor.handleCommand(this, originalCommand);
+                    CallExecutor.handleCommand(this, originalCommand);
                 } else {
                     TTSManager.speak(this, "مين اللي عايز تتصل بيه؟");
                 }
@@ -207,7 +206,7 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
                 String message = result.getEntity("message", "");
                 if (!recipient.isEmpty() && !message.isEmpty()) {
                     TTSManager.speak(this, "ببعت رسالة لـ " + recipient);
-                    // In a real implementation: WhatsAppExecutor.handleCommand(this, originalCommand);
+                    WhatsAppExecutor.handleCommand(this, originalCommand);
                 } else {
                     TTSManager.speak(this, "عايز تبعت رسالة لحد معين؟");
                 }
@@ -216,7 +215,7 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
                 String time = result.getEntity("time", "");
                 if (!time.isEmpty()) {
                     TTSManager.speak(this, "بأضع تنبيه لـ " + time);
-                    // In a real implementation: AlarmExecutor.handleCommand(this, originalCommand);
+                    AlarmExecutor.handleCommand(this, originalCommand);
                 } else {
                     TTSManager.speak(this, "متى عايز التنبيه؟");
                 }

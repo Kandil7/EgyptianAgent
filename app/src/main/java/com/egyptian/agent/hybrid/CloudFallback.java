@@ -1,6 +1,13 @@
 package com.egyptian.agent.hybrid;
 
+import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Build;
+import android.os.Environment;
+import android.os.StatFs;
+import android.os.BatteryManager;
 import android.util.Log;
 import com.egyptian.agent.core.IntentType;
 import com.egyptian.agent.nlp.IntentResult;
@@ -8,6 +15,7 @@ import com.egyptian.agent.stt.EgyptianNormalizer;
 import com.egyptian.agent.utils.CrashLogger;
 import okhttp3.*;
 import org.json.JSONObject;
+import org.json.JSONException;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -119,9 +127,54 @@ public class CloudFallback {
     }
 
     private String getDeviceInfo() {
-        // In a real implementation, this would gather device information
-        // for model optimization and analytics
-        return "honor_x6c_android12";
+        // Gather comprehensive device information for model optimization and analytics
+        JSONObject deviceInfo = new JSONObject();
+        try {
+            deviceInfo.put("manufacturer", Build.MANUFACTURER);
+            deviceInfo.put("model", Build.MODEL);
+            deviceInfo.put("brand", Build.BRAND);
+            deviceInfo.put("sdk_version", Build.VERSION.SDK_INT);
+            deviceInfo.put("release_version", Build.VERSION.RELEASE);
+            deviceInfo.put("device", Build.DEVICE);
+            deviceInfo.put("product", Build.PRODUCT);
+
+            // Memory information
+            ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+            ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
+            activityManager.getMemoryInfo(memInfo);
+            deviceInfo.put("total_memory", memInfo.totalMem);
+            deviceInfo.put("available_memory", memInfo.availMem);
+            deviceInfo.put("memory_threshold", memInfo.threshold);
+            deviceInfo.put("low_memory", memInfo.lowMemory);
+
+            // Storage information
+            StatFs internalStorage = new StatFs(Environment.getDataDirectory().getPath());
+            long internalTotal = internalStorage.getTotalBytes();
+            long internalAvailable = internalStorage.getAvailableBytes();
+            deviceInfo.put("internal_storage_total", internalTotal);
+            deviceInfo.put("internal_storage_available", internalAvailable);
+
+            // Battery information
+            IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            Intent batteryStatus = context.registerReceiver(null, filter);
+            if (batteryStatus != null) {
+                int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+                int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                float batteryPct = level * 100 / (float)scale;
+                deviceInfo.put("battery_percentage", batteryPct);
+
+                int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+                boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                                   status == BatteryManager.BATTERY_STATUS_FULL;
+                deviceInfo.put("is_charging", isCharging);
+            }
+
+            return deviceInfo.toString();
+        } catch (JSONException e) {
+            Log.e(TAG, "Error creating device info JSON", e);
+            // Fallback to simple identifier
+            return "honor_x6c_android12";
+        }
     }
 
     private IntentResult parseCloudResponse(String response) {

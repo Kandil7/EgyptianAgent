@@ -78,7 +78,7 @@ public class EgyptianDialectTestSuite {
             );
         }
 
-        System.out.printf("Normalization: %d/%d passed (%.1f%%)%n%n", 
+        System.out.printf("Normalization: %d/%d passed (%.1f%%)%n%n",
             passed, total, (passed * 100.0) / total);
     }
 
@@ -141,7 +141,7 @@ public class EgyptianDialectTestSuite {
             );
         }
 
-        System.out.printf("Intent Detection: %d/%d passed (%.1f%%)%n%n", 
+        System.out.printf("Intent Detection: %d/%d passed (%.1f%%)%n%n",
             passed, total, (passed * 100.0) / total);
     }
 
@@ -157,24 +157,24 @@ public class EgyptianDialectTestSuite {
         try {
             // Mock context for testing
             MockContext mockContext = new MockContext();
-            
+
             // Initialize the OpenPhone integration
             OpenPhoneIntegration integration = new OpenPhoneIntegration(mockContext);
-            
+
             // Wait a bit for model to potentially load (in mock, it loads instantly)
             Thread.sleep(100);
-            
+
             if (integration.isReady()) {
                 System.out.println("✓ OpenPhone integration initialized successfully");
             } else {
                 System.out.println("✗ OpenPhone integration failed to initialize");
             }
-            
+
             // Test a sample analysis
             integration.analyzeText("اتصل بأمي", new OpenPhoneIntegration.AnalysisCallback() {
                 @Override
                 public void onResult(IntentResult result) {
-                    System.out.printf("✓ Sample analysis completed: %s with confidence %.2f%n", 
+                    System.out.printf("✓ Sample analysis completed: %s with confidence %.2f%n",
                         result.getIntentType(), result.getConfidence());
                 }
 
@@ -183,13 +183,13 @@ public class EgyptianDialectTestSuite {
                     System.out.printf("ℹ Sample analysis fell back: %s%n", reason);
                 }
             });
-            
+
             // Clean up
             integration.destroy();
         } catch (Exception e) {
             System.out.println("✗ Error testing model integration: " + e.getMessage());
         }
-        
+
         System.out.println();
     }
 
@@ -240,15 +240,15 @@ public class EgyptianDialectTestSuite {
         for (String[] variant : variants) {
             String egyptian = variant[0];
             String meaning = variant[1];
-            
+
             // Just verify we can process these without errors
             String normalized = EgyptianNormalizer.normalize(egyptian);
             boolean processed = normalized != null && !normalized.isEmpty();
-            
+
             if (processed) {
                 passed++;
             }
-            
+
             System.out.printf("%s Egyptian: '%s' -> Meaning: '%s' -> Processed: %s%n",
                 processed ? "✓" : "✗",
                 egyptian,
@@ -257,7 +257,7 @@ public class EgyptianDialectTestSuite {
             );
         }
 
-        System.out.printf("Dialect Variants: %d/%d passed (%.1f%%)%n%n", 
+        System.out.printf("Dialect Variants: %d/%d passed (%.1f%%)%n%n",
             passed, total, (passed * 100.0) / total);
     }
 
@@ -287,24 +287,24 @@ public class EgyptianDialectTestSuite {
             try {
                 String result = EgyptianNormalizer.normalize(testCase);
                 boolean handled = result != null; // Should not crash
-                
+
                 if (handled) {
                     passed++;
                 }
-                
+
                 System.out.printf("%s Input: '%s' -> Handled: %s%n",
                     handled ? "✓" : "✗",
                     testCase.length() > 30 ? testCase.substring(0, 30) + "..." : testCase,
                     handled ? "Yes" : "No"
                 );
             } catch (Exception e) {
-                System.out.printf("✗ Input: '%s' -> Exception: %s%n", 
+                System.out.printf("✗ Input: '%s' -> Exception: %s%n",
                     testCase.length() > 30 ? testCase.substring(0, 30) + "..." : testCase,
                     e.getMessage());
             }
         }
 
-        System.out.printf("Edge Cases: %d/%d passed (%.1f%%)%n%n", 
+        System.out.printf("Edge Cases: %d/%d passed (%.1f%%)%n%n",
             passed, total, (passed * 100.0) / total);
     }
 
@@ -313,32 +313,32 @@ public class EgyptianDialectTestSuite {
         public IntentResult determineIntent(String text) {
             // Simple rule-based mock for testing
             IntentResult result = new IntentResult();
-            
-            if (text.contains(" emergencies") || text.contains("emergency") || 
+
+            if (text.contains(" emergencies") || text.contains("emergency") ||
                 text.contains("ngda") || text.contains("estghatha") || text.contains("tawari")) {
                 result.setIntentType(IntentType.EMERGENCY);
                 result.setConfidence(0.9f);
-            } else if (text.contains("call") || text.contains("connect") || 
-                      text.contains("tel") || text.contains("etasel") || 
+            } else if (text.contains("call") || text.contains("connect") ||
+                      text.contains("tel") || text.contains("etasel") ||
                       text.contains("klm") || text.contains("rn")) {
                 result.setIntentType(IntentType.CALL_CONTACT);
                 result.setConfidence(0.8f);
-            } else if (text.contains("whatsapp") || text.contains("message") || 
-                      text.contains("wts") || text.contains("rsala") || 
+            } else if (text.contains("whatsapp") || text.contains("message") ||
+                      text.contains("wts") || text.contains("rsala") ||
                       text.contains("b3t")) {
                 result.setIntentType(IntentType.SEND_WHATSAPP);
                 result.setConfidence(0.75f);
-            } else if (text.contains("alarm") || text.contains("remind") || 
-                      text.contains("nbhny") || text.contains("anbhny") || 
+            } else if (text.contains("alarm") || text.contains("remind") ||
+                      text.contains("nbhny") || text.contains("anbhny") ||
                       text.contains("zkry")) {
                 result.setIntentType(IntentType.SET_ALARM);
                 result.setConfidence(0.7f);
-            } else if (text.contains("time") || text.contains("hour") || 
-                      text.contains("sa3a") || text.contains("kam") || 
+            } else if (text.contains("time") || text.contains("hour") ||
+                      text.contains("sa3a") || text.contains("kam") ||
                       text.contains("alwqt")) {
                 result.setIntentType(IntentType.READ_TIME);
                 result.setConfidence(0.95f);
-            } else if (text.contains("missed") || text.contains("fa7ta") || 
+            } else if (text.contains("missed") || text.contains("fa7ta") ||
                       text.contains("fatya")) {
                 result.setIntentType(IntentType.READ_MISSED_CALLS);
                 result.setConfidence(0.85f);
@@ -346,7 +346,7 @@ public class EgyptianDialectTestSuite {
                 result.setIntentType(IntentType.UNKNOWN);
                 result.setConfidence(0.3f);
             }
-            
+
             return result;
         }
     }
@@ -356,7 +356,7 @@ public class EgyptianDialectTestSuite {
             // Mock implementation
             return new Object();
         }
-        
+
         public Object getAssets() {
             // Mock implementation
             return new Object();

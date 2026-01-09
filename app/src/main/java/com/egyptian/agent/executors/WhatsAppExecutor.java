@@ -206,10 +206,55 @@ public class WhatsAppExecutor {
      * Searches for contact in device contacts
      */
     private static String searchContacts(Context context, String partialName) {
-        // In a real implementation, this would query the contacts provider
-        // For this demo, we'll return a placeholder
-        Log.d(TAG, "Searching for contact: " + partialName);
-        return "201234567890"; // Placeholder number
+        String[] projection = new String[] {
+            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+            ContactsContract.CommonDataKinds.Phone.NUMBER
+        };
+
+        // More flexible search to handle Egyptian dialect variations
+        String selection = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " LIKE ? OR " +
+                          ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " LIKE ? OR " +
+                          ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " LIKE ? OR " +
+                          ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " LIKE ?";
+        String[] selectionArgs = new String[] {
+            "%" + partialName + "%",
+            "%" + EgyptianNormalizer.normalize(partialName) + "%",
+            "%" + partialName.toLowerCase() + "%",
+            "%" + partialName.toUpperCase() + "%"
+        };
+
+        Cursor cursor = null;
+        try {
+            cursor = context.getContentResolver().query(
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                    projection,
+                    selection,
+                    selectionArgs,
+                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC"
+            );
+
+            if (cursor != null && cursor.moveToFirst()) {
+                int nameIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+                int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+
+                if (numberIndex != -1) {
+                    String foundNumber = cursor.getString(numberIndex);
+                    String foundName = cursor.getString(nameIndex);
+
+                    Log.d(TAG, "Found contact: " + foundName + " -> " + foundNumber);
+                    return foundNumber;
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error searching contacts", e);
+            CrashLogger.logError(context, e);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -241,13 +286,16 @@ public class WhatsAppExecutor {
             TTSManager.speak(context, "عايز تبعت رسالة لـ " + recipient + 
                 " بعنوان \"" + message + "\"؟ قول 'نعم' بس، ولا 'لا'");
             
-            // In a real implementation, we would wait for user confirmation
-            // For this demo, we'll proceed directly after a simulated wait
-            new android.os.Handler().postDelayed(() -> {
-                VibrationManager.vibrateLong(context);
-                sendMessage(context, number, message);
-                TTSManager.speak(context, "ببعت الرسالة لـ " + recipient + " دلوقتي");
-            }, 3000); // Simulate waiting for confirmation
+            // Wait for user confirmation using speech recognition
+            SpeechConfirmation.waitForConfirmation(context, 10000, confirmed -> {
+                if (confirmed) {
+                    VibrationManager.vibrateLong(context);
+                    sendMessage(context, number, message);
+                    TTSManager.speak(context, "ببعت الرسالة لـ " + recipient + " دلوقتي");
+                } else {
+                    TTSManager.speak(context, "ما بعتتش رسالة. قول 'يا كبير' لو عايز تبعت رسالة تانية");
+                }
+            });
             
             return;
         }
