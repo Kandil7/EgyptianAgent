@@ -5,185 +5,183 @@ import android.util.Log;
 import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Properties;
 
 /**
- * Wrapper class for the OpenPhone-3B model
- * This implementation integrates with the actual OpenPhone model
+ * Wrapper class for OpenPhone-3B model integration
+ * Handles loading, inference, and management of the PyTorch model
  */
 public class OpenPhoneModel {
     private static final String TAG = "OpenPhoneModel";
-
-    private final String modelPath;
+    
+    private AssetManager assetManager;
+    private String modelPath;
     private boolean isLoaded = false;
-    private ai.openphone.OpenPhone openPhoneInstance;
-
-    public OpenPhoneModel(AssetManager assets, String modelPath) throws Exception {
+    
+    // Mock implementation of PyTorch model interface
+    // In a real implementation, this would interface with PyTorch Android
+    private Object pytorchModel; // Placeholder for actual PyTorch model
+    
+    public OpenPhoneModel(AssetManager assetManager, String modelPath) throws IOException {
+        this.assetManager = assetManager;
         this.modelPath = modelPath;
-
-        Log.i(TAG, "Initializing OpenPhone-3B model from: " + modelPath);
-
-        // Initialize the actual OpenPhone model
-        initializeModel(assets);
+        
+        Log.i(TAG, "Initializing OpenPhone model at: " + modelPath);
+        
+        // Load model properties
+        Properties modelProps = loadModelProperties();
+        
+        // Initialize the model (mock implementation)
+        initializeModel(modelProps);
     }
-
-    private void initializeModel(AssetManager assets) throws Exception {
+    
+    private Properties loadModelProperties() throws IOException {
+        Properties props = new Properties();
+        try (InputStream is = assetManager.open(modelPath + "/model.properties")) {
+            props.load(is);
+        } catch (IOException e) {
+            Log.w(TAG, "Model properties not found, using defaults");
+            // Set default properties
+            props.setProperty("model_version", "3.0");
+            props.setProperty("model_size", "3B");
+            props.setProperty("max_sequence_length", "512");
+            props.setProperty("vocabulary_size", "50000");
+        }
+        return props;
+    }
+    
+    private void initializeModel(Properties modelProps) throws IOException {
         try {
-            // Initialize the OpenPhone model with Egyptian dialect configuration
-            this.openPhoneInstance = new ai.openphone.OpenPhone.Builder()
-                .setModelPath("asset://" + modelPath)
-                .setAssetsManager(assets)
-                .setConfig(getModelConfig())
-                .build();
-
+            // In a real implementation, this would load the actual PyTorch model
+            // pytorchModel = PyTorchAndroid.loadModule(assetManager.open(modelPath + "/model.pt"));
+            
+            // For this mock implementation, we'll simulate model loading
+            Log.i(TAG, "Mock model loaded with properties: " + modelProps);
+            
+            // Simulate model loading delay
+            Thread.sleep(1000);
+            
             isLoaded = true;
-            Log.i(TAG, "OpenPhone-3B model loaded successfully");
+            Log.i(TAG, "OpenPhone model initialized successfully");
         } catch (Exception e) {
             Log.e(TAG, "Failed to initialize OpenPhone model", e);
-            throw e;
+            throw new IOException("Model initialization failed", e);
         }
     }
-
-    private ai.openphone.OpenPhoneConfig getModelConfig() {
-        // Configure the model for Egyptian dialect processing
-        return new ai.openphone.OpenPhoneConfig.Builder()
-            .setLanguage("ar-eg") // Egyptian Arabic
-            .setDialect("egyptian")
-            .setMaxTokens(512)
-            .setTemperature(0.7f) // Balanced creativity and accuracy
-            .setTopK(50)
-            .setTopP(0.95f)
-            .build();
-    }
-
+    
     /**
-     * Analyzes text using the OpenPhone model
-     * @param text The input text to analyze
-     * @return JSONObject containing the analysis results
+     * Performs inference on the given text
+     * @param inputText The input text to analyze
+     * @return JSONObject containing the analysis result
      */
-    public JSONObject analyze(String text) {
-        if (!isLoaded || openPhoneInstance == null) {
-            Log.e(TAG, "Model not loaded!");
-            return createFallbackResult(text);
+    public JSONObject analyze(String inputText) {
+        if (!isLoaded) {
+            Log.e(TAG, "Model not loaded, cannot perform inference");
+            return createErrorResult("Model not loaded");
         }
-
-        Log.d(TAG, "Analyzing text: " + text);
-
-        try {
-            // Prepare the prompt for the OpenPhone model
-            String prompt = createAnalysisPrompt(text);
-
-            // Call the actual OpenPhone model
-            ai.openphone.OpenPhoneResult result = openPhoneInstance.process(prompt);
-
-            // Convert the result to our expected format
-            return convertToStandardResult(result);
-        } catch (Exception e) {
-            Log.e(TAG, "Error during analysis", e);
-            return createFallbackResult(text);
-        }
-    }
-
-    /**
-     * Creates a prompt for the OpenPhone model to analyze the text
-     */
-    private String createAnalysisPrompt(String text) {
-        // Create a structured prompt for the OpenPhone model
-        return String.format(
-            "You are an Egyptian Arabic language understanding system. Analyze the following Egyptian dialect command and respond in JSON format.\n\n" +
-            "Command: \"%s\"\n\n" +
-            "Respond with JSON containing: {\"intent\": \"<intent_type>\", \"entities\": {\"<entity_type>\": \"<entity_value>\"}, \"confidence\": <0.0-1.0>}\n\n" +
-            "Intent types: CALL_CONTACT, SEND_WHATSAPP, SET_ALARM, READ_TIME, READ_MISSED_CALLS, EMERGENCY, UNKNOWN\n\n" +
-            "Example response: {\"intent\": \"CALL_CONTACT\", \"entities\": {\"contact\": \"أمي\"}, \"confidence\": 0.92}",
-            text
-        );
-    }
-
-    /**
-     * Converts the OpenPhone result to our standard format
-     */
-    private JSONObject convertToStandardResult(ai.openphone.OpenPhoneResult result) {
-        try {
-            // The OpenPhone result should contain the JSON response
-            String rawResponse = result.getResponse();
-
-            // Parse the JSON response
-            JSONObject parsedResponse = new JSONObject(rawResponse);
-
-            // Validate that it has the expected structure
-            if (!parsedResponse.has("intent") || !parsedResponse.has("entities") || !parsedResponse.has("confidence")) {
-                Log.w(TAG, "OpenPhone response missing required fields, using fallback");
-                return createFallbackResult("validation_error");
-            }
-
-            return parsedResponse;
-        } catch (Exception e) {
-            Log.e(TAG, "Error converting OpenPhone result", e);
-            return createFallbackResult("conversion_error");
-        }
-    }
-
-    /**
-     * Determines the intent of the given text
-     */
-    private String determineIntent(String text) {
-        text = text.toLowerCase();
         
+        try {
+            Log.d(TAG, "Analyzing text: " + inputText);
+            
+            // In a real implementation, this would call the PyTorch model
+            // IValue output = pytorchModel.forward(IValue.from(inputText)).toIValue();
+            // String resultJson = output.toString();
+            // return new JSONObject(resultJson);
+            
+            // For this mock implementation, we'll simulate the model response
+            // based on the input text and Egyptian dialect processing
+            return simulateModelResponse(inputText);
+        } catch (Exception e) {
+            Log.e(TAG, "Error during model inference", e);
+            return createErrorResult("Inference error: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Simulates model response based on input text
+     * This is a mock implementation that mimics the expected behavior
+     */
+    private JSONObject simulateModelResponse(String inputText) {
+        JSONObject result = new JSONObject();
+        
+        try {
+            // Determine intent based on keywords in the input
+            String intent = determineIntent(inputText);
+            
+            // Extract entities based on the input
+            JSONObject entities = extractEntities(inputText);
+            
+            // Set confidence based on how well we understood the input
+            float confidence = calculateConfidence(inputText, intent);
+            
+            result.put("intent", intent);
+            result.put("entities", entities);
+            result.put("confidence", confidence);
+            
+            Log.d(TAG, "Simulated model response: " + result.toString(2));
+        } catch (Exception e) {
+            Log.e(TAG, "Error simulating model response", e);
+            return createErrorResult("Simulation error: " + e.getMessage());
+        }
+        
+        return result;
+    }
+    
+    private String determineIntent(String inputText) {
         // Check for emergency keywords
-        if (text.contains("نجدة") || text.contains("استغاثة") || text.contains("طوارئ") || 
-            text.contains("إسعاف") || text.contains("شرطة") || text.contains("مساعدة")) {
+        if (containsAnyKeyword(inputText, new String[]{" emergencies", "emergency", "ngda", "estghatha", "tawari", "escaf", "police", "najda"})) {
             return "EMERGENCY";
         }
         
-        // Check for call keywords
-        if (text.contains("اتصل") || text.contains("كلم") || text.contains("رن") || 
-            text.contains("اتكلم")) {
+        // Check for call-related keywords
+        if (containsAnyKeyword(inputText, new String[]{"call", "connect", "ring", "contact", "tel", "etasel", "klm", "rn", "b3t", "ab3t", "wasl"})) {
             return "CALL_CONTACT";
         }
         
-        // Check for WhatsApp keywords
-        if (text.contains("واتساب") || text.contains("ابعت") || text.contains("رساله") || 
-            text.contains("قول ل")) {
+        // Check for WhatsApp-related keywords
+        if (containsAnyKeyword(inputText, new String[]{"whatsapp", "message", "send", "whats", "wts", "rsala", "b3t", "ab3t", "kalam"})) {
             return "SEND_WHATSAPP";
         }
         
-        // Check for alarm/time keywords
-        if (text.contains("انبهني") || text.contains("نبهني") || text.contains("ذكرني") || 
-            text.contains("الساعه") || text.contains("الوقت")) {
+        // Check for alarm/timer keywords
+        if (containsAnyKeyword(inputText, new String[]{"alarm", "remind", "timer", "notify", "think", "nbhny", "anbhny", "zkry", "thker", "mr"})) {
             return "SET_ALARM";
         }
         
-        // Check for time reading
-        if (text.contains("الوقت") || text.contains("الساعه") || text.contains("كام")) {
+        // Check for time-related keywords
+        if (containsAnyKeyword(inputText, new String[]{"time", "hour", "clock", "sa3a", "kam", "alwqt", "alsaa", "cam"})) {
             return "READ_TIME";
         }
         
-        // Default to unknown
+        // Check for missed calls
+        if (containsAnyKeyword(inputText, new String[]{"missed", "calls", "fa7ta", "fatya", "fa7t", "ftya", "mktb"})) {
+            return "READ_MISSED_CALLS";
+        }
+        
+        // Default to unknown if no specific intent is detected
         return "UNKNOWN";
     }
-
-    /**
-     * Extracts entities from the text
-     */
-    private JSONObject extractEntities(String text) {
+    
+    private JSONObject extractEntities(String inputText) {
         JSONObject entities = new JSONObject();
         
         try {
             // Extract contact name
-            String contactName = extractContactName(text);
+            String contactName = extractContactName(inputText);
             if (!contactName.isEmpty()) {
                 entities.put("contact", contactName);
             }
             
             // Extract time expression
-            String timeExpr = extractTimeExpression(text);
+            String timeExpr = extractTimeExpression(inputText);
             if (!timeExpr.isEmpty()) {
                 entities.put("time", timeExpr);
             }
             
             // Extract message content
-            String message = extractMessage(text);
-            if (!message.isEmpty()) {
-                entities.put("message", message);
+            String messageContent = extractMessageContent(inputText);
+            if (!messageContent.isEmpty()) {
+                entities.put("message", messageContent);
             }
             
         } catch (Exception e) {
@@ -192,71 +190,72 @@ public class OpenPhoneModel {
         
         return entities;
     }
-
-    /**
-     * Extracts contact name from text
-     */
-    private String extractContactName(String text) {
-        // This would use more sophisticated NLP in a real implementation
-        // For now, we'll use simple pattern matching
+    
+    private String extractContactName(String inputText) {
+        // Look for common Egyptian contact references
+        if (inputText.contains("mama") || inputText.contains("mom") || inputText.contains("ummy") || 
+            inputText.contains("amy") || inputText.contains("ami") || inputText.contains("amma")) {
+            return "Mother";
+        } else if (inputText.contains("baba") || inputText.contains("dad") || inputText.contains("aby") || 
+                   inputText.contains("abi") || inputText.contains("3ammo")) {
+            return "Father";
+        } else if (inputText.contains("doctor") || inputText.contains("doktor") || 
+                   inputText.contains("daktora") || inputText.contains("doktora")) {
+            return "Doctor";
+        } else if (inputText.contains("sister") || inputText.contains("sista") || 
+                   inputText.contains("okhty") || inputText.contains("ukhty")) {
+            return "Sister";
+        } else if (inputText.contains("brother") || inputText.contains("bro") || 
+                   inputText.contains("akh") || inputText.contains("akhy")) {
+            return "Brother";
+        }
         
-        // Look for patterns like "اتصل بـ [name]" or "كلم [name]"
-        if (text.contains("اتصل ب")) {
-            int startIndex = text.indexOf("اتصل ب") + 5;
-            if (startIndex < text.length()) {
-                String remaining = text.substring(startIndex).trim();
-                // Extract first word after the connector
-                String[] words = remaining.split("\\s+");
-                if (words.length > 0) {
-                    return words[0].replaceAll("[^\\p{L}\\s]", ""); // Keep only letters and spaces
-                }
-            }
-        } else if (text.contains("كلم ")) {
-            int startIndex = text.indexOf("كلم ") + 4;
-            if (startIndex < text.length()) {
-                String remaining = text.substring(startIndex).trim();
-                String[] words = remaining.split("\\s+");
-                if (words.length > 0) {
-                    return words[0].replaceAll("[^\\p{L}\\s]", "");
-                }
-            }
-        } else if (text.contains("رن على ")) {
-            int startIndex = text.indexOf("رن على ") + 7;
-            if (startIndex < text.length()) {
-                String remaining = text.substring(startIndex).trim();
-                String[] words = remaining.split("\\s+");
-                if (words.length > 0) {
-                    return words[0].replaceAll("[^\\p{L}\\s]", "");
+        // Look for generic contact names in the text
+        // This is a simplified extraction - in reality, this would use more sophisticated NLP
+        String[] words = inputText.split("\\s+");
+        for (int i = 0; i < words.length; i++) {
+            if ((words[i].equals("call") || words[i].equals("connect") || words[i].equals("etasel") || 
+                 words[i].equals("klm") || words[i].equals("rn")) && i + 1 < words.length) {
+                // Next word might be the contact name
+                String nextWord = words[i + 1];
+                if (!nextWord.equals("on") && !nextWord.equals("with") && !nextWord.equals("to") &&
+                    !nextWord.equals("3la") && !nextWord.equals("ma3a") && !nextWord.equals("le")) {
+                    return nextWord;
                 }
             }
         }
         
         return "";
     }
-
-    /**
-     * Extracts time expression from text
-     */
-    private String extractTimeExpression(String text) {
-        // Simple extraction of time-related phrases
-        if (text.contains("الصبح") || text.contains("الصباح")) return "الصباح";
-        if (text.contains("الظهر")) return "الظهر";
-        if (text.contains("المساء")) return "المساء";
-        if (text.contains("الليل")) return "الليل";
-        if (text.contains("بكرة") || text.contains("غدا")) return "غدا";
-        if (text.contains("بعد شوية") || text.contains("بعد قليل")) return "لاحقا";
-        
-        // Look for specific times like "الساعة 8"
-        if (text.contains("الساعة")) {
-            int startIndex = text.indexOf("الساعة") + 6;
-            if (startIndex < text.length()) {
-                String remaining = text.substring(startIndex).trim();
-                String[] words = remaining.split("\\s+");
-                if (words.length > 0) {
-                    // Extract the time number
-                    String timeNum = words[0].replaceAll("[^0-9]", "");
-                    if (!timeNum.isEmpty()) {
-                        return "الساعة " + timeNum;
+    
+    private String extractTimeExpression(String inputText) {
+        // Look for time expressions
+        if (inputText.contains("bakra") || inputText.contains("bokra") || inputText.contains("tomorrow") || 
+            inputText.contains("ghadan")) {
+            if (inputText.contains("sobh") || inputText.contains("sob7") || inputText.contains("morning") || 
+                inputText.contains("almsa2")) {
+                return "tomorrow morning";
+            } else if (inputText.contains("masa2") || inputText.contains("msa2") || inputText.contains("evening") || 
+                       inputText.contains("3esha")) {
+                return "tomorrow evening";
+            } else if (inputText.contains("zuhr") || inputText.contains("zohr") || inputText.contains("noon") || 
+                       inputText.contains("alzohr")) {
+                return "tomorrow noon";
+            } else {
+                return "tomorrow";
+            }
+        } else if (inputText.contains("now") || inputText.contains("dalo2ty") || inputText.contains("dlw2ty") || 
+                   inputText.contains("ana")) {
+            return "now";
+        } else if (inputText.contains("after") || inputText.contains("ba3d") || inputText.contains("bet")) {
+            // Extract time after expression
+            String[] words = inputText.split("\\s+");
+            for (int i = 0; i < words.length; i++) {
+                if (words[i].equals("after") || words[i].equals("ba3d") || words[i].equals("bet")) {
+                    if (i + 2 < words.length) {
+                        return "after " + words[i + 1] + " " + words[i + 2]; // e.g., "after 2 hours"
+                    } else if (i + 1 < words.length) {
+                        return "after " + words[i + 1]; // e.g., "after hour"
                     }
                 }
             }
@@ -264,37 +263,37 @@ public class OpenPhoneModel {
         
         return "";
     }
-
-    /**
-     * Extracts message content from text
-     */
-    private String extractMessage(String text) {
-        // Look for patterns like "قول لـ [name] إن [message]"
-        if (text.contains("قول ل")) {
-            int startIndex = text.indexOf("إن ");
-            if (startIndex != -1) {
-                startIndex += 2; // Skip "إن "
-                if (startIndex < text.length()) {
-                    return text.substring(startIndex).trim();
+    
+    private String extractMessageContent(String inputText) {
+        // Look for message content after keywords like "tell", "say", "message"
+        String[] keywords = {"tell", "say", "message", "qol", "kalam", "rsala", "b3t"};
+        for (String keyword : keywords) {
+            int idx = inputText.indexOf(keyword);
+            if (idx != -1) {
+                // Extract everything after the keyword
+                String message = inputText.substring(idx + keyword.length()).trim();
+                
+                // Remove common connectors
+                if (message.startsWith("to") || message.startsWith("for") || message.startsWith("le") || 
+                    message.startsWith("li")) {
+                    int spaceIdx = message.indexOf(' ');
+                    if (spaceIdx != -1) {
+                        message = message.substring(spaceIdx + 1).trim();
+                    }
                 }
-            }
-        } else if (text.contains("ابعت ") && text.contains("قال")) {
-            int startIndex = text.indexOf("قال");
-            if (startIndex != -1) {
-                startIndex += 3; // Skip "قال"
-                if (startIndex < text.length()) {
-                    return text.substring(startIndex).trim();
+                
+                // Only return if it seems like actual message content
+                if (message.length() > 3 && !message.contains("call") && !message.contains("connect")) {
+                    return message;
                 }
             }
         }
         
         return "";
     }
-
-    /**
-     * Calculates confidence based on text analysis
-     */
-    private float calculateConfidence(String text, String intent) {
+    
+    private float calculateConfidence(String inputText, String intent) {
+        // Calculate confidence based on various factors
         float baseConfidence = 0.5f; // Base confidence
         
         // Increase confidence if we found a clear intent
@@ -302,43 +301,78 @@ public class OpenPhoneModel {
             baseConfidence += 0.3f;
         }
         
-        // Increase confidence if text contains known Egyptian dialect patterns
-        if (text.contains("يا كبير") || text.contains("يا صاحبي") || 
-            text.contains("دلوقتي") || text.contains("بكرة") || 
-            text.contains("امبارح") || text.contains("النهارده")) {
+        // Increase confidence if we found entities
+        JSONObject entities = extractEntities(inputText);
+        try {
+            if (entities.length() > 0) {
+                baseConfidence += 0.1f * entities.length();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting entity count", e);
+        }
+        
+        // Increase confidence if the input contains common Egyptian dialect terms
+        if (containsEgyptianTerms(inputText)) {
             baseConfidence += 0.1f;
         }
         
         // Cap confidence at 0.95
         return Math.min(baseConfidence, 0.95f);
     }
-
-    /**
-     * Creates a fallback result when analysis fails
-     */
-    private JSONObject createFallbackResult(String text) {
-        JSONObject result = new JSONObject();
-
-        try {
-            result.put("intent", "UNKNOWN");
-            result.put("entities", new JSONObject());
-            result.put("confidence", 0.1f); // Low confidence for fallback
-        } catch (Exception e) {
-            Log.e(TAG, "Error creating fallback result", e);
+    
+    private boolean containsAnyKeyword(String text, String[] keywords) {
+        String lowerText = text.toLowerCase();
+        for (String keyword : keywords) {
+            if (lowerText.contains(keyword.toLowerCase())) {
+                return true;
+            }
         }
-
-        return result;
+        return false;
     }
-
+    
+    private boolean containsEgyptianTerms(String text) {
+        String[] egyptianTerms = {
+            "ya kabir", "ya sa7bi", "delwa2ty", "bokra", "enbar7", "alnaharda", 
+            "3ayez", "3ayza", "fa7t", "fatya", "ngda", "estghatha", "tawari"
+        };
+        
+        String lowerText = text.toLowerCase();
+        for (String term : egyptianTerms) {
+            if (lowerText.contains(term)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private JSONObject createErrorResult(String errorMessage) {
+        JSONObject errorResult = new JSONObject();
+        try {
+            errorResult.put("intent", "ERROR");
+            errorResult.put("entities", new JSONObject());
+            errorResult.put("confidence", 0.0f);
+            errorResult.put("error_message", errorMessage);
+        } catch (Exception e) {
+            Log.e(TAG, "Error creating error result", e);
+        }
+        return errorResult;
+    }
+    
     /**
      * Unloads the model and frees resources
      */
     public void unload() {
-        Log.i(TAG, "Unloading OpenPhone model");
-        if (openPhoneInstance != null) {
-            openPhoneInstance.unload();
-            openPhoneInstance = null;
+        if (pytorchModel != null) {
+            // In a real implementation, this would unload the PyTorch model
+            // pytorchModel.close();
+            pytorchModel = null;
         }
+        
         isLoaded = false;
+        Log.i(TAG, "OpenPhone model unloaded");
+    }
+    
+    public boolean isLoaded() {
+        return isLoaded;
     }
 }
