@@ -164,9 +164,48 @@ public class SeniorModeManager {
         config.getMedicationReminders().add(reminder);
         saveConfigToPreferences();
         
-        // Schedule the reminder
-        // In a real implementation, this would use AlarmManager or WorkManager
+        // Schedule the reminder using AlarmManager
+        scheduleMedicationReminder(reminder);
         Log.i(TAG, "Medication reminder added: " + reminder.getMedicationName());
+    }
+
+    /**
+     * Schedules a medication reminder using AlarmManager
+     */
+    private void scheduleMedicationReminder(MedicationReminder reminder) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+        // Create intent for the medication reminder
+        Intent intent = new Intent(context, MedicationReceiver.class);
+        intent.setAction("MEDICATION_REMINDER");
+        intent.putExtra("medication_name", reminder.getMedicationName());
+        intent.putExtra("dosage", reminder.getDosage());
+
+        // Create unique request code for this reminder
+        int requestCode = reminder.getMedicationName().hashCode();
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        // Set the alarm
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                reminder.getTimeInMillis(),
+                pendingIntent
+            );
+        } else {
+            alarmManager.setExact(
+                AlarmManager.RTC_WAKEUP,
+                reminder.getTimeInMillis(),
+                pendingIntent
+            );
+        }
+
+        Log.i(TAG, "Medication reminder scheduled for: " + new Date(reminder.getTimeInMillis()));
     }
     
     public List<MedicationReminder> getMedicationReminders() {

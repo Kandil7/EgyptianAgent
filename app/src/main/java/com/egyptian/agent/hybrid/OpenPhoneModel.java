@@ -139,13 +139,40 @@ public class OpenPhoneModel {
         @Override
         public NDList processInput(TranslatorContext ctx, String input) {
             // Process the input text for the model
-            // Tokenize the input text
+            // Tokenize the input text using the BERT tokenizer
             ai.djl.modality.nlp.DefaultVocabulary vocab = tokenizer.getVocabulary();
 
-            // In a real implementation, this would properly tokenize the input
-            // for the PyTorch model, but for now we'll return a dummy tensor
-            NDArray inputIds = ctx.getNDManager().create(new long[]{1, 2, 3, 4, 5}, new Shape(1, 5));
-            return new NDList(inputIds);
+            // Properly tokenize the input for the PyTorch model
+            // First normalize the Egyptian dialect
+            String normalizedInput = com.egyptian.agent.stt.EgyptianNormalizer.normalize(input);
+
+            // Tokenize the input
+            java.util.List<String> tokens = tokenizer.tokenize(normalizedInput);
+
+            // Convert tokens to IDs
+            long[] tokenIds = new long[tokens.size()];
+            for (int i = 0; i < tokens.size(); i++) {
+                String token = tokens.get(i);
+                Long tokenId = vocab.getIndex(token);
+                tokenIds[i] = tokenId != null ? tokenId : vocab.getIndex("[UNK]"); // Use unknown token if not found
+            }
+
+            // Add special tokens if needed (e.g., [CLS] at start, [SEP] at end)
+            long[] inputIds = new long[tokenIds.length + 2];
+            inputIds[0] = vocab.getIndex("[CLS]"); // Classification token
+            System.arraycopy(tokenIds, 0, inputIds, 1, tokenIds.length);
+            inputIds[inputIds.length - 1] = vocab.getIndex("[SEP]"); // Separator token
+
+            // Create attention mask (all 1s for real tokens, 0s for padding if needed)
+            long[] attentionMask = new long[inputIds.length];
+            java.util.Arrays.fill(attentionMask, 1L);
+
+            // Create tensors for the model
+            NDArray inputIdsTensor = ctx.getNDManager().create(inputIds, new Shape(1, inputIds.length));
+            NDArray attentionMaskTensor = ctx.getNDManager().create(attentionMask, new Shape(1, attentionMask.length));
+
+            // Return the input tensors
+            return new NDList(inputIdsTensor, attentionMaskTensor);
         }
     }
     

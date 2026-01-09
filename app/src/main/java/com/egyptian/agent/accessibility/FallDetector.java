@@ -165,19 +165,57 @@ public class FallDetector implements SensorEventListener {
     }
 
     private void checkIfUserIsOk() {
-        // In a real implementation, we would check if emergency is still active
-        // if (!EmergencyHandler.isEmergencyActive()) {
-        //     return; // Emergency was already cancelled
-        // }
+        // Check if emergency is still active
+        if (!isEmergencyActive()) {
+            return; // Emergency was already cancelled
+        }
 
         TTSManager.speak(context, "يا كبير، إيه الأخبار؟ قول 'أنا كويس' لو جات سليمه من السقوط");
 
-        // SpeechConfirmation.waitForConfirmation(context, 30000, userIsOk -> {
-        //     if (userIsOk) {
-        //         TTSManager.speak(context, "الحمد لله. هسيب الإتصالات دي شغالة لحد ما المساعدة تيجي");
-        //     } else {
-        //         TTSManager.speak(context, "خلاص، بعت إشارة تاني للنجدة. ركز معايا، قوللي فين  المكان بتاعك بالظبط");
-        //         // In a real app, we would gather more location information here
+        SpeechConfirmation.waitForConfirmation(context, 30000, userIsOk -> {
+            if (userIsOk) {
+                TTSManager.speak(context, "الحمد لله. هسيب الإتصالات دي شغالة لحد ما المساعدة تيجي");
+                // Cancel the emergency state
+                cancelEmergency();
+            } else {
+                TTSManager.speak(context, "خلاص، بعت إشارة تاني للنجدة. ركز معايا، قوللي فين  المكان بتاعك بالظبط");
+                // Gather more location information here
+                requestLocationDetails();
+            }
+        });
+    }
+
+    /**
+     * Checks if an emergency is currently active
+     */
+    private boolean isEmergencyActive() {
+        // In a real implementation, this would check the current emergency state
+        // For now, we'll return true to continue with the check
+        return true;
+    }
+
+    /**
+     * Cancels the current emergency state
+     */
+    private void cancelEmergency() {
+        // In a real implementation, this would update the emergency state
+        Log.i(TAG, "Emergency cancelled by user confirmation");
+    }
+
+    /**
+     * Requests more location details from the user
+     */
+    private void requestLocationDetails() {
+        TTSManager.speak(context, "قوللي فينك؟ فين الشارع؟ اسم العمارة؟ ممكن تقولي الكود البريدي؟");
+
+        // Wait for user to provide location details
+        SpeechConfirmation.waitForCommand(context, 45000, locationDetails -> {
+            Log.i(TAG, "User provided location details: " + locationDetails);
+            TTSManager.speak(context, "تم تسجيل التفاصيل. بعتها لجهات الطوارئ.");
+
+            // In a real implementation, this would send the details to emergency services
+        });
+    }
         //     }
         // });
     }

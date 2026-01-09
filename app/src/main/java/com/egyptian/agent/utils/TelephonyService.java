@@ -20,6 +20,7 @@ import java.util.List;
 public class TelephonyService implements TelephonyServiceInterface {
     private static final String TAG = "TelephonyService";
     private Context context;
+    private android.telephony.PhoneStateListener phoneStateListener;
 
     public TelephonyService() {
         // Default constructor
@@ -116,9 +117,40 @@ public class TelephonyService implements TelephonyServiceInterface {
 
     @Override
     public void setCallStateListener(CallStateListener listener) {
-        // In a real implementation, this would register a listener for call state changes
-        // This typically involves using a PhoneStateListener with TelephonyManager
-        Log.d(TAG, "Call state listener set (implementation would register PhoneStateListener)");
+        // Register a listener for call state changes using PhoneStateListener
+        if (telephonyManager != null) {
+            telephonyManager.listen(phoneStateListener = new android.telephony.PhoneStateListener() {
+                @Override
+                public void onCallStateChanged(int state, String phoneNumber) {
+                    super.onCallStateChanged(state, phoneNumber);
+
+                    switch (state) {
+                        case TelephonyManager.CALL_STATE_IDLE:
+                            Log.d(TAG, "Call state: IDLE");
+                            if (listener != null) {
+                                listener.onCallStateChanged(CallState.IDLE, phoneNumber);
+                            }
+                            break;
+                        case TelephonyManager.CALL_STATE_OFFHOOK:
+                            Log.d(TAG, "Call state: OFFHOOK");
+                            if (listener != null) {
+                                listener.onCallStateChanged(CallState.OFFHOOK, phoneNumber);
+                            }
+                            break;
+                        case TelephonyManager.CALL_STATE_RINGING:
+                            Log.d(TAG, "Call state: RINGING");
+                            if (listener != null) {
+                                listener.onCallStateChanged(CallState.RINGING, phoneNumber);
+                            }
+                            break;
+                    }
+                }
+            }, android.telephony.PhoneStateListener.LISTEN_CALL_STATE);
+
+            Log.d(TAG, "Call state listener registered successfully");
+        } else {
+            Log.e(TAG, "Cannot register call state listener: telephony manager is null");
+        }
     }
 
     // Inner class for call log entries

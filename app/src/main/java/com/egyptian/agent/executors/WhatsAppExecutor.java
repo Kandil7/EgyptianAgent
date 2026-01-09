@@ -349,9 +349,77 @@ public class WhatsAppExecutor {
     private static void handleContactNotFound(Context context, String contactName) {
         TTSManager.speak(context, "مش لاقي " + contactName + " في جهات الاتصال. قول 'أضف' عشان تضيف الرقم الجديد");
 
-        // In a real implementation, we would listen for add contact command
-        // For this demo, we'll just provide instructions
-        TTSManager.speak(context, "عايز تضيف جهة اتصال جديدة؟ قول 'أضف' واتبع التعليمات");
+        // Listen for add contact command
+        SpeechConfirmation.waitForCommand(context, 15000, command -> {
+            if (command.contains("أضف") || command.contains("اضيف") || command.contains("add")) {
+                TTSManager.speak(context, "قول الرقم الجديد");
+                SpeechConfirmation.waitForCommand(context, 30000, numberCommand -> {
+                    String newNumber = extractNumber(numberCommand);
+                    if (!newNumber.isEmpty()) {
+                        // Add the new contact to the device
+                        boolean success = addContactToPhone(context, contactName, newNumber);
+                        if (success) {
+                            TTSManager.speak(context, "تم حفظ الرقم الجديد لـ " + contactName);
+
+                            // Format number for WhatsApp and send message
+                            String formattedNumber = formatNumberForWhatsApp(newNumber);
+                            sendMessage(context, formattedNumber, "تمت إضافة جهة الاتصال الجديدة");
+                        } else {
+                            TTSManager.speak(context, "حصل مشكلة في حفظ الرقم. حاول تاني");
+                        }
+                    } else {
+                        TTSManager.speak(context, "متعرفش الرقم. قول 'يا كبير' وانا أساعدك");
+                    }
+                });
+            } else {
+                TTSManager.speak(context, "ما فهمتش. قول 'يا كبير' لو عايز تبعت رسالة لحد تاني");
+            }
+        });
+    }
+
+    /**
+     * Adds a new contact to the phone
+     */
+    private static boolean addContactToPhone(Context context, String name, String number) {
+        try {
+            // Check for contacts permission
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+                TTSManager.speak(context, "محتاج إذن لحفظ جهات الاتصال");
+                return false;
+            }
+
+            // Create a new contact
+            ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+
+            ops.add(ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
+                .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
+                .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, null)
+                .build());
+
+            // Name
+            ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name)
+                .build());
+
+            // Phone number
+            ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, number)
+                .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_HOME)
+                .build());
+
+            // Execute the operations
+            context.getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+            return true;
+        } catch (Exception e) {
+            Log.e(TAG, "Error adding contact", e);
+            CrashLogger.logError(context, e);
+            return false;
+        }
     }
 
     /**

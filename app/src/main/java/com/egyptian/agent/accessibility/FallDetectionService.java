@@ -90,13 +90,38 @@ public class FallDetectionService extends Service implements SensorEventListener
     }
 
     private void handlePotentialFall(double acceleration) {
-        // In a real implementation, this would trigger appropriate actions
-        // such as alerting emergency contacts or asking the user if they're OK
-        
+        // Trigger appropriate actions for potential fall
         Log.i(TAG, "Handling potential fall with acceleration: " + acceleration);
-        
-        // Example: Alert the user or trigger emergency protocols
-        // This would involve calling methods from EmergencyHandler
+
+        // Vibrate to alert the user
+        VibrationManager.vibrateEmergency(this);
+
+        // Speak an alert to the user
+        TTSManager.speak(this, "يا كبير، لقيت إنك وقعت؟ لو مفيش رد هيتم الاتصال بجهات الطوارئ خلال 10 ثواني");
+
+        // Start a countdown timer to trigger emergency if no response
+        new android.os.Handler(Looper.getMainLooper()).postDelayed(() -> {
+            // Check if user responded (this would be implemented with voice recognition)
+            boolean userResponded = checkUserResponse();
+
+            if (!userResponded) {
+                Log.e(TAG, "No response after potential fall - triggering emergency");
+                // Trigger emergency response
+                com.egyptian.agent.executors.EmergencyHandler.trigger(this, true); // true indicates fall-triggered
+            } else {
+                Log.i(TAG, "User responded after potential fall - no emergency needed");
+            }
+        }, 10000); // 10 seconds to respond
+    }
+
+    /**
+     * Checks if the user has responded to the fall alert
+     * In a real implementation, this would use voice recognition to detect "I'm fine" or similar
+     */
+    private boolean checkUserResponse() {
+        // For now, return false to simulate no response
+        // In a real implementation, this would check for user voice response
+        return false;
     }
 
     @Override

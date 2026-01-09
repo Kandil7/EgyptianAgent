@@ -164,10 +164,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateServiceStatus() {
-        // In a real implementation, we would check if the service is actually running
-        // For now, we'll just update the UI
+        // Check if the voice service is actually running
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        boolean isServiceRunning = false;
+        if (manager != null) {
+            for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+                if ("com.egyptian.agent.core.VoiceService".equals(service.service.getClassName())) {
+                    isServiceRunning = true;
+                    break;
+                }
+            }
+        }
+
         if (statusTextView != null) {
-            statusTextView.setText("الوكيل المصري جاهز. قول \"يا كبير\" أو \"يا صاحبي\" لتفعيله.");
+            if (isServiceRunning) {
+                statusTextView.setText("الوكيل المصري جاهز. قول \"يا كبير\" أو \"يا صاحبي\" لتفعيله.");
+                statusTextView.setTextColor(ContextCompat.getColor(this, android.R.color.holo_green_dark));
+            } else {
+                statusTextView.setText("الوكيل المصري غير مفعل. يرجى التأكد من تشغيل الخدمة.");
+                statusTextView.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark));
+
+                // Try to start the service
+                Intent serviceIntent = new Intent(this, VoiceService.class);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(serviceIntent);
+                } else {
+                    startService(serviceIntent);
+                }
+            }
         }
     }
 

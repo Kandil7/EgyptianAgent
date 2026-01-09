@@ -44,34 +44,195 @@ public class OpenPhone {
     }
     
     public OpenPhoneResult process(String prompt) {
-        // Mock implementation - in real scenario this would call the actual OpenPhone model
-        return new OpenPhoneResult(mockProcess(prompt));
+        // In a real implementation, this would call the actual OpenPhone model
+        // For now, we'll implement a more sophisticated mock that better handles Egyptian dialect
+        return new OpenPhoneResult(processReal(prompt));
     }
-    
-    private String mockProcess(String prompt) {
-        // This is a mock implementation that simulates the OpenPhone model response
-        // In a real implementation, this would call the actual model
-        
-        // For demo purposes, we'll create a basic response based on the prompt
-        if (prompt.contains("اتصل") || prompt.contains("كلم") || prompt.contains("رن")) {
-            // Detect call intent
-            return "{\"intent\": \"CALL_CONTACT\", \"entities\": {\"contact\": \"person\"}, \"confidence\": 0.85}";
-        } else if (prompt.contains("واتساب") || prompt.contains("ابعت") || prompt.contains("رساله")) {
-            // Detect WhatsApp intent
-            return "{\"intent\": \"SEND_WHATSAPP\", \"entities\": {\"contact\": \"person\", \"message\": \"message\"}, \"confidence\": 0.82}";
-        } else if (prompt.contains("انبهني") || prompt.contains("نبهني") || prompt.contains("ذكرني")) {
-            // Detect alarm intent
-            return "{\"intent\": \"SET_ALARM\", \"entities\": {\"time\": \"time\"}, \"confidence\": 0.78}";
-        } else if (prompt.contains("الوقت") || prompt.contains("الساعه") || prompt.contains("كام")) {
-            // Detect time intent
-            return "{\"intent\": \"READ_TIME\", \"entities\": {}, \"confidence\": 0.95}";
-        } else if (prompt.contains("Emergency") || prompt.contains("ngda") || prompt.contains("estghatha")) {
-            // Detect emergency intent
-            return "{\"intent\": \"EMERGENCY\", \"entities\": {}, \"confidence\": 0.98}";
-        } else {
-            // Unknown intent
-            return "{\"intent\": \"UNKNOWN\", \"entities\": {}, \"confidence\": 0.30}";
+
+    private String processReal(String prompt) {
+        // This would call the actual OpenPhone model in a real implementation
+        // For now, we'll implement a more sophisticated processing that handles Egyptian dialect better
+
+        // Normalize the prompt using Egyptian dialect rules
+        String normalizedPrompt = com.egyptian.agent.stt.EgyptianNormalizer.normalize(prompt);
+
+        // Perform intent detection with more sophisticated rules
+        com.egyptian.agent.nlp.IntentResult result = detectIntent(normalizedPrompt);
+
+        // Convert to JSON format
+        return formatAsJson(result);
+    }
+
+    private com.egyptian.agent.nlp.IntentResult detectIntent(String normalizedPrompt) {
+        com.egyptian.agent.nlp.IntentResult result = new com.egyptian.agent.nlp.IntentResult();
+
+        // Enhanced detection logic for Egyptian dialect
+        if (containsAny(normalizedPrompt, new String[]{"call", "connect", "ring", "contact", "tel", "اتصل", "كلم", "رن", "بعت", "ابعت", "wasl"})) {
+            result.setIntentType(com.egyptian.agent.core.IntentType.CALL_CONTACT);
+            result.setConfidence(0.85f);
+
+            // Extract contact name
+            String contact = extractContactName(normalizedPrompt);
+            if (!contact.isEmpty()) {
+                result.setEntity("contact", contact);
+            }
         }
+        else if (containsAny(normalizedPrompt, new String[]{"whatsapp", "message", "send", "whats", "wts", "rsala", "b3t", "ab3t", "kalam"})) {
+            result.setIntentType(com.egyptian.agent.core.IntentType.SEND_WHATSAPP);
+            result.setConfidence(0.82f);
+
+            // Extract contact and message
+            String contact = extractContactName(normalizedPrompt);
+            if (!contact.isEmpty()) {
+                result.setEntity("contact", contact);
+            }
+
+            String message = extractMessage(normalizedPrompt);
+            if (!message.isEmpty()) {
+                result.setEntity("message", message);
+            }
+        }
+        else if (containsAny(normalizedPrompt, new String[]{"alarm", "remind", "timer", "notify", "think", "nbhny", "anbhny", "zkry", "thker", "mr"})) {
+            result.setIntentType(com.egyptian.agent.core.IntentType.SET_ALARM);
+            result.setConfidence(0.78f);
+
+            // Extract time
+            String time = extractTime(normalizedPrompt);
+            if (!time.isEmpty()) {
+                result.setEntity("time", time);
+            }
+        }
+        else if (containsAny(normalizedPrompt, new String[]{"time", "hour", "clock", "sa3a", "kam", "alwqt", "alsaa", "cam"})) {
+            result.setIntentType(com.egyptian.agent.core.IntentType.READ_TIME);
+            result.setConfidence(0.95f);
+        }
+        else if (containsAny(normalizedPrompt, new String[]{" emergencies", "emergency", "ngda", "estghatha", "tawari", "escaf", "police", "najda", "استغاثة", "نجدة", "طوارئ"})) {
+            result.setIntentType(com.egyptian.agent.core.IntentType.EMERGENCY);
+            result.setConfidence(0.98f);
+        }
+        else {
+            result.setIntentType(com.egyptian.agent.core.IntentType.UNKNOWN);
+            result.setConfidence(0.30f);
+        }
+
+        return result;
+    }
+
+    private boolean containsAny(String text, String[] keywords) {
+        String lowerText = text.toLowerCase();
+        for (String keyword : keywords) {
+            if (lowerText.contains(keyword.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String extractContactName(String text) {
+        // Look for common Egyptian contact references
+        if (containsAny(text, new String[]{"mama", "mom", "ummy", "amy", "ami", "amma", "ماما", "مامي", "엄마"})) {
+            return "Mother";
+        } else if (containsAny(text, new String[]{"baba", "dad", "aby", "abi", "3ammo", "بابا", "أبي"})) {
+            return "Father";
+        } else if (containsAny(text, new String[]{"doctor", "doktor", "daktora", "doktora", "دكتور", "دكتورة"})) {
+            return "Doctor";
+        } else if (containsAny(text, new String[]{"sister", "sista", "okhty", "ukhty", "أخت", "اخت"})) {
+            return "Sister";
+        } else if (containsAny(text, new String[]{"brother", "bro", "akh", "akhy", "أخ", "اخ"})) {
+            return "Brother";
+        }
+
+        // Look for generic contact names in the text
+        String[] words = text.split("\\s+");
+        for (int i = 0; i < words.length; i++) {
+            if (containsAny(words[i], new String[]{"call", "connect", "اتصل", "كلم", "rn", "klm", "b3t"}) && i + 1 < words.length) {
+                // Next word might be the contact name
+                String nextWord = words[i + 1];
+                if (!containsAny(nextWord, new String[]{"on", "with", "to", "3la", "ma3a", "le", "ال", "ل", "في"})) {
+                    return nextWord;
+                }
+            }
+        }
+
+        return "";
+    }
+
+    private String extractMessage(String text) {
+        // Look for message content after keywords like "tell", "say", "message"
+        String[] keywords = {"tell", "say", "message", "qol", "kalam", "rsala", "b3t", "قول", "كلم", "رساله"};
+        for (String keyword : keywords) {
+            int idx = text.indexOf(keyword);
+            if (idx != -1) {
+                // Extract everything after the keyword
+                String message = text.substring(idx + keyword.length()).trim();
+
+                // Remove common connectors
+                if (message.startsWith("to") || message.startsWith("for") || message.startsWith("le") ||
+                    message.startsWith("li")) {
+                    int spaceIdx = message.indexOf(' ');
+                    if (spaceIdx != -1) {
+                        message = message.substring(spaceIdx + 1).trim();
+                    }
+                }
+
+                // Only return if it seems like actual message content
+                if (message.length() > 3 && !containsAny(message, new String[]{"call", "connect", "اتصل", "كلم"})) {
+                    return message;
+                }
+            }
+        }
+
+        return "";
+    }
+
+    private String extractTime(String text) {
+        // Look for time expressions
+        if (containsAny(text, new String[]{"bakra", "bokra", "tomorrow", "غدا", "بكرة"})) {
+            if (containsAny(text, new String[]{"sobh", "sob7", "morning", "الصبح", "الصباح"})) {
+                return "tomorrow morning";
+            } else if (containsAny(text, new String[]{"masa2", "msa2", "evening", "المساء", "العشية"})) {
+                return "tomorrow evening";
+            } else if (containsAny(text, new String[]{"zuhr", "zohr", "noon", "الظهر"})) {
+                return "tomorrow noon";
+            } else {
+                return "tomorrow";
+            }
+        } else if (containsAny(text, new String[]{"now", "dalo2ty", "dlw2ty", "ana", "دلوقتي", "الآن"})) {
+            return "now";
+        } else if (containsAny(text, new String[]{"after", "ba3d", "bet", "بعد"})) {
+            // Extract time after expression
+            String[] words = text.split("\\s+");
+            for (int i = 0; i < words.length; i++) {
+                if (containsAny(words[i], new String[]{"after", "ba3d", "bet", "بعد"})) {
+                    if (i + 2 < words.length) {
+                        return "after " + words[i + 1] + " " + words[i + 2]; // e.g., "after 2 hours"
+                    } else if (i + 1 < words.length) {
+                        return "after " + words[i + 1]; // e.g., "after hour"
+                    }
+                }
+            }
+        }
+
+        return "";
+    }
+
+    private String formatAsJson(com.egyptian.agent.nlp.IntentResult result) {
+        StringBuilder json = new StringBuilder();
+        json.append("{");
+        json.append("\"intent\": \"").append(result.getIntentType().toString()).append("\",");
+        json.append("\"entities\": {");
+
+        boolean first = true;
+        for (String key : result.getAllEntities().keySet()) {
+            if (!first) json.append(",");
+            json.append("\"").append(key).append("\": \"").append(result.getEntity(key, "")).append("\"");
+            first = false;
+        }
+        json.append("},");
+        json.append("\"confidence\": ").append(result.getConfidence());
+        json.append("}");
+
+        return json.toString();
     }
     
     public void unload() {
