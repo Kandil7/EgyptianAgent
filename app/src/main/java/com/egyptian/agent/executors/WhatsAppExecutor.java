@@ -1,5 +1,6 @@
 package com.egyptian.agent.executors;
 
+import android.content.ContentProviderOperation;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -182,8 +183,7 @@ public class WhatsAppExecutor {
             Exception error = null;
 
             try {
-                // In a real implementation, we would look up the contact's phone number
-                // and then convert it to WhatsApp ID format
+                // Look up the contact's phone number and then convert it to WhatsApp ID format
                 number = searchContacts(context, contactName);
                 if (number != null) {
                     // Format number for WhatsApp (remove leading zeros, add country code)

@@ -335,4 +335,33 @@ public class EmergencyHandler {
         seniorModeEnabled = false;
         Log.d(TAG, "Senior mode disabled for emergency handler");
     }
+
+    /**
+     * Sends location details to emergency contacts
+     */
+    public static void sendLocationDetailsToEmergencyContacts(Context context, String locationDetails) {
+        // Get emergency contacts
+        List<String> emergencyContacts = getEmergencyContacts(context);
+
+        // Check for SMS permission
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS)
+            != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "Missing SEND_SMS permission");
+            return;
+        }
+
+        String message = "Emergency location details: " + locationDetails;
+
+        // Send SMS to each contact
+        for (String contact : emergencyContacts) {
+            try {
+                android.telephony.SmsManager smsManager = android.telephony.SmsManager.getDefault();
+                smsManager.sendTextMessage(contact, null, message, null, null);
+                Log.d(TAG, "Location details sent to " + contact + ": " + message);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to send location details to " + contact, e);
+                CrashLogger.logError(context, e);
+            }
+        }
+    }
 }

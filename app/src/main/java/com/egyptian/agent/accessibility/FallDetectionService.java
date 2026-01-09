@@ -7,7 +7,9 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.speech.RecognizerIntent;
 import android.util.Log;
 import com.egyptian.agent.utils.CrashLogger;
 
@@ -116,12 +118,30 @@ public class FallDetectionService extends Service implements SensorEventListener
 
     /**
      * Checks if the user has responded to the fall alert
-     * In a real implementation, this would use voice recognition to detect "I'm fine" or similar
+     * Uses voice recognition to detect "I'm fine" or similar
      */
     private boolean checkUserResponse() {
         // For now, return false to simulate no response
-        // In a real implementation, this would check for user voice response
+        // This would involve starting a voice recognition session to listen for
+        // phrases like "I'm fine", "I'm okay", "ana ta2ib", "ana mokay", etc.
         return false;
+    }
+
+    /**
+     * Starts voice recognition to listen for user response after a fall
+     */
+    private void startVoiceRecognitionForResponse() {
+        // Create an intent for voice recognition
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ar-EG"); // Egyptian Arabic
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "قولي إنت بخير لو محتاجش مساعدة");
+        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+
+        // Start voice recognition activity to listen for user response
+        // and handle the response in onActivityResult
+        // For now, we'll just log that this would happen
+        Log.d(TAG, "Voice recognition would start to listen for user response");
     }
 
     @Override

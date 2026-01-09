@@ -189,17 +189,29 @@ public class FallDetector implements SensorEventListener {
      * Checks if an emergency is currently active
      */
     private boolean isEmergencyActive() {
-        // In a real implementation, this would check the current emergency state
-        // For now, we'll return true to continue with the check
-        return true;
+        // Check the current emergency state by checking if the emergency service is running
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        if (manager != null) {
+            for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+                if ("com.egyptian.agent.executors.EmergencyHandler".equals(service.service.getClassName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
      * Cancels the current emergency state
      */
     private void cancelEmergency() {
-        // In a real implementation, this would update the emergency state
+        // Update the emergency state
         Log.i(TAG, "Emergency cancelled by user confirmation");
+
+        // Cancel any pending emergency actions
+        if (mainHandler != null) {
+            mainHandler.removeCallbacksAndMessages(null); // Remove all pending callbacks
+        }
     }
 
     /**
@@ -213,8 +225,61 @@ public class FallDetector implements SensorEventListener {
             Log.i(TAG, "User provided location details: " + locationDetails);
             TTSManager.speak(context, "تم تسجيل التفاصيل. بعتها لجهات الطوارئ.");
 
-            // In a real implementation, this would send the details to emergency services
+            // Send the details to emergency services
+            sendLocationDetailsToEmergencyServices(locationDetails);
         });
+    }
+
+    /**
+     * Sends location details to emergency services
+     */
+    private void sendLocationDetailsToEmergencyServices(String locationDetails) {
+        // For now, we'll log it and send to configured emergency contacts
+        Log.i(TAG, "Sending location details to emergency services: " + locationDetails);
+
+        // Get current location if available
+        String currentLocation = getCurrentLocation();
+        String fullDetails = locationDetails + (currentLocation != null ? " - Current location: " + currentLocation : "");
+
+        // Send to emergency contacts
+        com.egyptian.agent.executors.EmergencyHandler.sendLocationDetailsToEmergencyContacts(context, fullDetails);
+    }
+
+    /**
+     * Gets current location if available
+     */
+    private String getCurrentLocation() {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "Location permission not granted");
+            return null;
+        }
+
+        try {
+            android.location.LocationManager locationManager =
+                (android.location.LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+
+            // Get last known location
+            android.location.Location location = locationManager.getLastKnownLocation(
+                android.location.LocationManager.GPS_PROVIDER);
+
+            if (location != null) {
+                return String.format("%.4f, %.4f", location.getLatitude(), location.getLongitude());
+            } else {
+                // Try network provider as fallback
+                location = locationManager.getLastKnownLocation(
+                    android.location.LocationManager.NETWORK_PROVIDER);
+
+                if (location != null) {
+                    return String.format("%.4f, %.4f", location.getLatitude(), location.getLongitude());
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting location", e);
+            com.egyptian.agent.utils.CrashLogger.logError(context, e);
+        }
+
+        return null;
     }
         //     }
         // });
