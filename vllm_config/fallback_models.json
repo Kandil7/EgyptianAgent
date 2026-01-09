@@ -1,0 +1,36 @@
+{
+  "fallback_models": {
+    "primary": {
+      "name": "openphone-3b-local",
+      "path": "model/openphone-3b",
+      "type": "local",
+      "priority": 1,
+      "max_tokens": 2048,
+      "timeout_ms": 30000
+    },
+    "secondary": {
+      "name": "openphone-3b-cloud",
+      "endpoint": "https://api.openphone-llm.com/v1/chat/completions",
+      "type": "remote",
+      "priority": 2,
+      "timeout_ms": 15000,
+      "requires_internet": true
+    },
+    "emergency": {
+      "name": "emergency-keywords",
+      "type": "rule-based",
+      "priority": 3,
+      "timeout_ms": 100,
+      "keywords": ["emergency", "help", "ambulance", "hospital", "doctor", "medicine", "urgent", "danger", "accident", "injury", "pain", "fall", "dizzy", "breathing", "heart", "medicine", "ngeda", "estegatha", "tor2", "tor2 ya kabir", "ya kabir"]
+    }
+  },
+  "fallback_strategy": {
+    "timeout_threshold": 5000,
+    "max_retries": 2,
+    "retry_delay_ms": 1000,
+    "circuit_breaker": {
+      "failure_threshold": 5,
+      "timeout_ms": 60000
+    }
+  }
+}
