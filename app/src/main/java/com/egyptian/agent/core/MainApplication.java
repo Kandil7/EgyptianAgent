@@ -3,6 +3,7 @@ package com.egyptian.agent.core;
 import android.app.Application;
 import android.util.Log;
 import com.egyptian.agent.utils.CrashLogger;
+import com.egyptian.agent.system.SystemPrivilegeManager;
 
 public class MainApplication extends Application {
 
@@ -15,6 +16,9 @@ public class MainApplication extends Application {
 
         // Initialize crash logger
         CrashLogger.registerGlobalExceptionHandler(this);
+
+        // Initialize system privileges via Shizuku
+        SystemPrivilegeManager.initialize(this);
 
         // Initialize TTS engine
         TTSManager.initialize(this);
@@ -33,6 +37,7 @@ public class MainApplication extends Application {
         super.onTerminate();
         // Cleanup resources
         TTSManager.shutdown();
+        SystemPrivilegeManager.cleanup();
         Log.i(TAG, "Egyptian Agent Application terminated");
     }
 }

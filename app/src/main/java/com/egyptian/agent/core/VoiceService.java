@@ -13,6 +13,7 @@ import com.egyptian.agent.hybrid.HybridOrchestrator;
 import com.egyptian.agent.nlp.IntentResult;
 import com.egyptian.agent.utils.CrashLogger;
 import com.egyptian.agent.utils.SystemAppHelper;
+import com.egyptian.agent.system.SystemPrivilegeManager;
 import java.util.*;
 
 public class VoiceService extends Service implements AudioManager.OnAudioFocusChangeListener {
@@ -36,6 +37,14 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "VoiceService created");
+
+        // Check system privileges
+        if (!SystemPrivilegeManager.hasSystemPrivileges()) {
+            Log.w(TAG, "System privileges not available, requesting...");
+            SystemPrivilegeManager.requestSystemPrivileges(this);
+        } else {
+            Log.i(TAG, "System privileges already available");
+        }
 
         // Critical initialization sequence for Honor X6c
         initializeWakeLock();
