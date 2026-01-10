@@ -1,0 +1,2 @@
+Placeholder for OpenPhone-3B model files
+The actual model files would be stored here in a production environment

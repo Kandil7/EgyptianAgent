@@ -1,0 +1,763 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.egyptian.agent"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="28"
+8-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml
+9        android:targetSdkVersion="34" />
+9-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml
+10
+11    <!-- Critical permissions for system app -->
+12    <uses-permission android:name="android.permission.CALL_PHONE" />
+12-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:7:5-69
+12-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:7:22-66
+13    <uses-permission android:name="android.permission.READ_CONTACTS" />
+13-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:8:5-72
+13-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:8:22-69
+14    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+14-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:9:5-72
+14-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:9:22-69
+15    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+15-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:10:5-73
+15-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:10:22-70
+16    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+16-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:11:5-71
+16-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:11:22-68
+17
+18    <!-- Audio permissions -->
+19    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+19-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:14:5-71
+19-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:14:22-68
+20    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+20-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:15:5-80
+20-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:15:22-77
+21
+22    <!-- System-level permissions -->
+23    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+23-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:18:5-78
+23-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:18:22-75
+24    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+24-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:19:5-77
+24-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:19:22-74
+25    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+25-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:20:5-88
+25-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:20:22-85
+26    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SENSORS" />
+26-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:21:5-85
+26-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:21:22-82
+27    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+27-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:22:5-81
+27-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:22:22-78
+28    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+28-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:23:5-75
+28-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:23:22-72
+29    <uses-permission android:name="android.permission.WAKE_LOCK" />
+29-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:24:5-68
+29-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:24:22-65
+30    <uses-permission android:name="android.permission.DEVICE_POWER" />
+30-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:25:5-71
+30-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:25:22-68
+31
+32    <!-- Senior accessibility permissions -->
+33    <uses-permission android:name="android.permission.BODY_SENSORS" />
+33-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:28:5-71
+33-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:28:22-68
+34    <uses-permission android:name="android.permission.VIBRATE" />
+34-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:29:5-66
+34-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:29:22-63
+35    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+35-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:30:5-79
+35-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:30:22-76
+36
+37    <!-- For emergency features -->
+38    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+38-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:33:5-79
+38-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:33:22-76
+39    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+39-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:34:5-81
+39-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:34:22-78
+40    <uses-permission android:name="android.permission.SEND_SMS" />
+40-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:35:5-67
+40-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:35:22-64
+41
+42    <!-- Special permissions for Honor devices -->
+43    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+43-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:38:5-95
+43-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:38:22-92
+44    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+44-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:39:5-40:47
+44-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:39:22-75
+45
+46    <!-- Permissions for OpenPhone model processing -->
+47    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+47-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:43:5-79
+47-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:43:22-76
+48    <uses-permission android:name="android.permission.INTERNET" />
+48-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:44:5-67
+48-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:44:22-64
+49
+50    <!-- Hardware features -->
+51    <uses-feature
+51-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:47:5-88
+52        android:name="android.hardware.microphone"
+52-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:47:19-61
+53        android:required="true" />
+53-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:47:62-85
+54    <uses-feature
+54-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:48:5-99
+55        android:name="android.hardware.sensor.accelerometer"
+55-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:48:19-71
+56        android:required="false" />
+56-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:48:72-96
+57
+58    <permission
+58-->[androidx.core:core:1.12.0] C:\Users\Dell\.gradle\caches\transforms-3\fc798df66139bbd517b2c9b431d25fff\transformed\core-1.12.0\AndroidManifest.xml:22:5-24:47
+59        android:name="com.egyptian.agent.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+59-->[androidx.core:core:1.12.0] C:\Users\Dell\.gradle\caches\transforms-3\fc798df66139bbd517b2c9b431d25fff\transformed\core-1.12.0\AndroidManifest.xml:23:9-81
+60        android:protectionLevel="signature" />
+60-->[androidx.core:core:1.12.0] C:\Users\Dell\.gradle\caches\transforms-3\fc798df66139bbd517b2c9b431d25fff\transformed\core-1.12.0\AndroidManifest.xml:24:9-44
+61
+62    <uses-permission android:name="com.egyptian.agent.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+62-->[androidx.core:core:1.12.0] C:\Users\Dell\.gradle\caches\transforms-3\fc798df66139bbd517b2c9b431d25fff\transformed\core-1.12.0\AndroidManifest.xml:26:5-97
+62-->[androidx.core:core:1.12.0] C:\Users\Dell\.gradle\caches\transforms-3\fc798df66139bbd517b2c9b431d25fff\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
+63    <uses-permission android:name="moe.shizuku.manager.permission.API_V23" />
+63-->[dev.rikka.shizuku:provider:12.1.0] C:\Users\Dell\.gradle\caches\transforms-3\f45dde7a3ddfdf376ef7779fc230375e\transformed\jetified-provider-12.1.0\AndroidManifest.xml:10:5-78
+63-->[dev.rikka.shizuku:provider:12.1.0] C:\Users\Dell\.gradle\caches\transforms-3\f45dde7a3ddfdf376ef7779fc230375e\transformed\jetified-provider-12.1.0\AndroidManifest.xml:10:22-75
+64
+65    <application
+65-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:50:5-200:19
+66        android:name="com.egyptian.agent.core.MainApplication"
+66-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:51:9-45
+67        android:allowBackup="true"
+67-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:52:9-35
+68        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+68-->[androidx.core:core:1.12.0] C:\Users\Dell\.gradle\caches\transforms-3\fc798df66139bbd517b2c9b431d25fff\transformed\core-1.12.0\AndroidManifest.xml:28:18-86
+69        android:debuggable="true"
+70        android:extractNativeLibs="false"
+71        android:icon="@mipmap/ic_launcher"
+71-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:53:9-43
+72        android:label="@string/app_name"
+72-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:54:9-41
+73        android:requestLegacyExternalStorage="true"
+73-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:60:9-52
+74        android:roundIcon="@mipmap/ic_launcher_round"
+74-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:55:9-54
+75        android:sharedUserId="android.uid.system"
+75-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:58:9-50
+76        android:supportsRtl="true"
+76-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:56:9-35
+77        android:testOnly="true"
+78        android:theme="@style/AppTheme"
+78-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:57:9-40
+79        android:usesCleartextTraffic="true" >
+79-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:59:9-44
+80
+81        <!-- Main activity -->
+82        <activity
+82-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:64:9-75:20
+83            android:name="com.egyptian.agent.ui.MainActivity"
+83-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:65:13-44
+84            android:excludeFromRecents="true"
+84-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:68:13-46
+85            android:exported="true"
+85-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:66:13-36
+86            android:launchMode="singleTask"
+86-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:67:13-44
+87            android:taskAffinity=""
+87-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:69:13-36
+88            android:theme="@style/Theme.AppCompat.NoActionBar" >
+88-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:70:13-63
+89            <intent-filter>
+89-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:71:13-74:29
+90                <action android:name="android.intent.action.MAIN" />
+90-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:72:17-69
+90-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:72:25-66
+91
+92                <category android:name="android.intent.category.LAUNCHER" />
+92-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:73:17-77
+92-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:73:27-74
+93            </intent-filter>
+94        </activity>
+95
+96        <!-- Integration test activity -->
+97        <activity
+97-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:78:9-81:74
+98            android:name="com.egyptian.agent.hybrid.IntegrationTestActivity"
+98-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:79:13-59
+99            android:exported="false"
+99-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:80:13-37
+100            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
+100-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:81:13-71
+101
+102        <!-- Voice service (critical component) -->
+103        <service
+103-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:84:9-93:19
+104            android:name="com.egyptian.agent.core.VoiceService"
+104-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:85:13-46
+105            android:enabled="true"
+105-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:86:13-35
+106            android:exported="true"
+106-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:87:13-36
+107            android:foregroundServiceType="microphone|sensors"
+107-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:88:13-63
+108            android:permission="android.permission.BIND_DEVICE_ADMIN" >
+108-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:89:13-70
+109            <intent-filter>
+109-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:90:13-92:29
+110                <action android:name="com.egyptian.agent.action.START_VOICE_SERVICE" />
+110-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:91:17-88
+110-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:91:25-85
+111            </intent-filter>
+112        </service>
+113
+114        <!-- Fall detection service -->
+115        <service
+115-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:96:9-101:19
+116            android:name="com.egyptian.agent.accessibility.FallDetectionService"
+116-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:97:13-63
+117            android:enabled="true"
+117-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:98:13-35
+118            android:exported="false"
+118-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:99:13-37
+119            android:foregroundServiceType="sensors" >
+119-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:100:13-52
+120        </service>
+121
+122        <!-- Boot receiver (start service on boot) -->
+123        <receiver
+123-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:104:9-113:20
+124            android:name="com.egyptian.agent.receivers.BootReceiver"
+124-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:105:13-51
+125            android:enabled="true"
+125-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:106:13-35
+126            android:exported="true" >
+126-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:107:13-36
+127            <intent-filter>
+127-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:108:13-112:29
+128                <action android:name="android.intent.action.BOOT_COMPLETED" />
+128-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:109:17-79
+128-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:109:25-76
+129                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+129-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:110:17-82
+129-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:110:25-79
+130                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+130-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:111:17-82
+130-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:111:25-79
+131            </intent-filter>
+132        </receiver>
+133
+134        <!-- Volume button receiver (for emergency triple-click) -->
+135        <receiver
+135-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:116:9-123:20
+136            android:name="com.egyptian.agent.receivers.VolumeButtonReceiver"
+136-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:117:13-59
+137            android:enabled="true"
+137-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:118:13-35
+138            android:exported="true" >
+138-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:119:13-36
+139            <intent-filter android:priority="1000" >
+139-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:120:13-122:29
+139-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:120:28-51
+140                <action android:name="android.media.VOLUME_CHANGED_ACTION" />
+140-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:121:17-78
+140-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:121:25-75
+141            </intent-filter>
+142        </receiver>
+143
+144        <!-- Emergency follow-up receiver -->
+145        <receiver
+145-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:126:9-133:20
+146            android:name="com.egyptian.agent.executors.EmergencyFollowupReceiver"
+146-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:127:13-64
+147            android:enabled="true"
+147-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:128:13-35
+148            android:exported="true" >
+148-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:129:13-36
+149            <intent-filter>
+149-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:130:13-132:29
+150                <action android:name="com.egyptian.agent.action.EMERGENCY_FOLLOWUP" />
+150-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:131:17-87
+150-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:131:25-84
+151            </intent-filter>
+152        </receiver>
+153
+154        <!-- Medication reminder receiver -->
+155        <receiver
+155-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:136:9-143:20
+156            android:name="com.egyptian.agent.accessibility.MedicationReceiver"
+156-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:137:13-61
+157            android:enabled="true"
+157-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:138:13-35
+158            android:exported="false" >
+158-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:139:13-37
+159            <intent-filter>
+159-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:140:13-142:29
+160                <action android:name="android.intent.action.BOOT_COMPLETED" />
+160-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:109:17-79
+160-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:109:25-76
+161            </intent-filter>
+162        </receiver>
+163
+164        <!-- Saiy-PS SelfAwareService -->
+165        <service
+165-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:146:9-153:19
+166            android:name="com.saiy.android.service.SelfAwareService"
+166-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:147:13-69
+167            android:exported="true"
+167-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:149:13-36
+168            android:foregroundServiceType="microphone|sensors" >
+168-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:148:13-63
+169            <intent-filter>
+169-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:150:13-152:29
+170                <action android:name="com.saiy.android.service.SELF_AWARE_SERVICE" />
+170-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:151:17-86
+170-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:151:25-83
+171            </intent-filter>
+172        </service>
+173
+174        <!-- Shizuku Provider for system privileges -->
+175        <provider
+176            android:name="rikka.shizuku.ShizukuProvider"
+176-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:157:13-57
+177            android:authorities="com.egyptian.agent.shizuku"
+177-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:158:13-59
+178            android:enabled="true"
+178-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:160:13-35
+179            android:exported="true"
+179-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:161:13-36
+180            android:multiprocess="false"
+180-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:159:13-41
+181            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
+181-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:162:13-79
+182
+183        <!-- Admin receiver (for device admin privileges) -->
+184        <receiver
+184-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:165:9-175:20
+185            android:name="com.egyptian.agent.receivers.AdminReceiver"
+185-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:166:13-52
+186            android:exported="true"
+186-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:168:13-36
+187            android:permission="android.permission.BIND_DEVICE_ADMIN" >
+187-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:167:13-70
+188            <meta-data
+188-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:169:13-171:56
+189                android:name="android.app.device_admin"
+189-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:170:17-56
+190                android:resource="@xml/device_admin" />
+190-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:171:17-53
+191
+192            <intent-filter>
+192-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:172:13-174:29
+193                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+193-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:173:17-82
+193-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:173:25-79
+194            </intent-filter>
+195        </receiver>
+196
+197        <!-- Model loading service for OpenPhone -->
+198        <service
+198-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:178:9-183:19
+199            android:name="com.egyptian.agent.hybrid.ModelLoadingService"
+199-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:179:13-55
+200            android:enabled="true"
+200-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:180:13-35
+201            android:exported="false"
+201-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:181:13-37
+202            android:foregroundServiceType="dataSync" >
+202-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:182:13-53
+203        </service>
+204
+205        <!-- Notification channels -->
+206        <meta-data
+206-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:186:9-188:51
+207            android:name="com.google.firebase.messaging.default_notification_channel_id"
+207-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:187:13-89
+208            android:value="voice_agent_channel" />
+208-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:188:13-48
+209
+210        <!-- Special configuration for Honor devices -->
+211        <meta-data
+211-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:191:9-193:50
+212            android:name="notch.config"
+212-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:192:13-40
+213            android:value="portrait|landscape" />
+213-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:193:13-47
+214
+215        <!-- Disable battery optimization by default -->
+216        <meta-data
+216-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:196:9-198:36
+217            android:name="auto_disable_battery_optimization"
+217-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:197:13-61
+218            android:value="true" />
+218-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:198:13-33
+219
+220        <service
+220-->[com.google.mlkit:smart-reply:16.0.0] C:\Users\Dell\.gradle\caches\transforms-3\e05c2c1a13df211effa51d2f7f3c2f75\transformed\jetified-smart-reply-16.0.0\AndroidManifest.xml:23:9-32:19
+221            android:name="com.google.mlkit.common.internal.MlKitComponentDiscoveryService"
+221-->[com.google.mlkit:smart-reply:16.0.0] C:\Users\Dell\.gradle\caches\transforms-3\e05c2c1a13df211effa51d2f7f3c2f75\transformed\jetified-smart-reply-16.0.0\AndroidManifest.xml:24:13-91
+222            android:directBootAware="true"
+222-->[com.google.mlkit:common:18.11.0] C:\Users\Dell\.gradle\caches\transforms-3\2611c30691ae70ca10958dfb03c3067c\transformed\jetified-common-18.11.0\AndroidManifest.xml:17:13-43
+223            android:exported="false" >
+223-->[com.google.mlkit:smart-reply:16.0.0] C:\Users\Dell\.gradle\caches\transforms-3\e05c2c1a13df211effa51d2f7f3c2f75\transformed\jetified-smart-reply-16.0.0\AndroidManifest.xml:25:13-37
+224            <meta-data
+224-->[com.google.mlkit:smart-reply:16.0.0] C:\Users\Dell\.gradle\caches\transforms-3\e05c2c1a13df211effa51d2f7f3c2f75\transformed\jetified-smart-reply-16.0.0\AndroidManifest.xml:26:13-28:85
+225                android:name="com.google.firebase.components:com.google.mlkit.nl.smartreply.component.SmartReplyComponentRegistrar"
+225-->[com.google.mlkit:smart-reply:16.0.0] C:\Users\Dell\.gradle\caches\transforms-3\e05c2c1a13df211effa51d2f7f3c2f75\transformed\jetified-smart-reply-16.0.0\AndroidManifest.xml:27:17-132
+226                android:value="com.google.firebase.components.ComponentRegistrar" />
+226-->[com.google.mlkit:smart-reply:16.0.0] C:\Users\Dell\.gradle\caches\transforms-3\e05c2c1a13df211effa51d2f7f3c2f75\transformed\jetified-smart-reply-16.0.0\AndroidManifest.xml:28:17-82
+227            <meta-data
+227-->[com.google.mlkit:smart-reply:16.0.0] C:\Users\Dell\.gradle\caches\transforms-3\e05c2c1a13df211effa51d2f7f3c2f75\transformed\jetified-smart-reply-16.0.0\AndroidManifest.xml:29:13-31:85
+228                android:name="com.google.firebase.components:com.google.mlkit.nl.smartreply.component.RemoteConfigRegistrar"
+228-->[com.google.mlkit:smart-reply:16.0.0] C:\Users\Dell\.gradle\caches\transforms-3\e05c2c1a13df211effa51d2f7f3c2f75\transformed\jetified-smart-reply-16.0.0\AndroidManifest.xml:30:17-125
+229                android:value="com.google.firebase.components.ComponentRegistrar" />
+229-->[com.google.mlkit:smart-reply:16.0.0] C:\Users\Dell\.gradle\caches\transforms-3\e05c2c1a13df211effa51d2f7f3c2f75\transformed\jetified-smart-reply-16.0.0\AndroidManifest.xml:31:17-82
+230            <meta-data
+230-->[com.google.mlkit:language-id:17.0.6] C:\Users\Dell\.gradle\caches\transforms-3\57d83f1540f04b57d49e8f42a01ea487\transformed\jetified-language-id-17.0.6\AndroidManifest.xml:11:13-13:85
+231                android:name="com.google.firebase.components:com.google.mlkit.nl.languageid.bundled.internal.ThickLanguageIdRegistrar"
+231-->[com.google.mlkit:language-id:17.0.6] C:\Users\Dell\.gradle\caches\transforms-3\57d83f1540f04b57d49e8f42a01ea487\transformed\jetified-language-id-17.0.6\AndroidManifest.xml:12:17-135
+232                android:value="com.google.firebase.components.ComponentRegistrar" />
+232-->[com.google.mlkit:language-id:17.0.6] C:\Users\Dell\.gradle\caches\transforms-3\57d83f1540f04b57d49e8f42a01ea487\transformed\jetified-language-id-17.0.6\AndroidManifest.xml:13:17-82
+233            <meta-data
+233-->[com.google.mlkit:language-id-common:16.1.0] C:\Users\Dell\.gradle\caches\transforms-3\aeaa0e03a8e2de70c08e96d924d6716c\transformed\jetified-language-id-common-16.1.0\AndroidManifest.xml:26:13-28:85
+234                android:name="com.google.firebase.components:com.google.mlkit.nl.languageid.internal.LanguageIdRegistrar"
+234-->[com.google.mlkit:language-id-common:16.1.0] C:\Users\Dell\.gradle\caches\transforms-3\aeaa0e03a8e2de70c08e96d924d6716c\transformed\jetified-language-id-common-16.1.0\AndroidManifest.xml:27:17-122
+235                android:value="com.google.firebase.components.ComponentRegistrar" />
+235-->[com.google.mlkit:language-id-common:16.1.0] C:\Users\Dell\.gradle\caches\transforms-3\aeaa0e03a8e2de70c08e96d924d6716c\transformed\jetified-language-id-common-16.1.0\AndroidManifest.xml:28:17-82
+236            <meta-data
+236-->[com.google.mlkit:common:18.11.0] C:\Users\Dell\.gradle\caches\transforms-3\2611c30691ae70ca10958dfb03c3067c\transformed\jetified-common-18.11.0\AndroidManifest.xml:20:13-22:85
+237                android:name="com.google.firebase.components:com.google.mlkit.common.internal.CommonComponentRegistrar"
+237-->[com.google.mlkit:common:18.11.0] C:\Users\Dell\.gradle\caches\transforms-3\2611c30691ae70ca10958dfb03c3067c\transformed\jetified-common-18.11.0\AndroidManifest.xml:21:17-120
+238                android:value="com.google.firebase.components.ComponentRegistrar" />
+238-->[com.google.mlkit:common:18.11.0] C:\Users\Dell\.gradle\caches\transforms-3\2611c30691ae70ca10958dfb03c3067c\transformed\jetified-common-18.11.0\AndroidManifest.xml:22:17-82
+239        </service>
+240
+241        <provider
+241-->[com.google.mlkit:common:18.11.0] C:\Users\Dell\.gradle\caches\transforms-3\2611c30691ae70ca10958dfb03c3067c\transformed\jetified-common-18.11.0\AndroidManifest.xml:9:9-13:38
+242            android:name="com.google.mlkit.common.internal.MlKitInitProvider"
+242-->[com.google.mlkit:common:18.11.0] C:\Users\Dell\.gradle\caches\transforms-3\2611c30691ae70ca10958dfb03c3067c\transformed\jetified-common-18.11.0\AndroidManifest.xml:10:13-78
+243            android:authorities="com.egyptian.agent.mlkitinitprovider"
+243-->[com.google.mlkit:common:18.11.0] C:\Users\Dell\.gradle\caches\transforms-3\2611c30691ae70ca10958dfb03c3067c\transformed\jetified-common-18.11.0\AndroidManifest.xml:11:13-69
+244            android:exported="false"
+244-->[com.google.mlkit:common:18.11.0] C:\Users\Dell\.gradle\caches\transforms-3\2611c30691ae70ca10958dfb03c3067c\transformed\jetified-common-18.11.0\AndroidManifest.xml:12:13-37
+245            android:initOrder="99" />
+245-->[com.google.mlkit:common:18.11.0] C:\Users\Dell\.gradle\caches\transforms-3\2611c30691ae70ca10958dfb03c3067c\transformed\jetified-common-18.11.0\AndroidManifest.xml:13:13-35
+246
+247        <activity
+247-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\Dell\.gradle\caches\transforms-3\a41756e36a1e4f7863ea3cc8e9c49b7f\transformed\jetified-play-services-base-18.5.0\AndroidManifest.xml:5:9-173
+248            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+248-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\Dell\.gradle\caches\transforms-3\a41756e36a1e4f7863ea3cc8e9c49b7f\transformed\jetified-play-services-base-18.5.0\AndroidManifest.xml:5:19-85
+249            android:exported="false"
+249-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\Dell\.gradle\caches\transforms-3\a41756e36a1e4f7863ea3cc8e9c49b7f\transformed\jetified-play-services-base-18.5.0\AndroidManifest.xml:5:146-170
+250            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+250-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\Dell\.gradle\caches\transforms-3\a41756e36a1e4f7863ea3cc8e9c49b7f\transformed\jetified-play-services-base-18.5.0\AndroidManifest.xml:5:86-145
+251
+252        <meta-data
+252-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\Dell\.gradle\caches\transforms-3\f154aaaf19003256a17212c0a4a0d643\transformed\jetified-play-services-basement-18.4.0\AndroidManifest.xml:6:9-122
+253            android:name="com.google.android.gms.version"
+253-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\Dell\.gradle\caches\transforms-3\f154aaaf19003256a17212c0a4a0d643\transformed\jetified-play-services-basement-18.4.0\AndroidManifest.xml:6:20-65
+254            android:value="@integer/google_play_services_version" />
+254-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\Dell\.gradle\caches\transforms-3\f154aaaf19003256a17212c0a4a0d643\transformed\jetified-play-services-basement-18.4.0\AndroidManifest.xml:6:66-119
+255
+256        <provider
+256-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:29:9-37:20
+257            android:name="androidx.startup.InitializationProvider"
+257-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:30:13-67
+258            android:authorities="com.egyptian.agent.androidx-startup"
+258-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:31:13-68
+259            android:exported="false" >
+259-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:32:13-37
+260            <meta-data
+260-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:34:13-36:52
+261                android:name="androidx.work.WorkManagerInitializer"
+261-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:35:17-68
+262                android:value="androidx.startup" />
+262-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:36:17-49
+263            <meta-data
+263-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Dell\.gradle\caches\transforms-3\425137d2385fa733430d35f8e5412112\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
+264                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+264-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Dell\.gradle\caches\transforms-3\425137d2385fa733430d35f8e5412112\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:30:17-75
+265                android:value="androidx.startup" />
+265-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Dell\.gradle\caches\transforms-3\425137d2385fa733430d35f8e5412112\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:31:17-49
+266            <meta-data
+266-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\Dell\.gradle\caches\transforms-3\65b5e015de67be0f9e444cf846dad687\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:29:13-31:52
+267                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+267-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\Dell\.gradle\caches\transforms-3\65b5e015de67be0f9e444cf846dad687\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:30:17-78
+268                android:value="androidx.startup" />
+268-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\Dell\.gradle\caches\transforms-3\65b5e015de67be0f9e444cf846dad687\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:31:17-49
+269            <meta-data
+269-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:29:13-31:52
+270                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+270-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:30:17-85
+271                android:value="androidx.startup" />
+271-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:31:17-49
+272        </provider>
+273
+274        <service
+274-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:39:9-45:35
+275            android:name="androidx.work.impl.background.systemalarm.SystemAlarmService"
+275-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:40:13-88
+276            android:directBootAware="false"
+276-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:41:13-44
+277            android:enabled="@bool/enable_system_alarm_service_default"
+277-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:42:13-72
+278            android:exported="false" />
+278-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:43:13-37
+279        <service
+279-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:46:9-52:35
+280            android:name="androidx.work.impl.background.systemjob.SystemJobService"
+280-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:47:13-84
+281            android:directBootAware="false"
+281-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:48:13-44
+282            android:enabled="@bool/enable_system_job_service_default"
+282-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:49:13-70
+283            android:exported="true"
+283-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:50:13-36
+284            android:permission="android.permission.BIND_JOB_SERVICE" />
+284-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:51:13-69
+285        <service
+285-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:53:9-59:35
+286            android:name="androidx.work.impl.foreground.SystemForegroundService"
+286-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:54:13-81
+287            android:directBootAware="false"
+287-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:55:13-44
+288            android:enabled="@bool/enable_system_foreground_service_default"
+288-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:56:13-77
+289            android:exported="false" />
+289-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:57:13-37
+290
+291        <receiver
+291-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:61:9-66:35
+292            android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"
+292-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:62:13-88
+293            android:directBootAware="false"
+293-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:63:13-44
+294            android:enabled="true"
+294-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:64:13-35
+295            android:exported="false" />
+295-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:65:13-37
+296        <receiver
+296-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:67:9-77:20
+297            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy"
+297-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:68:13-106
+298            android:directBootAware="false"
+298-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:69:13-44
+299            android:enabled="false"
+299-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:70:13-36
+300            android:exported="false" >
+300-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:71:13-37
+301            <intent-filter>
+301-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:73:13-76:29
+302                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+302-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:74:17-87
+302-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:74:25-84
+303                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+303-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:75:17-90
+303-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:75:25-87
+304            </intent-filter>
+305        </receiver>
+306        <receiver
+306-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:78:9-88:20
+307            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy"
+307-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:79:13-104
+308            android:directBootAware="false"
+308-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:80:13-44
+309            android:enabled="false"
+309-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:81:13-36
+310            android:exported="false" >
+310-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:82:13-37
+311            <intent-filter>
+311-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:84:13-87:29
+312                <action android:name="android.intent.action.BATTERY_OKAY" />
+312-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:85:17-77
+312-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:85:25-74
+313                <action android:name="android.intent.action.BATTERY_LOW" />
+313-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:86:17-76
+313-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:86:25-73
+314            </intent-filter>
+315        </receiver>
+316        <receiver
+316-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:89:9-99:20
+317            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy"
+317-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:90:13-104
+318            android:directBootAware="false"
+318-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:91:13-44
+319            android:enabled="false"
+319-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:92:13-36
+320            android:exported="false" >
+320-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:93:13-37
+321            <intent-filter>
+321-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:95:13-98:29
+322                <action android:name="android.intent.action.DEVICE_STORAGE_LOW" />
+322-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:96:17-83
+322-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:96:25-80
+323                <action android:name="android.intent.action.DEVICE_STORAGE_OK" />
+323-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:97:17-82
+323-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:97:25-79
+324            </intent-filter>
+325        </receiver>
+326        <receiver
+326-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:100:9-109:20
+327            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$NetworkStateProxy"
+327-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:101:13-103
+328            android:directBootAware="false"
+328-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:102:13-44
+329            android:enabled="false"
+329-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:103:13-36
+330            android:exported="false" >
+330-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:104:13-37
+331            <intent-filter>
+331-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:106:13-108:29
+332                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+332-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:107:17-79
+332-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:107:25-76
+333            </intent-filter>
+334        </receiver>
+335        <receiver
+335-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:110:9-121:20
+336            android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
+336-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:111:13-88
+337            android:directBootAware="false"
+337-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:112:13-44
+338            android:enabled="false"
+338-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:113:13-36
+339            android:exported="false" >
+339-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:114:13-37
+340            <intent-filter>
+340-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:116:13-120:29
+341                <action android:name="android.intent.action.BOOT_COMPLETED" />
+341-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:109:17-79
+341-->K:\projects\mobile\EgyptianAgent\app\src\main\AndroidManifest.xml:109:25-76
+342                <action android:name="android.intent.action.TIME_SET" />
+342-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:118:17-73
+342-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:118:25-70
+343                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+343-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:119:17-81
+343-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:119:25-78
+344            </intent-filter>
+345        </receiver>
+346        <receiver
+346-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:122:9-131:20
+347            android:name="androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver"
+347-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:123:13-99
+348            android:directBootAware="false"
+348-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:124:13-44
+349            android:enabled="@bool/enable_system_alarm_service_default"
+349-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:125:13-72
+350            android:exported="false" >
+350-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:126:13-37
+351            <intent-filter>
+351-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:128:13-130:29
+352                <action android:name="androidx.work.impl.background.systemalarm.UpdateProxies" />
+352-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:129:17-98
+352-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:129:25-95
+353            </intent-filter>
+354        </receiver>
+355        <receiver
+355-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:132:9-142:20
+356            android:name="androidx.work.impl.diagnostics.DiagnosticsReceiver"
+356-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:133:13-78
+357            android:directBootAware="false"
+357-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:134:13-44
+358            android:enabled="true"
+358-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:135:13-35
+359            android:exported="true"
+359-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:136:13-36
+360            android:permission="android.permission.DUMP" >
+360-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:137:13-57
+361            <intent-filter>
+361-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:139:13-141:29
+362                <action android:name="androidx.work.diagnostics.REQUEST_DIAGNOSTICS" />
+362-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:140:17-88
+362-->[androidx.work:work-runtime:2.8.1] C:\Users\Dell\.gradle\caches\transforms-3\5f2be7ff31dd632d902f1dfb1388ba32\transformed\work-runtime-2.8.1\AndroidManifest.xml:140:25-85
+363            </intent-filter>
+364        </receiver>
+365
+366        <service
+366-->[androidx.room:room-runtime:2.5.0] C:\Users\Dell\.gradle\caches\transforms-3\ab37daa5457b76c8ffd5ff397ddfe3c5\transformed\room-runtime-2.5.0\AndroidManifest.xml:24:9-28:63
+367            android:name="androidx.room.MultiInstanceInvalidationService"
+367-->[androidx.room:room-runtime:2.5.0] C:\Users\Dell\.gradle\caches\transforms-3\ab37daa5457b76c8ffd5ff397ddfe3c5\transformed\room-runtime-2.5.0\AndroidManifest.xml:25:13-74
+368            android:directBootAware="true"
+368-->[androidx.room:room-runtime:2.5.0] C:\Users\Dell\.gradle\caches\transforms-3\ab37daa5457b76c8ffd5ff397ddfe3c5\transformed\room-runtime-2.5.0\AndroidManifest.xml:26:13-43
+369            android:exported="false" />
+369-->[androidx.room:room-runtime:2.5.0] C:\Users\Dell\.gradle\caches\transforms-3\ab37daa5457b76c8ffd5ff397ddfe3c5\transformed\room-runtime-2.5.0\AndroidManifest.xml:27:13-37
+370
+371        <receiver
+371-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:34:9-52:20
+372            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+372-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:35:13-76
+373            android:directBootAware="false"
+373-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:36:13-44
+374            android:enabled="true"
+374-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:37:13-35
+375            android:exported="true"
+375-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:38:13-36
+376            android:permission="android.permission.DUMP" >
+376-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:39:13-57
+377            <intent-filter>
+377-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:40:13-42:29
+378                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+378-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:41:17-91
+378-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:41:25-88
+379            </intent-filter>
+380            <intent-filter>
+380-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:43:13-45:29
+381                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+381-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:44:17-85
+381-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:44:25-82
+382            </intent-filter>
+383            <intent-filter>
+383-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:46:13-48:29
+384                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+384-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:47:17-88
+384-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:47:25-85
+385            </intent-filter>
+386            <intent-filter>
+386-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:49:13-51:29
+387                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+387-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:50:17-95
+387-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Dell\.gradle\caches\transforms-3\003ac86f78d5238bed104a74558796ec\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:50:25-92
+388            </intent-filter>
+389        </receiver>
+390
+391        <meta-data
+391-->[dev.rikka.shizuku:provider:12.1.0] C:\Users\Dell\.gradle\caches\transforms-3\f45dde7a3ddfdf376ef7779fc230375e\transformed\jetified-provider-12.1.0\AndroidManifest.xml:13:9-15:36
+392            android:name="moe.shizuku.client.V3_SUPPORT"
+392-->[dev.rikka.shizuku:provider:12.1.0] C:\Users\Dell\.gradle\caches\transforms-3\f45dde7a3ddfdf376ef7779fc230375e\transformed\jetified-provider-12.1.0\AndroidManifest.xml:14:13-57
+393            android:value="true" />
+393-->[dev.rikka.shizuku:provider:12.1.0] C:\Users\Dell\.gradle\caches\transforms-3\f45dde7a3ddfdf376ef7779fc230375e\transformed\jetified-provider-12.1.0\AndroidManifest.xml:15:13-33
+394
+395        <service
+395-->[com.google.android.datatransport:transport-backend-cct:2.3.3] C:\Users\Dell\.gradle\caches\transforms-3\65717ef6c5962abd62a458f516f7fc56\transformed\jetified-transport-backend-cct-2.3.3\AndroidManifest.xml:29:9-35:19
+396            android:name="com.google.android.datatransport.runtime.backends.TransportBackendDiscovery"
+396-->[com.google.android.datatransport:transport-backend-cct:2.3.3] C:\Users\Dell\.gradle\caches\transforms-3\65717ef6c5962abd62a458f516f7fc56\transformed\jetified-transport-backend-cct-2.3.3\AndroidManifest.xml:30:13-103
+397            android:exported="false" >
+397-->[com.google.android.datatransport:transport-backend-cct:2.3.3] C:\Users\Dell\.gradle\caches\transforms-3\65717ef6c5962abd62a458f516f7fc56\transformed\jetified-transport-backend-cct-2.3.3\AndroidManifest.xml:31:13-37
+398            <meta-data
+398-->[com.google.android.datatransport:transport-backend-cct:2.3.3] C:\Users\Dell\.gradle\caches\transforms-3\65717ef6c5962abd62a458f516f7fc56\transformed\jetified-transport-backend-cct-2.3.3\AndroidManifest.xml:32:13-34:39
+399                android:name="backend:com.google.android.datatransport.cct.CctBackendFactory"
+399-->[com.google.android.datatransport:transport-backend-cct:2.3.3] C:\Users\Dell\.gradle\caches\transforms-3\65717ef6c5962abd62a458f516f7fc56\transformed\jetified-transport-backend-cct-2.3.3\AndroidManifest.xml:33:17-94
+400                android:value="cct" />
+400-->[com.google.android.datatransport:transport-backend-cct:2.3.3] C:\Users\Dell\.gradle\caches\transforms-3\65717ef6c5962abd62a458f516f7fc56\transformed\jetified-transport-backend-cct-2.3.3\AndroidManifest.xml:34:17-36
+401        </service>
+402        <service
+402-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\Dell\.gradle\caches\transforms-3\3daea700fe181cfb0184a806b56fa361\transformed\jetified-transport-runtime-2.2.6\AndroidManifest.xml:26:9-30:19
+403            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService"
+403-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\Dell\.gradle\caches\transforms-3\3daea700fe181cfb0184a806b56fa361\transformed\jetified-transport-runtime-2.2.6\AndroidManifest.xml:27:13-117
+404            android:exported="false"
+404-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\Dell\.gradle\caches\transforms-3\3daea700fe181cfb0184a806b56fa361\transformed\jetified-transport-runtime-2.2.6\AndroidManifest.xml:28:13-37
+405            android:permission="android.permission.BIND_JOB_SERVICE" >
+405-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\Dell\.gradle\caches\transforms-3\3daea700fe181cfb0184a806b56fa361\transformed\jetified-transport-runtime-2.2.6\AndroidManifest.xml:29:13-69
+406        </service>
+407
+408        <receiver
+408-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\Dell\.gradle\caches\transforms-3\3daea700fe181cfb0184a806b56fa361\transformed\jetified-transport-runtime-2.2.6\AndroidManifest.xml:32:9-34:40
+409            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver"
+409-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\Dell\.gradle\caches\transforms-3\3daea700fe181cfb0184a806b56fa361\transformed\jetified-transport-runtime-2.2.6\AndroidManifest.xml:33:13-132
+410            android:exported="false" />
+410-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\Dell\.gradle\caches\transforms-3\3daea700fe181cfb0184a806b56fa361\transformed\jetified-transport-runtime-2.2.6\AndroidManifest.xml:34:13-37
+411    </application>
+412
+413</manifest>
