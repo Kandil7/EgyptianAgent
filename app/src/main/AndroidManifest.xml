@@ -142,6 +142,25 @@
             </intent-filter>
         </receiver>
 
+        <!-- Saiy-PS SelfAwareService -->
+        <service
+            android:name="com.saiy.android.service.SelfAwareService"
+            android:foregroundServiceType="microphone|sensors"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.saiy.android.service.SELF_AWARE_SERVICE" />
+            </intent-filter>
+        </service>
+
+        <!-- Shizuku Provider for system privileges -->
+        <provider
+            android:name="rikka.shizuku.ShizukuProvider"
+            android:authorities="${applicationId}.shizuku"
+            android:multiprocess="false"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
+
         <!-- Admin receiver (for device admin privileges) -->
         <receiver
             android:name=".receivers.AdminReceiver"

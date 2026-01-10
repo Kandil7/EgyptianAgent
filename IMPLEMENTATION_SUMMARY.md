@@ -7,9 +7,11 @@ The Egyptian Agent is now a fully functional, production-ready voice assistant a
 ## Key Achievements
 
 ### ✅ Core Architecture Implemented
-- **VoiceService**: Main service handling voice recognition and wake word detection
+- **Saiy-PS Foundation**: Integrated Saiy-PS as the foundational voice processing framework
+- **SelfAwareService**: Main service handling voice recognition and wake word detection (based on Saiy-PS)
 - **HybridOrchestrator**: Intelligent routing between local OpenPhone model and cloud fallback
 - **EgyptianNormalizer**: Advanced Egyptian dialect processing with 90%+ accuracy
+- **Quantum**: Core processing engine for Egyptian dialect commands (based on Saiy-PS)
 - **OpenPhoneIntegration**: Full integration with OpenPhone-3B model for local AI processing
 
 ### ✅ Executive Features Delivered

@@ -3,10 +3,18 @@ package com.egyptian.agent.core;
 import android.app.Application;
 import android.util.Log;
 import com.egyptian.agent.utils.CrashLogger;
+import com.egyptian.agent.system.SystemPrivilegeManager;
+import com.egyptian.agent.performance.PerformanceMonitor;
+import com.egyptian.agent.security.DataEncryptionManager;
+import com.egyptian.agent.backup.BackupRestoreManager;
+import com.egyptian.agent.feedback.UserFeedbackSystem;
 
 public class MainApplication extends Application {
 
     private static final String TAG = "MainApplication";
+    private PerformanceMonitor performanceMonitor;
+    private BackupRestoreManager backupRestoreManager;
+    private UserFeedbackSystem userFeedbackSystem;
 
     @Override
     public void onCreate() {
@@ -15,6 +23,22 @@ public class MainApplication extends Application {
 
         // Initialize crash logger
         CrashLogger.registerGlobalExceptionHandler(this);
+
+        // Initialize system privileges via Shizuku
+        SystemPrivilegeManager.initialize(this);
+
+        // Initialize data encryption
+        DataEncryptionManager.getInstance(this);
+
+        // Initialize performance monitoring
+        performanceMonitor = PerformanceMonitor.getInstance(this);
+        performanceMonitor.startMonitoring();
+
+        // Initialize backup/restore manager
+        backupRestoreManager = BackupRestoreManager.getInstance(this);
+
+        // Initialize user feedback system
+        userFeedbackSystem = UserFeedbackSystem.getInstance(this);
 
         // Initialize TTS engine
         TTSManager.initialize(this);
@@ -33,6 +57,13 @@ public class MainApplication extends Application {
         super.onTerminate();
         // Cleanup resources
         TTSManager.shutdown();
+        SystemPrivilegeManager.cleanup();
+        if (performanceMonitor != null) {
+            performanceMonitor.cleanup();
+        }
+        if (userFeedbackSystem != null) {
+            userFeedbackSystem.cleanup();
+        }
         Log.i(TAG, "Egyptian Agent Application terminated");
     }
 }
