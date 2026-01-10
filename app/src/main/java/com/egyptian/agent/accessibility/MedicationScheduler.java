@@ -5,104 +5,128 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import java.util.Calendar;
+import com.egyptian.agent.core.TTSManager;
+import com.egyptian.agent.utils.VibrationManager;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Scheduler for medication reminders as specified in the SRD
+ * Schedules medication reminders for senior users
  */
 public class MedicationScheduler {
     private static final String TAG = "MedicationScheduler";
-    private Context context;
-    private AlarmManager alarmManager;
-    
-    public MedicationScheduler(Context context) {
-        this.context = context;
-        this.alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+    private static final String MEDICATION_REMINDER_ACTION = "com.egyptian.agent.MEDICATION_REMINDER";
+
+    private static List<MedicationReminder> medicationReminders = new ArrayList<>();
+    private static Context context;
+
+    public static void initialize(Context appContext) {
+        context = appContext.getApplicationContext();
     }
-    
-    public void scheduleReminders(java.util.List<MedicationReminder> reminders) {
-        for (MedicationReminder reminder : reminders) {
-            scheduleReminder(reminder);
-        }
+
+    /**
+     * Adds a medication reminder to the scheduler
+     */
+    public static void addMedicationReminder(MedicationReminder reminder) {
+        medicationReminders.add(reminder);
+
+        // Schedule the reminder using AlarmManager
+        scheduleMedicationReminder(reminder);
+        Log.i(TAG, "Medication reminder added: " + reminder.getMedicationName());
     }
-    
-    public void scheduleReminder(MedicationReminder reminder) {
-        // Calculate the time for the reminder today
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, reminder.getTime().getHour());
-        calendar.set(Calendar.MINUTE, reminder.getTime().getMinute());
-        calendar.set(Calendar.SECOND, 0);
-        
-        // If the time has already passed today, schedule for tomorrow
-        if (calendar.before(Calendar.getInstance())) {
-            calendar.add(Calendar.DAY_OF_YEAR, 1);
-        }
-        
-        // Create intent for the reminder
+
+    /**
+     * Schedules a medication reminder using AlarmManager
+     */
+    private static void scheduleMedicationReminder(MedicationReminder reminder) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+        // Create intent for the medication reminder
         Intent intent = new Intent(context, MedicationReceiver.class);
+        intent.setAction(MEDICATION_REMINDER_ACTION);
         intent.putExtra("medication_name", reminder.getMedicationName());
-        intent.putExtra("instructions", reminder.getInstructions());
-        
-        // Create a unique request code for each reminder
-        int requestCode = reminder.hashCode();
-        
+        intent.putExtra("dosage", reminder.getDosage());
+
+        // Create unique request code for this reminder
+        int requestCode = reminder.getMedicationName().hashCode();
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
             context,
             requestCode,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
-        
-        // Schedule the alarm
-        if (reminder.isRecurring()) {
-            // For recurring reminders, use setRepeating
-            alarmManager.setRepeating(
+
+        // Set the alarm
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
-                calendar.getTimeInMillis(),
-                AlarmManager.INTERVAL_DAY, // Repeat daily
+                reminder.getTimeInMillis(),
                 pendingIntent
             );
         } else {
-            // For one-time reminders, use setExactAndAllowWhileIdle
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    calendar.getTimeInMillis(),
-                    pendingIntent
-                );
-            } else {
-                alarmManager.set(
-                    AlarmManager.RTC_WAKEUP,
-                    calendar.getTimeInMillis(),
-                    pendingIntent
-                );
-            }
+            alarmManager.setExact(
+                AlarmManager.RTC_WAKEUP,
+                reminder.getTimeInMillis(),
+                pendingIntent
+            );
         }
-        
-        Log.i(TAG, "Scheduled medication reminder for: " + reminder.getMedicationName() + 
-              " at " + reminder.getTime());
+
+        Log.i(TAG, "Medication reminder scheduled for: " + new java.util.Date(reminder.getTimeInMillis()));
     }
-    
-    public void cancelReminder(MedicationReminder reminder) {
+
+    /**
+     * Removes a medication reminder from the scheduler
+     */
+    public static void removeMedicationReminder(MedicationReminder reminder) {
+        medicationReminders.remove(reminder);
+
+        // Cancel the alarm for this reminder
+        cancelMedicationReminder(reminder);
+        Log.i(TAG, "Medication reminder removed: " + reminder.getMedicationName());
+    }
+
+    /**
+     * Cancels a medication reminder
+     */
+    private static void cancelMedicationReminder(MedicationReminder reminder) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+        // Create the same intent that was used to schedule the reminder
         Intent intent = new Intent(context, MedicationReceiver.class);
+        intent.setAction(MEDICATION_REMINDER_ACTION);
+        intent.putExtra("medication_name", reminder.getMedicationName());
+        intent.putExtra("dosage", reminder.getDosage());
+
+        // Create the same request code
+        int requestCode = reminder.getMedicationName().hashCode();
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
             context,
-            reminder.hashCode(),
+            requestCode,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
-        
+
+        // Cancel the alarm
         alarmManager.cancel(pendingIntent);
-        Log.i(TAG, "Cancelled medication reminder for: " + reminder.getMedicationName());
+
+        Log.i(TAG, "Medication reminder cancelled: " + reminder.getMedicationName());
     }
-    
-    public void rescheduleReminders(java.util.List<MedicationReminder> reminders) {
-        // Cancel all existing reminders
-        for (MedicationReminder reminder : reminders) {
-            cancelReminder(reminder);
+
+    /**
+     * Gets all scheduled medication reminders
+     */
+    public static List<MedicationReminder> getMedicationReminders() {
+        return new ArrayList<>(medicationReminders);
+    }
+
+    /**
+     * Clears all medication reminders
+     */
+    public static void clearAllReminders() {
+        for (MedicationReminder reminder : medicationReminders) {
+            cancelMedicationReminder(reminder);
         }
-        
-        // Schedule them again with new settings
-        scheduleReminders(reminders);
+        medicationReminders.clear();
+        Log.i(TAG, "All medication reminders cleared");
     }
 }

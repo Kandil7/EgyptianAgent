@@ -1,72 +1,82 @@
 package com.egyptian.agent.accessibility;
 
-import java.time.LocalTime;
+import java.util.Date;
 
 /**
- * Class representing a medication reminder as specified in the SRD
+ * Represents a medication reminder for the senior mode
  */
 public class MedicationReminder {
     private String medicationName;
-    private LocalTime time;
-    private String instructions;
-    private boolean recurring = true; // Daily by default
-    
-    // Constructors
-    public MedicationReminder() {}
-    
-    public MedicationReminder(String medicationName, LocalTime time, String instructions) {
+    private String dosage;
+    private long timeInMillis;
+    private String frequency; // daily, weekly, etc.
+    private boolean isActive;
+
+    public MedicationReminder(String medicationName, String dosage, long timeInMillis) {
         this.medicationName = medicationName;
-        this.time = time;
-        this.instructions = instructions;
+        this.dosage = dosage;
+        this.timeInMillis = timeInMillis;
+        this.frequency = "daily"; // default
+        this.isActive = true;
     }
-    
-    public MedicationReminder(String medicationName, LocalTime time, String instructions, boolean recurring) {
+
+    public MedicationReminder(String medicationName, String dosage, long timeInMillis, String frequency) {
         this.medicationName = medicationName;
-        this.time = time;
-        this.instructions = instructions;
-        this.recurring = recurring;
+        this.dosage = dosage;
+        this.timeInMillis = timeInMillis;
+        this.frequency = frequency;
+        this.isActive = true;
     }
-    
+
     // Getters and setters
     public String getMedicationName() {
         return medicationName;
     }
-    
+
     public void setMedicationName(String medicationName) {
         this.medicationName = medicationName;
     }
-    
-    public LocalTime getTime() {
-        return time;
+
+    public String getDosage() {
+        return dosage;
     }
-    
-    public void setTime(LocalTime time) {
-        this.time = time;
+
+    public void setDosage(String dosage) {
+        this.dosage = dosage;
     }
-    
-    public String getInstructions() {
-        return instructions;
+
+    public long getTimeInMillis() {
+        return timeInMillis;
     }
-    
-    public void setInstructions(String instructions) {
-        this.instructions = instructions;
+
+    public void setTimeInMillis(long timeInMillis) {
+        this.timeInMillis = timeInMillis;
     }
-    
-    public boolean isRecurring() {
-        return recurring;
+
+    public String getFrequency() {
+        return frequency;
     }
-    
-    public void setRecurring(boolean recurring) {
-        this.recurring = recurring;
+
+    public void setFrequency(String frequency) {
+        this.frequency = frequency;
     }
-    
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
     @Override
     public String toString() {
         return "MedicationReminder{" +
                 "medicationName='" + medicationName + '\'' +
-                ", time=" + time +
-                ", instructions='" + instructions + '\'' +
-                ", recurring=" + recurring +
+                ", dosage='" + dosage + '\'' +
+                ", timeInMillis=" + timeInMillis +
+                ", frequency='" + frequency + '\'' +
+                ", isActive=" + isActive +
                 '}';
     }
 }
