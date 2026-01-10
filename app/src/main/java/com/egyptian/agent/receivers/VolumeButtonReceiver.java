@@ -8,8 +8,8 @@ import android.os.SystemClock;
 import android.util.Log;
 import com.egyptian.agent.core.TTSManager;
 import com.egyptian.agent.executors.EmergencyHandler;
-import com.egyptian.agent.core.VibrationManager;
 import com.egyptian.agent.utils.CrashLogger;
+import com.egyptian.agent.utils.VibrationManager;
 
 public class VolumeButtonReceiver extends BroadcastReceiver {
 
@@ -94,9 +94,9 @@ public class VolumeButtonReceiver extends BroadcastReceiver {
         if (isEmergencyMode) return;
 
         // In senior mode, single click on volume down can activate the assistant
-        if (SeniorMode.isEnabled()) {
+        if (com.egyptian.agent.accessibility.SeniorMode.isEnabled()) {
             // Vibrate to confirm activation
-            // VibrationManager.vibrateShort(context);
+            VibrationManager.vibrateShort(context);
 
             // Start listening for command
             Intent serviceIntent = new Intent(context, com.egyptian.agent.core.VoiceService.class);
@@ -104,31 +104,6 @@ public class VolumeButtonReceiver extends BroadcastReceiver {
             context.startService(serviceIntent);
 
             Log.i(TAG, "Assistant activated via volume button in senior mode");
-        }
-
-        // In a real app, we would set up UI to refresh automatically when senior mode changes
-        registerSeniorModeChangeListener(context);
-    }
-
-    // New method to register for senior mode changes
-    private void registerSeniorModeChangeListener(Context context) {
-        // Register a broadcast receiver to listen for senior mode changes
-        android.content.IntentFilter filter = new android.content.IntentFilter("com.egyptian.agent.SENIOR_MODE_CHANGED");
-        android.content.BroadcastReceiver seniorModeReceiver = new android.content.BroadcastReceiver() {
-            @Override
-            public void onReceive(Context ctx, android.content.Intent intent) {
-                boolean isEnabled = intent.getBooleanExtra("enabled", false);
-                if (isEnabled) {
-                    // hideUIElements(); // This would be called from UI context
-                } else {
-                    // showUIElements(); // This would be called from UI context
-                }
-            }
-        };
-        try {
-            context.registerReceiver(seniorModeReceiver, filter);
-        } catch (Exception e) {
-            Log.e(TAG, "Error registering senior mode change receiver", e);
         }
     }
 }
