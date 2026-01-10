@@ -49,6 +49,11 @@ The Egyptian Agent is a revolutionary voice-controlled assistant designed specif
 └─────────────────────────────────────────────────────────────┘
                               │
 ┌─────────────────────────────────────────────────────────────┐
+│                 Saiy-PS Foundation Layer                   │
+│    Voice Processing • Wake Word Detection • ASR/TTS       │
+└─────────────────────────────────────────────────────────────┘
+                              │
+┌─────────────────────────────────────────────────────────────┐
 │                   System App Layer                         │
 │    Android OS • Root Permissions • Battery Manager        │
 └─────────────────────────────────────────────────────────────┘
@@ -66,6 +71,15 @@ The Egyptian Agent is a revolutionary voice-controlled assistant designed specif
 │  Contextual Actions                                       │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+### Saiy-PS Integration
+
+The Egyptian Agent leverages Saiy-PS as its foundational voice processing framework, enhancing it with:
+
+- **Egyptian Dialect Support**: Native understanding of Egyptian Arabic expressions
+- **Senior Mode**: Specialized interface for elderly users
+- **Emergency Features**: Integrated safety systems
+- **System-Level Integration**: Deep OS integration for reliability
 
 ## 🚀 Quick Start
 
