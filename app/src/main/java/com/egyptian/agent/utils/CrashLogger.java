@@ -1,318 +1,132 @@
 package com.egyptian.agent.utils;
 
 import android.content.Context;
-import android.os.Environment;
 import android.util.Log;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class CrashLogger {
-
+/**
+ * Production-grade crash reporting system for Egyptian Agent
+ * Logs errors securely while protecting user privacy
+ */
+public class CrashLogger implements UncaughtExceptionHandler {
     private static final String TAG = "CrashLogger";
-    private static final String LOGS_DIRECTORY = "egyptian_agent_logs";
-    private static final int MAX_LOG_SIZE = 10 * 1024 * 1024; // 10MB
-    private static final int MAX_LOG_FILES = 5;
-
-    // Singleton instance
+    private static final String CRASH_LOG_FILE = "crash_log.txt";
+    
     private static CrashLogger instance;
+    private static UncaughtExceptionHandler defaultExceptionHandler;
     private Context context;
-
+    
     private CrashLogger(Context context) {
         this.context = context.getApplicationContext();
+        defaultExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler(this);
     }
-
-    public static synchronized CrashLogger getInstance(Context context) {
+    
+    public static synchronized void registerGlobalExceptionHandler(Context context) {
         if (instance == null) {
             instance = new CrashLogger(context);
         }
-        return instance;
     }
-
-    /**
-     * Log an error with detailed information
-     */
-    public static void logError(Context context, Throwable error) {
-        getInstance(context).logErrorInternal(error);
+    
+    public static void logError(Context context, Throwable throwable) {
+        logError(context, "General Error", throwable);
     }
-
-    /**
-     * Log a warning message
-     */
-    public static void logWarning(Context context, String message) {
-        getInstance(context).logWarningInternal(message);
+    
+    public static void logError(Context context, String message, Throwable throwable) {
+        String errorDetails = formatError(message, throwable);
+        Log.e(TAG, errorDetails);
+        
+        // Write to secure local log file
+        writeToFile(context, errorDetails);
     }
-
-    /**
-     * Internal method to log error
-     */
-    private void logErrorInternal(Throwable error) {
-        if (error == null) return;
-
+    
+    private static String formatError(String message, Throwable throwable) {
+        StringBuilder sb = new StringBuilder();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        
+        sb.append("=== CRASH LOG ===\n");
+        sb.append("Timestamp: ").append(sdf.format(new Date())).append("\n");
+        sb.append("Message: ").append(message).append("\n");
+        sb.append("Exception: ").append(throwable.getClass().getName()).append("\n");
+        sb.append("Cause: ").append(throwable.getMessage()).append("\n");
+        sb.append("Stack Trace:\n");
+        
+        for (StackTraceElement element : throwable.getStackTrace()) {
+            sb.append(element.toString()).append("\n");
+        }
+        
+        sb.append("==================\n\n");
+        
+        return sb.toString();
+    }
+    
+    private static void writeToFile(Context context, String errorDetails) {
         try {
-            String logEntry = buildLogEntry("ERROR", getStackTrace(error));
-            writeLog(logEntry);
-
-            Log.e(TAG, "Error logged: " + error.getMessage());
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to log error", e);
+            FileWriter writer = new FileWriter(new java.io.File(context.getFilesDir(), CRASH_LOG_FILE), true);
+            writer.append(errorDetails);
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to write crash log to file", e);
         }
     }
-
+    
     /**
-     * Internal method to log warning
+     * Retrieves crash logs for diagnostics
      */
-    private void logWarningInternal(String message) {
-        if (message == null || message.isEmpty()) return;
-
+    public static String getRecentLogs(Context context) {
         try {
-            String logEntry = buildLogEntry("WARNING", message);
-            writeLog(logEntry);
-
-            Log.w(TAG, "Warning logged: " + message);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to log warning", e);
-        }
-    }
-
-    /**
-     * Build formatted log entry
-     */
-    private String buildLogEntry(String level, String message) {
-        String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault()).format(new Date());
-        String deviceId = android.provider.Settings.Secure.getString(
-            context.getContentResolver(),
-            android.provider.Settings.Secure.ANDROID_ID
-        );
-
-        return String.format(
-            "[%s] [%s] [Device: %s] [Version: %s]\n%s\n\n",
-            timestamp,
-            level,
-            deviceId,
-            "1.0", // Using placeholder version
-            message
-        );
-    }
-
-    /**
-     * Get stack trace as string
-     */
-    private String getStackTrace(Throwable throwable) {
-        if (throwable == null) return "";
-
-        java.io.StringWriter sw = new java.io.StringWriter();
-        java.io.PrintWriter pw = new java.io.PrintWriter(sw);
-        throwable.printStackTrace(pw);
-        return sw.toString();
-    }
-
-    /**
-     * Write log entry to file
-     */
-    private void writeLog(String logEntry) throws IOException {
-        // Create logs directory
-        File logsDir = new File(context.getExternalFilesDir(null), LOGS_DIRECTORY);
-        if (!logsDir.exists()) {
-            logsDir.mkdirs();
-        }
-
-        // Rotate log files if needed
-        rotateLogFiles(logsDir);
-
-        // Create/write to log file
-        File logFile = new File(logsDir, "current_log.txt");
-
-        try (FileWriter writer = new FileWriter(logFile, true)) { // Append mode
-            writer.write(logEntry);
-        }
-
-        // Check file size and rotate if needed
-        checkAndRotateLogFile(logFile);
-    }
-
-    /**
-     * Rotate log files to prevent excessive size
-     */
-    private void rotateLogFiles(File logsDir) {
-        File currentLogFile = new File(logsDir, "current_log.txt");
-
-        if (currentLogFile.exists() && currentLogFile.length() > MAX_LOG_SIZE) {
-            // Rename old files
-            for (int i = MAX_LOG_FILES - 1; i >= 1; i--) {
-                File oldFile = new File(logsDir, "log_" + i + ".txt");
-                File newFile = new File(logsDir, "log_" + (i + 1) + ".txt");
-                if (oldFile.exists()) {
-                    oldFile.renameTo(newFile);
-                }
+            java.io.File logFile = new java.io.File(context.getFilesDir(), CRASH_LOG_FILE);
+            if (!logFile.exists()) {
+                return "No crash logs found.";
             }
-
-            // Rename current log to log_1
-            File log1File = new File(logsDir, "log_1.txt");
-            if (currentLogFile.exists()) {
-                currentLogFile.renameTo(log1File);
-            }
-        }
-    }
-
-    /**
-     * Check log file size and rotate if needed
-     */
-    private void checkAndRotateLogFile(File logFile) {
-        if (logFile.length() > MAX_LOG_SIZE) {
-            // In a real app, we would compress and archive old logs
-            File logsDir = logFile.getParentFile();
-            if (logsDir != null) {
-                compressAndArchiveOldLogs(logsDir);
-            }
-        }
-    }
-
-    // In a real app, we would compress and archive old logs
-    private void compressAndArchiveOldLogs(File logsDir) {
-        try {
-            // Create archive directory
-            File archiveDir = new File(logsDir, "archive");
-            if (!archiveDir.exists()) {
-                archiveDir.mkdirs();
-            }
-
-            // Get current date for filename
-            String dateStr = new java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault()).format(new java.util.Date());
-
-            // Compress current log
-            File currentLogFile = new File(logsDir, "current_log.txt");
-            if (currentLogFile.exists() && currentLogFile.length() > 0) {
-                File zipFile = new File(archiveDir, "logs_" + dateStr + ".zip");
-
-                try (java.io.FileOutputStream fos = new java.io.FileOutputStream(zipFile);
-                     java.util.zip.ZipOutputStream zipOut = new java.util.zip.ZipOutputStream(fos)) {
-
-                    java.util.zip.ZipEntry zipEntry = new java.util.zip.ZipEntry("current_log.txt");
-                    zipOut.putNextEntry(zipEntry);
-
-                    byte[] bytes = new byte[1024];
-                    try (java.io.FileInputStream fis = new java.io.FileInputStream(currentLogFile)) {
-                        int length;
-                        while ((length = fis.read(bytes)) >= 0) {
-                            zipOut.write(bytes, 0, length);
-                        }
-                    }
-                    zipOut.closeEntry();
-                }
-
-                Log.i(TAG, "Log file compressed and archived: " + zipFile.getAbsolutePath());
-
-                // Clear current log after archiving
-                currentLogFile.delete();
-            }
-
-            // Keep only last 7 archive files (one week)
-            File[] archiveFiles = archiveDir.listFiles();
-            if (archiveFiles != null && archiveFiles.length > 7) {
-                java.util.Arrays.sort(archiveFiles, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
-                for (int i = 7; i < archiveFiles.length; i++) {
-                    archiveFiles[i].delete();
-                }
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to compress and archive logs", e);
-        }
-    }
-
-    /**
-     * Read logs (for sending to guardian)
-     */
-    public String readLogs() {
-        try {
-            File logsDir = new File(context.getExternalFilesDir(null), LOGS_DIRECTORY);
-            File currentLogFile = new File(logsDir, "current_log.txt");
-
-            if (!currentLogFile.exists()) {
-                return "No logs available";
-            }
-
-            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(currentLogFile));
+            
+            java.util.Scanner scanner = new java.util.Scanner(logFile);
             StringBuilder content = new StringBuilder();
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                content.append(line).append("\n");
+            while (scanner.hasNextLine()) {
+                content.append(scanner.nextLine()).append("\n");
             }
-            reader.close();
-
+            scanner.close();
+            
             return content.toString();
         } catch (Exception e) {
-            Log.e(TAG, "Failed to read logs", e);
+            Log.e(TAG, "Failed to read crash logs", e);
+            return "Error reading crash logs: " + e.getMessage();
         }
-
-        return "Failed to read logs";
     }
-
+    
     /**
-     * Send logs to guardian via WhatsApp
+     * Clears crash logs
      */
-    public void sendLogsToGuardian(Context context) {
-        // if (!SeniorMode.isEnabled()) {
-        //     TTSManager.speak(context, "الميزة دي متاحة بس في وضع كبار السن");
-        //     return;
-        // }
-        //
-        // TTSManager.speak(context, "عايز أبعت سجلات الأخطاء لولي أمرك؟ قول 'نعم'");
-        //
-        // SpeechConfirmation.waitForConfirmation(context, confirmed -> {
-        //     if (confirmed) {
-        //         String logs = readLogs();
-        //         WhatsAppExecutor.sendLogsToGuardian(context, logs);
-        //         TTSManager.speak(context, "السجلات اتبعتت. الشكر لله");
-        //     } else {
-        //         TTSManager.speak(context, "ما بعتناش السجلات");
-        //     }
-        // });
-    }
-
-    /**
-     * Clear all logs (privacy feature)
-     */
-    public void clearAllLogs() {
+    public static void clearLogs(Context context) {
         try {
-            File logsDir = new File(context.getExternalFilesDir(null), LOGS_DIRECTORY);
-            if (logsDir.exists()) {
-                File[] files = logsDir.listFiles();
-                if (files != null) {
-                    for (File file : files) {
-                        file.delete();
-                    }
-                }
-                logsDir.delete();
+            java.io.File logFile = new java.io.File(context.getFilesDir(), CRASH_LOG_FILE);
+            if (logFile.exists()) {
+                logFile.delete();
             }
-
-            TTSManager.speak(context, "كل السجلات اتمسحت");
         } catch (Exception e) {
-            Log.e(TAG, "Failed to clear logs", e);
-            TTSManager.speak(context, "حصل مشكلة في مسح السجلات");
+            Log.e(TAG, "Failed to clear crash logs", e);
         }
     }
-
-    /**
-     * Register global exception handler
-     */
-    public static void registerGlobalExceptionHandler(Context context) {
-        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            getInstance(context).logErrorInternal(throwable);
-
-            // Also speak the error in senior mode
-            // if (SeniorMode.isEnabled()) {
-            //     TTSManager.speak(context, "حصل خطأ غير متوقع. بعت الإبلاغ للدعم");
-            //     WhatsAppExecutor.sendEmergencyWhatsApp(context, "01000000000", "Critical App Crash");
-            // }
-
-            // Call original handler if exists
+    
+    @Override
+    public void uncaughtException(Thread thread, Throwable ex) {
+        Log.e(TAG, "Uncaught exception in thread: " + thread.getName(), ex);
+        logError(context, "Uncaught Exception in " + thread.getName(), ex);
+        
+        // Allow the default handler to run as well
+        if (defaultExceptionHandler != null) {
+            defaultExceptionHandler.uncaughtException(thread, ex);
+        } else {
+            // If no default handler, exit gracefully
             android.os.Process.killProcess(android.os.Process.myPid());
             System.exit(10);
-        });
+        }
     }
 }

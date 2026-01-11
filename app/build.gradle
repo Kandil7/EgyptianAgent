@@ -5,14 +5,14 @@ plugins {
 
 android {
     namespace 'com.egyptian.agent'
-    compileSdk 34
+    compileSdk rootProject.ext.compileSdkVersion
 
     defaultConfig {
         applicationId "com.egyptian.agent"
-        minSdk 28
-        targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        minSdk rootProject.ext.minSdkVersion
+        targetSdk rootProject.ext.targetSdkVersion
+        versionCode rootProject.ext.versionMajor * 10000 + rootProject.ext.versionMinor * 100 + rootProject.ext.versionPatch
+        versionName "${rootProject.ext.versionMajor}.${rootProject.ext.versionMinor}.${rootProject.ext.versionPatch}"
 
         // Critical for Honor X6c (MediaTek Helio G81 Ultra)
         // ABI filter moved to splits section to avoid conflicts
@@ -89,15 +89,15 @@ android {
 // Dependencies optimized for Honor X6c
 dependencies {
     // Core AndroidX libraries
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'androidx.fragment:fragment-ktx:1.6.2'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.7.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
+    implementation "androidx.core:core-ktx:$rootProject.ext.coreKtxVersion"
+    implementation "androidx.appcompat:appcompat:$rootProject.ext.appcompatVersion"
+    implementation "androidx.fragment:fragment-ktx:$rootProject.ext.fragmentKtxVersion"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$rootProject.ext.lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$rootProject.ext.lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$rootProject.ext.lifecycleVersion"
 
     // Material design
-    implementation 'com.google.android.material:material:1.11.0'
+    implementation "com.google.android.material:material:$rootProject.ext.materialVersion"
 
     // Vosk STT engine - critical dependency
     implementation files('libs/vosk-android-0.3.44.aar')
@@ -106,36 +106,36 @@ dependencies {
     implementation 'net.java.dev.jna:jna:5.13.0@aar'
 
     // Networking for LLM fallback
-    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation "com.squareup.okhttp3:okhttp:$rootProject.ext.okhttpVersion"
+    implementation "com.squareup.retrofit2:retrofit:$rootProject.ext.retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$rootProject.ext.retrofitVersion"
 
     // Sensor processing for fall detection - using built-in Android APIs
     // The Android Sensor API is part of the platform, no additional dependency needed
-    implementation 'androidx.activity:activity-ktx:1.8.2'
+    implementation "androidx.activity:activity-ktx:$rootProject.ext.activityKtxVersion"
 
     // Coroutines for background processing
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.coroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.ext.coroutinesVersion"
 
     // Security and encryption
-    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+    implementation "androidx.security:security-crypto:$rootProject.ext.securityCryptoVersion"
     // JCE (Java Cryptography Extension) is built into Android, no separate dependency needed
 
     // WorkManager for background tasks
-    implementation 'androidx.work:work-runtime:2.8.1'
+    implementation "androidx.work:work-runtime:$rootProject.ext.workRuntimeVersion"
 
     // OpenPhone dependencies - using local implementation
-    implementation 'org.pytorch:pytorch_android:1.13.0'
-    implementation 'org.pytorch:pytorch_android_torchvision:1.13.0'
+    implementation "org.pytorch:pytorch_android:$rootProject.ext.pytorchVersion"
+    implementation "org.pytorch:pytorch_android_torchvision:$rootProject.ext.pytorchVersion"
 
     // For model optimization
-    implementation 'androidx.profileinstaller:profileinstaller:1.3.1'
+    implementation "androidx.profileinstaller:profileinstaller:$rootProject.ext.profileInstallerVersion"
 
     // Additional dependencies for NLP and text processing
-    implementation 'com.google.mlkit:language-id:17.0.6'
+    implementation "com.google.mlkit:language-id:$rootProject.ext.mlKitLanguageIdVersion"
     // Smart Reply functionality - using the correct dependency
-    implementation 'com.google.mlkit:smart-reply:16.0.0'
+    implementation "com.google.mlkit:smart-reply:$rootProject.ext.mlKitSmartReplyVersion"
 
     // Testing dependencies
     testImplementation 'junit:junit:4.13.2'
@@ -143,8 +143,8 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
     // Shizuku API for system privileges
-    implementation 'dev.rikka.shizuku:api:12.1.0'
-    implementation 'dev.rikka.shizuku:provider:12.1.0'
+    implementation "dev.rikka.shizuku:api:$rootProject.ext.shizukuVersion"
+    implementation "dev.rikka.shizuku:provider:$rootProject.ext.shizukuVersion"
 
     // Special Honor device support
     compileOnly files('libs/honor-system-api.jar')

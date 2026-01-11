@@ -28,9 +28,9 @@ public class OpenPhoneIntegration {
         new Thread(() -> {
             try {
                 Log.i(TAG, "Loading OpenPhone-3B model...");
-                localModel = new OpenPhoneModel(context.getAssets(), "openphone-3b");
-                isModelLoaded = true;
-                Log.i(TAG, "OpenPhone-3B model loaded successfully");
+                localModel = new OpenPhoneModel(context, "openphone-3b");
+                isModelLoaded = localModel.isReady();
+                Log.i(TAG, "OpenPhone-3B model loaded successfully: " + isModelLoaded);
 
                 // التحقق من ذاكرة الجهاز
                 MemoryOptimizer.checkMemoryConstraints(context);
@@ -71,15 +71,15 @@ public class OpenPhoneIntegration {
 
                 // تشغيل النموذج
                 long startTime = System.currentTimeMillis();
-                JSONObject result = localModel.analyze(enhancedText);
+                Map<String, Object> result = localModel.analyze(enhancedText);
                 long endTime = System.currentTimeMillis();
 
                 Log.i(TAG, String.format("Inference completed in %d ms", endTime - startTime));
 
                 // التحقق من ثقة النتيجة
-                float confidence = result.optFloat("confidence", 0.0f);
-                if (confidence < MIN_CONFIDENCE_THRESHOLD) {
-                    callback.onFallbackRequired("Low confidence: " + confidence);
+                Float confidence = (Float) result.get("confidence");
+                if (confidence == null || confidence < MIN_CONFIDENCE_THRESHOLD) {
+                    callback.onFallbackRequired("Low confidence: " + (confidence != null ? confidence : 0.0f));
                     return;
                 }
 
@@ -121,25 +121,31 @@ public class OpenPhoneIntegration {
         }
     }
 
-    private IntentResult parseModelResult(JSONObject jsonResult) {
+    private IntentResult parseModelResult(Map<String, Object> modelResult) {
         // تحويل نتيجة OpenPhone لنظام النوايا الخاص بنا
         IntentResult result = new IntentResult();
 
         // تحديد نوع النية
-        String intentStr = jsonResult.optString("intent", "UNKNOWN");
+        String intentStr = (String) modelResult.get("intent");
+        if (intentStr == null) intentStr = "UNKNOWN";
         result.setIntentType(IntentType.fromOpenPhoneString(intentStr));
 
         // استخراج الكيانات
-        JSONObject entities = jsonResult.optJSONObject("entities");
+        @SuppressWarnings("unchecked")
+        Map<String, String> entities = (Map<String, String>) modelResult.get("entities");
         if (entities != null) {
-            for (String key : entities.keySet()) {
-                String value = entities.optString(key, "");
-                result.setEntity(key, value);
+            for (Map.Entry<String, String> entry : entities.entrySet()) {
+                result.setEntity(entry.getKey(), entry.getValue());
             }
         }
 
         // تحديد مستوى الثقة
-        result.setConfidence(jsonResult.optFloat("confidence", 0.7f));
+        Float confidence = (Float) modelResult.get("confidence");
+        if (confidence != null) {
+            result.setConfidence(confidence);
+        } else {
+            result.setConfidence(0.7f);
+        }
 
         return result;
     }
