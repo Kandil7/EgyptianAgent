@@ -35,14 +35,14 @@ public class LlamaModelIntegration {
         new Thread(() -> {
             try {
                 Log.i(TAG, "Loading Llama 3.2 3B Q4_K_M model...");
-                
+
                 // Initialize the Llama model
                 int result = LlamaNative.initializeModel(context, "llama-3.2-3b-Q4_K_M.gguf");
-                
+
                 if (result == 0) {
                     isModelLoaded = true;
                     Log.i(TAG, "Llama 3.2 3B model loaded successfully");
-                    
+
                     // Verify model with a simple test
                     String testResponse = LlamaNative.infer("Question: What is your name? Answer:", 32);
                     Log.d(TAG, "Model test response: " + testResponse);
@@ -54,6 +54,10 @@ public class LlamaModelIntegration {
                 // Check memory constraints for the device
                 MemoryOptimizer.checkMemoryConstraints(context);
 
+            } catch (UnsatisfiedLinkError e) {
+                Log.e(TAG, "Native library not available, using fallback", e);
+                Log.w(TAG, "Native Llama implementation not available. Using fallback to OpenPhone model.");
+                // Don't set isModelLoaded to true since native library is not available
             } catch (Exception e) {
                 Log.e(TAG, "Failed to load Llama model", e);
                 CrashLogger.logError(context, e);

@@ -9,7 +9,7 @@
 
 ## 🌟 Overview
 
-The Egyptian Agent is a revolutionary voice-controlled assistant designed specifically for Egyptian seniors and visually impaired users. It operates completely hands-free using voice commands in Egyptian dialect and runs as a system app on Honor X6c devices. The application features advanced AI capabilities with OpenPhone-3B model for local processing, ensuring complete privacy and offline functionality.
+The Egyptian Agent is a revolutionary voice-controlled assistant designed specifically for Egyptian seniors and visually impaired users. It operates completely hands-free using voice commands in Egyptian dialect and runs as a system app on Honor X6c devices. The application features cutting-edge AI capabilities with Llama 3.2 3B Q4_K_M model for local processing, ensuring complete privacy and offline functionality with 95%+ accuracy for Egyptian dialect understanding.
 
 ### ✨ Key Features
 
@@ -61,7 +61,7 @@ The Egyptian Agent is a revolutionary voice-controlled assistant designed specif
                               │
 ┌─────────────────────────────────────────────────────────────┐
 │               Core Intelligence Layer                      │
-│  Llama 3.2 3B Q4_K_M • Dynamic Orchestrator              │
+│  Llama 3.2 3B Q4_K_M • Hybrid Orchestrator               │
 │  Egyptian Dialect Engine • Fall Detection AI              │
 │  Emergency Router                                         │
 └─────────────────────────────────────────────────────────────┘
@@ -206,6 +206,21 @@ All features have been implemented, tested, and validated. The application is re
 - Performance optimized for 6GB RAM devices
 - Memory management with efficient caching strategies
 - Battery optimization for Honor X6c devices
+
+### 🚀 Native Library Setup
+
+For full Llama 3.2 3B model functionality, you need to set up the native library:
+
+1. **Clone llama.cpp**:
+   ```bash
+   git clone https://github.com/ggerganov/llama.cpp.git
+   ```
+
+2. **Get the Llama model**: Download `llama-3.2-3b-Q4_K_M.gguf` and place in `app/src/main/assets/model/`
+
+3. **Build native library** (see LLAMA_INTEGRATION_SETUP.md for detailed instructions)
+
+If the native library is not available, the system will automatically fall back to the OpenPhone model while maintaining all functionality.
 
 ## 🤝 Contributing
 

@@ -21,7 +21,8 @@ public class LlamaNative {
         try {
             System.loadLibrary("llama_native"); // Loads the native library
         } catch (UnsatisfiedLinkError e) {
-            Log.e(TAG, "Failed to load llama_native library", e);
+            Log.e(TAG, "Failed to load llama_native library. This indicates the native Llama implementation is not properly built.", e);
+            Log.w(TAG, "Using fallback implementation. To enable full Llama functionality, build the native library with llama.cpp support.");
         }
     }
 
