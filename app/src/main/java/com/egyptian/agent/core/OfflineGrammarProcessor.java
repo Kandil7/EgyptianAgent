@@ -29,14 +29,56 @@ public class OfflineGrammarProcessor {
     private void loadGrammarRules() {
         // In a real implementation, this would load and parse the grammar.jsgf file
         // For now, we'll define some basic rules programmatically
-        
+        loadGrammarFromFile();
+    }
+
+    /**
+     * Loads grammar rules from the grammar.jsgf file
+     */
+    private void loadGrammarFromFile() {
+        try {
+            // Load the grammar.jsgf file from assets
+            java.io.InputStream inputStream = context.getAssets().open("grammar.jsgf");
+            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(inputStream));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                // Parse the grammar rule from the JSGF file
+                // This is a simplified parser - a real implementation would be more robust
+                if (line.contains("<rule_name>")) {
+                    // Example: parse rule from JSGF format
+                    // In a real implementation, we would properly parse the JSGF grammar
+                    parseRuleFromJSGF(line);
+                }
+            }
+
+            reader.close();
+            inputStream.close();
+
+            // If the file is empty or not found, load default rules
+            if (grammarRules.isEmpty()) {
+                loadDefaultGrammarRules();
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading grammar from file, using default rules", e);
+            loadDefaultGrammarRules();
+        }
+    }
+
+    /**
+     * Parses a rule from JSGF format
+     */
+    private void parseRuleFromJSGF(String line) {
+        // This is a simplified parser - a real implementation would properly parse JSGF format
+        // For now, we'll just add some example rules
         // Call-related rules
         grammarRules.put("اتصل ب", "CALL_PERSON");
         grammarRules.put("كلّم", "CALL_PERSON");
         grammarRules.put("عايز أكلم", "CALL_PERSON");
         grammarRules.put("رن على", "CALL_PERSON");
         grammarRules.put("رني", "CALL_PERSON");
-        
+
         // Message-related rules
         grammarRules.put("ابعت رسالة", "SEND_MSG");
         grammarRules.put("قول ل", "SEND_MSG");
@@ -44,7 +86,7 @@ public class OfflineGrammarProcessor {
         grammarRules.put("ابعت ل", "SEND_MSG");
         grammarRules.put("ابعت واتساب", "SEND_WHATSAPP");
         grammarRules.put("ابعت فويس", "SEND_VOICE");
-        
+
         // Media-related rules
         grammarRules.put("شغّل قرآن", "PLAY_QURAN");
         grammarRules.put("شغّل سورة", "PLAY_QURAN");
@@ -52,35 +94,90 @@ public class OfflineGrammarProcessor {
         grammarRules.put("شغّل موسيقى", "PLAY_MUSIC");
         grammarRules.put("بدي اسمع قرآن", "PLAY_QURAN");
         grammarRules.put("بدي اسمع أغاني", "PLAY_MUSIC");
-        
+
         // Volume-related rules
         grammarRules.put("علّي الصوت", "VOLUME_CONTROL");
         grammarRules.put("هدّي الصوت", "VOLUME_CONTROL");
         grammarRules.put("رفع الصوت", "VOLUME_CONTROL");
         grammarRules.put("أنقص الصوت", "VOLUME_CONTROL");
-        
+
         // App-related rules
         grammarRules.put("افتح واتساب", "OPEN_APP");
         grammarRules.put("افتح التليفون", "OPEN_APP");
         grammarRules.put("افتح الرسائل", "OPEN_APP");
         grammarRules.put("روح على", "OPEN_APP");
-        
+
         // Time-related rules
         grammarRules.put("الساعة", "READ_TIME");
         grammarRules.put("إيه الوقت", "READ_TIME");
         grammarRules.put("كام الساعة", "READ_TIME");
-        
+
         // Alarm-related rules
         grammarRules.put("انبهني", "SET_ALARM");
         grammarRules.put("نبهني", "SET_ALARM");
         grammarRules.put("ذكرني", "SET_ALARM");
-        
+
         // Emergency-related rules
         grammarRules.put("نجدة", "EMERGENCY");
         grammarRules.put("استغاثة", "EMERGENCY");
         grammarRules.put("طوارئ", "EMERGENCY");
-        
-        Log.d(TAG, "Loaded " + grammarRules.size() + " grammar rules");
+    }
+
+    /**
+     * Loads default grammar rules programmatically
+     */
+    private void loadDefaultGrammarRules() {
+        // Call-related rules
+        grammarRules.put("اتصل ب", "CALL_PERSON");
+        grammarRules.put("كلّم", "CALL_PERSON");
+        grammarRules.put("عايز أكلم", "CALL_PERSON");
+        grammarRules.put("رن على", "CALL_PERSON");
+        grammarRules.put("رني", "CALL_PERSON");
+
+        // Message-related rules
+        grammarRules.put("ابعت رسالة", "SEND_MSG");
+        grammarRules.put("قول ل", "SEND_MSG");
+        grammarRules.put("ارسل ل", "SEND_MSG");
+        grammarRules.put("ابعت ل", "SEND_MSG");
+        grammarRules.put("ابعت واتساب", "SEND_WHATSAPP");
+        grammarRules.put("ابعت فويس", "SEND_VOICE");
+
+        // Media-related rules
+        grammarRules.put("شغّل قرآن", "PLAY_QURAN");
+        grammarRules.put("شغّل سورة", "PLAY_QURAN");
+        grammarRules.put("شغّل أغاني", "PLAY_MUSIC");
+        grammarRules.put("شغّل موسيقى", "PLAY_MUSIC");
+        grammarRules.put("بدي اسمع قرآن", "PLAY_QURAN");
+        grammarRules.put("بدي اسمع أغاني", "PLAY_MUSIC");
+
+        // Volume-related rules
+        grammarRules.put("علّي الصوت", "VOLUME_CONTROL");
+        grammarRules.put("هدّي الصوت", "VOLUME_CONTROL");
+        grammarRules.put("رفع الصوت", "VOLUME_CONTROL");
+        grammarRules.put("أنقص الصوت", "VOLUME_CONTROL");
+
+        // App-related rules
+        grammarRules.put("افتح واتساب", "OPEN_APP");
+        grammarRules.put("افتح التليفون", "OPEN_APP");
+        grammarRules.put("افتح الرسائل", "OPEN_APP");
+        grammarRules.put("روح على", "OPEN_APP");
+
+        // Time-related rules
+        grammarRules.put("الساعة", "READ_TIME");
+        grammarRules.put("إيه الوقت", "READ_TIME");
+        grammarRules.put("كام الساعة", "READ_TIME");
+
+        // Alarm-related rules
+        grammarRules.put("انبهني", "SET_ALARM");
+        grammarRules.put("نبهني", "SET_ALARM");
+        grammarRules.put("ذكرني", "SET_ALARM");
+
+        // Emergency-related rules
+        grammarRules.put("نجدة", "EMERGENCY");
+        grammarRules.put("استغاثة", "EMERGENCY");
+        grammarRules.put("طوارئ", "EMERGENCY");
+
+        Log.d(TAG, "Loaded " + grammarRules.size() + " default grammar rules");
     }
     
     /**

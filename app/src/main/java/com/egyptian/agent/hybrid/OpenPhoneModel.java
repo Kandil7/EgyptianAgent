@@ -33,10 +33,13 @@ public class OpenPhoneModel {
             // In a real implementation, this would load the OpenPhone model
             // For now, we'll simulate the loading process
             Log.i(TAG, "Initializing OpenPhone model: " + modelName);
-            
+
             // Simulate model loading delay
             Thread.sleep(1000);
-            
+
+            // In a real implementation, we would actually load the model from assets or internal storage
+            // Example: loadModelFromAssets();
+
             isLoaded = true;
             Log.i(TAG, "OpenPhone model loaded successfully: " + modelName);
         } catch (InterruptedException e) {
@@ -44,6 +47,38 @@ public class OpenPhoneModel {
             Thread.currentThread().interrupt();
         } catch (Exception e) {
             Log.e(TAG, "Error loading OpenPhone model: " + modelName, e);
+        }
+    }
+
+    /**
+     * Loads the model from assets
+     */
+    private void loadModelFromAssets() {
+        try {
+            // Get the model file from assets and copy it to internal storage if needed
+            String assetPath = "models/openphone/" + modelName + ".bin";
+            java.io.InputStream inputStream = context.getAssets().open(assetPath);
+
+            // Copy to internal storage
+            java.io.File modelFile = new java.io.File(context.getFilesDir(), modelName + ".bin");
+            java.io.FileOutputStream outputStream = new java.io.FileOutputStream(modelFile);
+
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            inputStream.close();
+            outputStream.close();
+
+            Log.d(TAG, "Model loaded from assets to: " + modelFile.getAbsolutePath());
+
+            // In a real implementation, we would initialize the actual model here
+            // Example: initializePyTorchModel(modelFile.getAbsolutePath());
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading model from assets", e);
         }
     }
     
