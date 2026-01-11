@@ -96,7 +96,6 @@ public class OpenPhoneModel {
         }
         
         try {
-            // In a real implementation, this would call the OpenPhone model
             // For now, we'll simulate the analysis based on the input text
             
             // Simple pattern matching for demonstration
