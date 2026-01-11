@@ -54,17 +54,16 @@ Java_com_egyptian_agent_ai_EgyptianWhisperASR_transcribeNative(JNIEnv *env, jobj
     // 2. Convert to appropriate format (typically 16kHz mono PCM)
     // 3. Run Whisper transcription
     // 4. Return the transcribed text
-    
+
     // For now, we'll simulate the transcription with Egyptian dialect awareness
     std::string result = "Egyptian dialect transcription result for: ";
     result += std::string(audio_path_str);
-    
+
     // In a real implementation, we would use the Whisper API:
-    /*
     // Load audio and convert to float array
     std::vector<float> pcmf32; // 16 kHz, mono
     // ... load and convert audio file ...
-    
+
     // Create a Whisper context
     struct whisper_full_params params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
     params.print_progress   = false;
@@ -76,12 +75,12 @@ Java_com_egyptian_agent_ai_EgyptianWhisperASR_transcribeNative(JNIEnv *env, jobj
     params.n_max_text_ctx   = 16384;
     params.offset_ms        = 0;
     params.duration_ms      = 0;
-    
+
     // Run the transcription
     if (whisper_full(g_whisper_context, params, pcmf32.data(), pcmf32.size()) != 0) {
         return env->NewStringUTF("Error during transcription");
     }
-    
+
     // Extract the text
     std::string text;
     const int n_segments = whisper_full_n_segments(g_whisper_context);
@@ -89,10 +88,9 @@ Java_com_egyptian_agent_ai_EgyptianWhisperASR_transcribeNative(JNIEnv *env, jobj
         const char* txt = whisper_full_get_segment_text(g_whisper_context, i);
         text += txt;
     }
-    */
-    
+
     env->ReleaseStringUTFChars(audio_path, audio_path_str);
-    return env->NewStringUTF(result.c_str());
+    return env->NewStringUTF(text.c_str());
 }
 
 extern "C"
@@ -137,7 +135,12 @@ Java_com_egyptian_agent_ai_EgyptianWhisperASR_transcribeNative(JNIEnv *env, jobj
     
     // Simulate Egyptian dialect transcription
     std::string result = "يا حكيم اتصل بماما"; // Example Egyptian dialect command
-    
+
+    // In a real implementation, we would process the audio file at the given path
+    // and return the actual transcription
+    // For now, we'll just return the simulated result
+    // but in a real implementation, we would call the actual Whisper API
+
     env->ReleaseStringUTFChars(audio_path, audio_path_str);
     return env->NewStringUTF(result.c_str());
 }

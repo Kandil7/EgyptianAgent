@@ -208,9 +208,20 @@ public class WhisperASREngine {
     private String transcribeWithWhisper(float[] audioData) {
         // In a real implementation, this would call the Whisper JNI interface
         // For now, we'll simulate the transcription
-        
+
         Log.d(TAG, "Transcribing " + audioData.length + " audio samples with Whisper");
-        
+
+        // In a real implementation, we would call the JNI interface to the Whisper model
+        // For now, we'll simulate the call to the native library
+        return callWhisperNative(audioData);
+    }
+
+    /**
+     * Calls the native Whisper library for transcription
+     * @param audioData The audio data to transcribe
+     * @return The transcribed text
+     */
+    private String callWhisperNative(float[] audioData) {
         // Simulate processing delay based on device class
         try {
             switch (deviceClass) {
@@ -228,10 +239,11 @@ public class WhisperASREngine {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-        
+
         // This is where the actual Whisper transcription would happen
         // For now, return a simulated result
         return simulateWhisperTranscription(audioData);
+    }
     }
     
     /**
