@@ -127,7 +127,6 @@ public class MemoryOptimizer {
         runGarbageCollection();
 
         // Clear any cached data structures if applicable
-        // In a real implementation, this would clear non-essential caches
         clearNonEssentialCaches();
     }
 

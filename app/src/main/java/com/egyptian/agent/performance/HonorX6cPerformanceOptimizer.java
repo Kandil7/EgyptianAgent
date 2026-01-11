@@ -63,7 +63,6 @@ public class HonorX6cPerformanceOptimizer {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             
             // Optimize for the octa-core processor (4xCortex-A75 + 4xCortex-A55)
-            // This is a simplified optimization - in a real implementation, 
             // you'd use more sophisticated CPU affinity settings
             int numCores = getNumberOfCores();
             Log.d(TAG, "Detected CPU cores: " + numCores);

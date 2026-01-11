@@ -49,8 +49,6 @@ public class MedicationReceiver extends BroadcastReceiver {
      * Schedules a follow-up reminder after 5 minutes if the user didn't acknowledge
      */
     private void scheduleFollowUpReminder(Context context, String medicationName, String dosage) {
-        // In a real implementation, this would schedule another alarm for 5 minutes later
-        // For now, we'll implement the actual scheduling
         scheduleFollowUpReminderImpl(context, medicationName, dosage);
     }
 
