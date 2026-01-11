@@ -164,7 +164,6 @@ public class HonorX6cPerformanceOptimizer {
         // Set appropriate cache sizes based on available RAM
         // For example, adjust the size of contact cache, model cache, etc.
         
-        // In a real implementation, we would configure caches based on available RAM
         // For now, we'll just log the optimization
         configureCachesForAvailableRAM();
     }
