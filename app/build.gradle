@@ -31,10 +31,7 @@ android {
             buildConfig = true
         }
 
-        // Specify the ABIs we want to target - only include arm64-v8a to match splits
-        ndk {
-            abiFilters 'arm64-v8a'
-        }
+        // Note: ABI filters are handled by splits configuration below
     }
 
     buildTypes {
@@ -74,7 +71,7 @@ android {
         abi {
             enable true
             reset()
-            include 'arm64-v8a'
+            include 'arm64-v8a', 'armeabi-v7a'  // Include both ABIs for broader compatibility
             universalApk false
         }
     }
