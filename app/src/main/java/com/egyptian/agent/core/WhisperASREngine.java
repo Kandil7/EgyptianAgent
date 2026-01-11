@@ -244,15 +244,14 @@ public class WhisperASREngine {
         // For now, return a simulated result
         return simulateWhisperTranscription(audioData);
     }
-    }
-    
+
     /**
      * Simulates Whisper transcription for demonstration purposes
      */
     private String simulateWhisperTranscription(float[] audioData) {
         // In a real implementation, this would call the actual Whisper model
         // For simulation, we'll return a placeholder based on some characteristics of the audio
-        
+
         // Just for simulation purposes, return some common Egyptian phrases
         // based on the length and characteristics of the audio
         if (audioData.length > 10000) {
@@ -263,15 +262,15 @@ public class WhisperASREngine {
             return "أنا هنا";
         }
     }
-    
+
     /**
      * Stops listening for speech
      */
     public void stopListening() {
         Log.i(TAG, "Stopping Whisper ASR engine");
-        
+
         isRecording = false;
-        
+
         try {
             if (recordingThread != null && recordingThread.isAlive()) {
                 recordingThread.interrupt();
@@ -280,7 +279,7 @@ public class WhisperASREngine {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-        
+
         try {
             if (audioRecord != null) {
                 if (audioRecord.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING) {
@@ -292,19 +291,19 @@ public class WhisperASREngine {
         } catch (Exception e) {
             Log.e(TAG, "Error releasing audio recorder", e);
         }
-        
+
         Log.i(TAG, "Whisper ASR engine stopped");
     }
-    
+
     /**
      * Cleans up resources
      */
     public void destroy() {
         stopListening();
-        
+
         inferenceExecutor.shutdown();
         audioProcessingExecutor.shutdown();
-        
+
         Log.i(TAG, "Whisper ASR engine destroyed");
     }
 }

@@ -181,8 +181,7 @@ public class WakeWordDetector {
         // In a real implementation, this would analyze the audio properly
         return false;
     }
-    }
-    
+
     /**
      * Destroys the wake word detector and cleans up resources
      */
@@ -195,7 +194,7 @@ public class WakeWordDetector {
             sttEngine.destroy();
         }
     }
-    
+
     /**
      * Callback interface for wake word detection
      */

@@ -205,6 +205,8 @@ public class WhatsAppExecutor {
      * @return The phone number, or null if not found
      */
     private static String getPhoneNumberForContact(Context context, String contactName) {
+        // In a real implementation, this would get the phone number for the recipient
+        // First, try to get the contact's phone number from the contacts
         try {
             // Query the contacts provider for the contact name
             android.database.Cursor cursor = context.getContentResolver().query(
