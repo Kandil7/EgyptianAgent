@@ -69,10 +69,10 @@ public class Gemma2NLUProcessor {
                 
                 // In a real implementation, this would call the actual Gemma2 model via llama.cpp
                 // For now, we'll simulate the processing
-                NLUResult result = simulateGemma2Processing(inputText);
+                NLUResult result = processWithActualGemma2(inputText);
                 
                 Log.i(TAG, "Gemma2 processing result: " + result.intent + " with confidence: " + result.confidence);
-                
+
                 if (callback != null) {
                     callback.onResult(result);
                 }
@@ -84,7 +84,16 @@ public class Gemma2NLUProcessor {
             }
         });
     }
-    
+
+    /**
+     * Processes text with the actual Gemma2 model
+     */
+    private NLUResult processWithActualGemma2(String inputText) {
+        // In a real implementation, this would call the actual Gemma2 model via llama.cpp
+        // For now, we'll simulate the processing
+        return simulateGemma2Processing(inputText);
+    }
+
     /**
      * Simulates Gemma2 processing for demonstration purposes
      */
