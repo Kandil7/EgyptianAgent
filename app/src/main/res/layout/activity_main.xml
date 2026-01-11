@@ -3,84 +3,54 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="center">
-
-    <ImageView
-        android:id="@+id/logoImageView"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:src="@drawable/ic_launcher_foreground"
-        android:layout_marginBottom="24dp"
-        android:contentDescription="Egyptian Agent Logo" />
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/titleTextView"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="الوكيل المصري"
+        android:text="Egyptian Agent"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:layout_marginBottom="8dp"
-        android:textColor="#2196F3" />
-
-    <TextView
-        android:id="@+id/subtitleTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="المساعد الصوتي لمصر"
-        android:textSize="16sp"
-        android:layout_marginBottom="32dp"
-        android:textColor="#757575" />
+        android:gravity="center"
+        android:layout_marginBottom="24dp" />
 
     <TextView
         android:id="@+id/statusTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="جارٍ التحقق من الأذونات..."
-        android:textSize="14sp"
-        android:padding="12dp"
-        android:background="#E3F2FD"
-        android:layout_marginBottom="24dp"
-        android:gravity="center" />
+        android:text="Service Status: Unknown"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:layout_marginBottom="24dp" />
 
     <Button
         android:id="@+id/startServiceButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="بدء خدمة الصوت"
-        android:textSize="16sp"
-        android:padding="12dp"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="#2196F3" />
+        android:text="Start Voice Service"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/stopServiceButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Stop Voice Service"
+        android:layout_marginBottom="16dp" />
 
     <Button
         android:id="@+id/seniorModeButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="تشغيل وضع كبار السن"
-        android:textSize="16sp"
-        android:padding="12dp"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="#4CAF50" />
+        android:text="Toggle Senior Mode"
+        android:layout_marginBottom="16dp" />
 
     <TextView
-        android:id="@+id/instructionsTitleTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="التعليمات:"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="8dp"
-        android:textColor="#212121" />
-
-    <TextView
-        android:id="@+id/instructionsTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="• قول \"يا كبير\" أو \"يا صاحبي\" لتفعيل المساعد\n• في وضع كبار السن، الصوت يكون أبطأ وأعلى\n• في حالات الطوارئ، قول \"نجدة\" أو \"استغاثة\""
+        android:text="To activate the assistant, say 'يا صاحبي' or 'يا كبير' in senior mode"
         android:textSize="14sp"
-        android:padding="8dp"
-        android:background="#F5F5F5" />
+        android:gravity="center"
+        android:layout_marginTop="24dp" />
 
 </LinearLayout>
