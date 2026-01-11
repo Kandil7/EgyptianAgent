@@ -74,7 +74,6 @@ public class SeniorMode {
      */
     public static boolean isCommandAllowed(String command) {
         // In senior mode, restrict certain complex commands
-        // For now, allow all commands but in a real implementation
         // this could filter out complex or potentially confusing commands
         return true;
     }
