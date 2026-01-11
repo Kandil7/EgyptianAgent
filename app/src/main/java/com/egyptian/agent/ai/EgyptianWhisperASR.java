@@ -83,8 +83,15 @@ public class EgyptianWhisperASR {
     private String extractModelToInternalStorage() {
         // In a real implementation, this would extract the Whisper model
         // from assets to internal storage for faster access
+        return extractWhisperModelFromAssets();
+    }
+
+    /**
+     * Extracts the Whisper model from assets to internal storage
+     */
+    private String extractWhisperModelFromAssets() {
         File modelDir = new File(context.getFilesDir(), "models/whisper-egy");
-        
+
         // Create models directory if it doesn't exist
         if (!modelDir.exists()) {
             if (!modelDir.mkdirs()) {
@@ -93,8 +100,36 @@ public class EgyptianWhisperASR {
             }
         }
 
-        // Return the expected path for the Whisper model
-        return new File(modelDir, "pytorch_model.bin").getAbsolutePath();
+        // Define the model file name
+        String modelFileName = "ggml-model-whisper.bin"; // Common Whisper model file name
+        File modelFile = new File(modelDir, modelFileName);
+
+        // Check if model already exists
+        if (modelFile.exists()) {
+            Log.d(TAG, "Whisper model already exists: " + modelFile.getAbsolutePath());
+            return modelFile.getAbsolutePath();
+        }
+
+        // Extract model from assets
+        try {
+            java.io.InputStream inputStream = context.getAssets().open("models/whisper/" + modelFileName);
+            java.io.FileOutputStream outputStream = new java.io.FileOutputStream(modelFile);
+
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            inputStream.close();
+            outputStream.close();
+
+            Log.d(TAG, "Whisper model extracted to: " + modelFile.getAbsolutePath());
+            return modelFile.getAbsolutePath();
+        } catch (Exception e) {
+            Log.e(TAG, "Error extracting Whisper model from assets", e);
+            return null;
+        }
     }
 
     /**

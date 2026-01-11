@@ -186,11 +186,83 @@ public class EmergencyHandler {
                 
                 // In a real implementation, this would share the location with emergency contacts
                 // For now, we'll just log it
+                shareLocationWithEmergencyContacts(context, latitude, longitude);
             } else {
                 Log.w(TAG, "Could not retrieve location for emergency");
             }
         } catch (Exception e) {
             Log.e(TAG, "Error getting location for emergency", e);
+        }
+    }
+
+    /**
+     * Shares location with configured emergency contacts
+     * @param context Context for the operation
+     * @param latitude Latitude of current position
+     * @param longitude Longitude of current position
+     */
+    private static void shareLocationWithEmergencyContacts(Context context, double latitude, double longitude) {
+        // Create location URL
+        String locationUrl = "https://www.google.com/maps/search/?api=1&query=" + latitude + "," + longitude;
+
+        Log.d(TAG, "Sharing emergency location: " + locationUrl);
+
+        // In a real implementation, this would:
+        // 1. Get emergency contacts from app settings
+        // 2. Send SMS or make calls to these contacts with the location
+        // 3. Possibly send via WhatsApp or other messaging apps
+        // 4. Log the emergency event
+
+        // For now, we'll simulate sending to configured emergency contacts
+        String[] emergencyContacts = getEmergencyContacts(context);
+        if (emergencyContacts != null) {
+            for (String contactNumber : emergencyContacts) {
+                sendLocationSms(context, contactNumber, locationUrl);
+            }
+        }
+    }
+
+    /**
+     * Gets configured emergency contacts from app settings
+     * @param context Context for the operation
+     * @return Array of emergency contact numbers
+     */
+    private static String[] getEmergencyContacts(Context context) {
+        // In a real implementation, this would retrieve emergency contacts from shared preferences
+        // or a database where the user has configured their emergency contacts
+        android.content.SharedPreferences prefs = context.getSharedPreferences("emergency_contacts", Context.MODE_PRIVATE);
+        String contactsStr = prefs.getString("contacts", "");
+
+        if (!contactsStr.isEmpty()) {
+            return contactsStr.split(",");
+        }
+
+        // Default emergency contacts could be retrieved from settings
+        return new String[]{"122", "123"}; // Police and ambulance as examples
+    }
+
+    /**
+     * Sends location via SMS to a contact
+     * @param context Context for the operation
+     * @param phoneNumber Phone number to send to
+     * @param locationUrl Location URL to send
+     */
+    private static void sendLocationSms(Context context, String phoneNumber, String locationUrl) {
+        try {
+            String message = "Egyptian Agent Emergency: Location during emergency situation: " + locationUrl;
+
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
+                Log.w(TAG, "SMS permission not granted for emergency location sharing");
+                return;
+            }
+
+            android.telephony.SmsManager smsManager = android.telephony.SmsManager.getDefault();
+            smsManager.sendTextMessage(phoneNumber, null, message, null, null);
+
+            Log.d(TAG, "Emergency location sent to: " + phoneNumber);
+        } catch (Exception e) {
+            Log.e(TAG, "Error sending emergency location SMS to: " + phoneNumber, e);
         }
     }
     
