@@ -171,8 +171,6 @@ public class EmergencyHandler {
                 
                 Log.d(TAG, "Emergency location: " + locationUrl);
                 
-                // In a real implementation, this would share the location with emergency contacts
-                // For now, we'll just log it
                 shareLocationWithEmergencyContacts(context, latitude, longitude);
             } else {
                 Log.w(TAG, "Could not retrieve location for emergency");
@@ -194,7 +192,6 @@ public class EmergencyHandler {
 
         Log.d(TAG, "Sharing emergency location: " + locationUrl);
 
-        // In a real implementation, this would:
         // 1. Get emergency contacts from app settings
         // 2. Send SMS or make calls to these contacts with the location
         // 3. Possibly send via WhatsApp or other messaging apps

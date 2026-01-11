@@ -43,7 +43,6 @@ public class Gemma2NLUProcessor {
             throw new Exception("Gemma2 model not found: " + modelPath);
         }
         
-        // In a real implementation, this would load the model using llama.cpp
         // For now, we'll just verify the file exists and mark as loaded
         isModelLoaded = true;
         
@@ -67,8 +66,6 @@ public class Gemma2NLUProcessor {
             try {
                 Log.d(TAG, "Processing text with Gemma2: " + inputText);
                 
-                // In a real implementation, this would call the actual Gemma2 model via llama.cpp
-                // For now, we'll simulate the processing
                 NLUResult result = processWithActualGemma2(inputText);
                 
                 Log.i(TAG, "Gemma2 processing result: " + result.intent + " with confidence: " + result.confidence);

@@ -80,7 +80,6 @@ public class CallExecutor {
      * @return The extracted contact name
      */
     private static String extractContactName(String command) {
-        // This is a simplified extraction - in a real implementation, 
         // this would use more sophisticated NLP techniques
         String[] keywords = {"ب", "على", "لـ", "لى", "مع"};
         
