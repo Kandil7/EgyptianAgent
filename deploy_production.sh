@@ -1,6 +1,7 @@
 #!/bin/bash
-# Production Deployment Script for Egyptian Agent
-# Deploys the Egyptian Agent as a system app on Honor X6c devices
+
+# Production deployment script for Egyptian Agent
+# Deploys the APK as a system app on Honor X6c devices
 
 set -e  # Exit on any error
 
@@ -8,163 +9,237 @@ set -e  # Exit on any error
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}=== Egyptian Agent Production Deployment ===${NC}"
-echo -e "${BLUE}Deploying to Honor X6c (MediaTek Helio G81 Ultra)${NC}"
+echo -e "${GREEN}Starting Egyptian Agent production deployment...${NC}"
 
 # Configuration
-PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
-BUILD_DIR="$PROJECT_DIR/app/build/outputs/apk"
-APK_NAME="EgyptianAgent-production.apk"
+DEVICE_SERIAL=${DEVICE_SERIAL:-""}
+APK_PATH=${APK_PATH:-"app/build/outputs/apk/release/app-release.apk"}
 SYSTEM_APP_DIR="/system/priv-app/EgyptianAgent"
-BACKUP_DIR="/sdcard/egyptian_agent_backup"
+TEMP_DIR="/sdcard"
+PACKAGE_NAME="com.egyptian.agent"
+BACKUP_DIR="/sdcard/backup_$(date +%Y%m%d_%H%M%S)"
 
-# Function to print status
-print_status() {
-    echo -e "${GREEN}[INFO]${NC} $1"
-}
-
-print_warning() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
-}
-
-print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
-# Check prerequisites
+# Function to check prerequisites
 check_prerequisites() {
-    print_status "Checking prerequisites..."
-
+    echo -e "${GREEN}Checking prerequisites...${NC}"
+    
     # Check if ADB is available
     if ! command -v adb &> /dev/null; then
-        print_error "ADB not found! Please install Android SDK platform-tools."
+        echo -e "${RED}Error: ADB is not installed or not in PATH${NC}"
         exit 1
     fi
-
+    
     # Check if device is connected
-    DEVICE_COUNT=$(adb devices | grep -c "device$")
-    if [ "$DEVICE_COUNT" -eq 0 ]; then
-        print_error "No connected devices found!"
-        exit 1
-    fi
-
-    # Check if device is rooted
-    IS_ROOTED=$(adb shell su -c "id" 2>/dev/null | grep -c "uid=0")
-    if [ "$IS_ROOTED" -eq 0 ]; then
-        print_error "Device is not rooted! Egyptian Agent requires root access to function as a system app."
-        exit 1
-    fi
-
-    print_status "All prerequisites met"
-}
-
-# Build the application
-build_application() {
-    print_status "Building Egyptian Agent application..."
-
-    cd "$PROJECT_DIR"
-    
-    # Clean previous build
-    ./gradlew clean
-    
-    # Build release APK
-    ./gradlew assembleRelease
-    
-    # Verify APK was created
-    if [ ! -f "$BUILD_DIR/release/app-release.apk" ]; then
-        print_error "APK file not found at $BUILD_DIR/release/app-release.apk"
-        exit 1
-    fi
-    
-    # Rename APK for clarity
-    cp "$BUILD_DIR/release/app-release.apk" "$BUILD_DIR/release/$APK_NAME"
-    
-    print_status "Application built successfully: $BUILD_DIR/release/$APK_NAME"
-}
-
-# Backup existing installation
-backup_existing() {
-    print_status "Checking for existing installation..."
-    
-    EXISTS=$(adb shell "[ -d $SYSTEM_APP_DIR ] && echo 'exists' || echo 'not_exists'")
-    
-    if [ "$EXISTS" = "exists" ]; then
-        print_status "Creating backup of existing installation..."
-        adb shell su -c "mkdir -p $BACKUP_DIR"
-        adb shell su -c "cp -r $SYSTEM_APP_DIR $BACKUP_DIR/$(date +%Y%m%d_%H%M%S)"
-        print_status "Backup created at $BACKUP_DIR"
+    if [ -z "$DEVICE_SERIAL" ]; then
+        DEVICE_COUNT=$(adb devices | grep -c "device$")
+        if [ "$DEVICE_COUNT" -eq 0 ]; then
+            echo -e "${RED}Error: No device connected${NC}"
+            exit 1
+        elif [ "$DEVICE_COUNT" -gt 1 ]; then
+            echo -e "${RED}Error: Multiple devices connected. Please specify DEVICE_SERIAL.${NC}"
+            adb devices
+            exit 1
+        fi
     else
-        print_status "No existing installation found"
+        # Check if the specified device is connected
+        if ! adb -s "$DEVICE_SERIAL" devices | grep -q "device$"; then
+            echo -e "${RED}Error: Device $DEVICE_SERIAL is not connected${NC}"
+            exit 1
+        fi
+    fi
+    
+    # Check if device is rooted
+    if [ -z "$DEVICE_SERIAL" ]; then
+        IS_ROOTED=$(adb shell su -c "id" 2>/dev/null | grep -c "uid=0")
+    else
+        IS_ROOTED=$(adb -s "$DEVICE_SERIAL" shell su -c "id" 2>/dev/null | grep -c "uid=0")
+    fi
+    
+    if [ "$IS_ROOTED" -eq 0 ]; then
+        echo -e "${RED}Error: Device is not rooted or SU access denied${NC}"
+        exit 1
+    fi
+    
+    echo -e "${GREEN}Prerequisites check passed${NC}"
+}
+
+# Function to prepare device for installation
+prepare_device() {
+    echo -e "${GREEN}Preparing device for installation...${NC}"
+    
+    # Remount system partition as writable
+    if [ -z "$DEVICE_SERIAL" ]; then
+        adb shell su -c "mount -o rw,remount /system"
+        RESULT=$?
+    else
+        adb -s "$DEVICE_SERIAL" shell su -c "mount -o rw,remount /system"
+        RESULT=$?
+    fi
+    
+    if [ $RESULT -ne 0 ]; then
+        echo -e "${RED}Error: Failed to remount system partition as writable${NC}"
+        exit 1
+    fi
+    
+    # Create backup of existing installation if present
+    if [ -z "$DEVICE_SERIAL" ]; then
+        HAS_EXISTING=$(adb shell su -c "[ -d $SYSTEM_APP_DIR ] && echo 1 || echo 0")
+    else
+        HAS_EXISTING=$(adb -s "$DEVICE_SERIAL" shell su -c "[ -d $SYSTEM_APP_DIR ] && echo 1 || echo 0")
+    fi
+    
+    if [ "$HAS_EXISTING" -eq 1 ]; then
+        echo -e "${YELLOW}Existing installation found, creating backup...${NC}"
+        
+        if [ -z "$DEVICE_SERIAL" ]; then
+            adb shell su -c "mkdir -p $BACKUP_DIR"
+            adb shell su -c "cp -r $SYSTEM_APP_DIR $BACKUP_DIR/"
+        else
+            adb -s "$DEVICE_SERIAL" shell su -c "mkdir -p $BACKUP_DIR"
+            adb -s "$DEVICE_SERIAL" shell su -c "cp -r $SYSTEM_APP_DIR $BACKUP_DIR/"
+        fi
+        
+        echo -e "${GREEN}Backup created at $BACKUP_DIR${NC}"
     fi
 }
 
-# Deploy as system app
-deploy_system_app() {
-    print_status "Deploying Egyptian Agent as system app..."
+# Function to install the APK as a system app
+install_system_app() {
+    echo -e "${GREEN}Installing Egyptian Agent as system app...${NC}"
     
     # Push APK to device
-    adb push "$BUILD_DIR/release/$APK_NAME" /sdcard/
+    echo -e "${GREEN}Pushing APK to device...${NC}"
+    if [ -z "$DEVICE_SERIAL" ]; then
+        adb push "$APK_PATH" "$TEMP_DIR/"
+    else
+        adb -s "$DEVICE_SERIAL" push "$APK_PATH" "$TEMP_DIR/"
+    fi
     
     # Create system app directory
-    adb shell su -c "mkdir -p $SYSTEM_APP_DIR"
+    if [ -z "$DEVICE_SERIAL" ]; then
+        adb shell su -c "mkdir -p $SYSTEM_APP_DIR"
+    else
+        adb -s "$DEVICE_SERIAL" shell su -c "mkdir -p $SYSTEM_APP_DIR"
+    fi
     
     # Copy APK to system directory
-    adb shell su -c "cp /sdcard/$APK_NAME $SYSTEM_APP_DIR/EgyptianAgent.apk"
+    APK_FILENAME=$(basename "$APK_PATH")
+    if [ -z "$DEVICE_SERIAL" ]; then
+        adb shell su -c "cp $TEMP_DIR/$APK_FILENAME $SYSTEM_APP_DIR/EgyptianAgent.apk"
+        adb shell su -c "chmod 644 $SYSTEM_APP_DIR/EgyptianAgent.apk"
+    else
+        adb -s "$DEVICE_SERIAL" shell su -c "cp $TEMP_DIR/$APK_FILENAME $SYSTEM_APP_DIR/EgyptianAgent.apk"
+        adb -s "$DEVICE_SERIAL" shell su -c "chmod 644 $SYSTEM_APP_DIR/EgyptianAgent.apk"
+    fi
     
-    # Set proper permissions
-    adb shell su -c "chmod 644 $SYSTEM_APP_DIR/EgyptianAgent.apk"
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Error: Failed to copy APK to system directory${NC}"
+        exit 1
+    fi
     
-    # Set proper ownership
-    adb shell su -c "chown 0:0 $SYSTEM_APP_DIR/EgyptianAgent.apk"
-    
-    print_status "Egyptian Agent deployed to system partition"
+    echo -e "${GREEN}APK installed to system directory${NC}"
 }
 
-# Optimize for Honor X6c
-optimize_for_honor() {
-    print_status "Optimizing for Honor X6c..."
+# Function to apply Honor-specific optimizations
+apply_honor_optimizations() {
+    echo -e "${GREEN}Applying Honor-specific optimizations...${NC}"
     
-    # Disable battery optimization for the app
-    adb shell su -c "dumpsys deviceidle whitelist +com.egyptian.agent"
-    
-    # Set app to be unrestricted
-    adb shell cmd appops set com.egyptian.agent RUN_IN_BACKGROUND allow
-    adb shell cmd appops set com.egyptian.agent SYSTEM_ALERT_WINDOW allow
-    
-    print_status "Honor X6c optimizations applied"
+    # Push optimization script to device
+    OPTIMIZATION_SCRIPT="honor_battery_fix.sh"
+    if [ -f "scripts/$OPTIMIZATION_SCRIPT" ]; then
+        if [ -z "$DEVICE_SERIAL" ]; then
+            adb push "scripts/$OPTIMIZATION_SCRIPT" "$TEMP_DIR/"
+            adb shell su -c "sh $TEMP_DIR/$OPTIMIZATION_SCRIPT"
+        else
+            adb -s "$DEVICE_SERIAL" push "scripts/$OPTIMIZATION_SCRIPT" "$TEMP_DIR/"
+            adb -s "$DEVICE_SERIAL" shell su -c "sh $TEMP_DIR/$OPTIMIZATION_SCRIPT"
+        fi
+        echo -e "${GREEN}Honor battery optimizations applied${NC}"
+    else
+        echo -e "${YELLOW}Honor optimization script not found, skipping...${NC}"
+    fi
 }
 
-# Restart services
+# Function to restart services
 restart_services() {
-    print_status "Restarting services..."
+    echo -e "${GREEN}Restarting services...${NC}"
     
     # Force stop the app if running
-    adb shell am force-stop com.egyptian.agent
+    if [ -z "$DEVICE_SERIAL" ]; then
+        adb shell am force-stop "$PACKAGE_NAME"
+        # Reboot the device to ensure system app takes effect
+        echo -e "${YELLOW}Rebooting device to complete installation...${NC}"
+        adb reboot
+    else
+        adb -s "$DEVICE_SERIAL" shell am force-stop "$PACKAGE_NAME"
+        # Reboot the device to ensure system app takes effect
+        echo -e "${YELLOW}Rebooting device to complete installation...${NC}"
+        adb -s "$DEVICE_SERIAL" reboot
+    fi
+}
+
+# Function to verify installation
+verify_installation() {
+    echo -e "${GREEN}Waiting for device to reboot...${NC}"
+    sleep 30  # Wait for device to start
     
-    # Reboot the device to ensure system app is properly loaded
-    print_warning "Rebooting device to complete installation..."
-    adb reboot
+    # Wait for device to be available
+    echo -e "${GREEN}Waiting for device to be available...${NC}"
+    until [ -z "$DEVICE_SERIAL" ] && adb devices | grep -q "device$" || [ -n "$DEVICE_SERIAL" ] && adb -s "$DEVICE_SERIAL" devices | grep -q "device$"; do
+        sleep 5
+        echo -e "${YELLOW}Still waiting...${NC}"
+    done
     
-    print_status "Device reboot initiated. Please wait for it to restart."
+    sleep 10  # Additional wait for services to start
+    
+    # Verify app is installed
+    if [ -z "$DEVICE_SERIAL" ]; then
+        IS_INSTALLED=$(adb shell pm list packages | grep -c "$PACKAGE_NAME")
+    else
+        IS_INSTALLED=$(adb -s "$DEVICE_SERIAL" shell pm list packages | grep -c "$PACKAGE_NAME")
+    fi
+    
+    if [ "$IS_INSTALLED" -eq 1 ]; then
+        echo -e "${GREEN}Egyptian Agent successfully installed as system app${NC}"
+        
+        # Check if it's running as system app
+        if [ -z "$DEVICE_SERIAL" ]; then
+            APP_INFO=$(adb shell dumpsys package "$PACKAGE_NAME" | grep -i "userId")
+        else
+            APP_INFO=$(adb -s "$DEVICE_SERIAL" shell dumpsys package "$PACKAGE_NAME" | grep -i "userId")
+        fi
+        
+        if echo "$APP_INFO" | grep -q "1000\|0"; then
+            echo -e "${GREEN}App is running with system privileges${NC}"
+        else
+            echo -e "${YELLOW}App may not be running with system privileges${NC}"
+        fi
+    else
+        echo -e "${RED}Error: Egyptian Agent not found after installation${NC}"
+        exit 1
+    fi
 }
 
 # Main deployment process
 main() {
-    print_status "Starting Egyptian Agent production deployment"
+    echo -e "${GREEN}Starting deployment process for Egyptian Agent${NC}"
+    echo "  - APK Path: $APK_PATH"
+    echo "  - Device Serial: ${DEVICE_SERIAL:-Not specified (using first available)}"
+    echo "  - System App Directory: $SYSTEM_APP_DIR"
     
     check_prerequisites
-    build_application
-    backup_existing
-    deploy_system_app
-    optimize_for_honor
+    prepare_device
+    install_system_app
+    apply_honor_optimizations
     restart_services
+    verify_installation
     
-    print_status "Egyptian Agent production deployment completed!"
-    print_status "After device restarts, the app will be available as a system service."
+    echo -e "${GREEN}Deployment completed successfully!${NC}"
+    echo -e "${GREEN}Egyptian Agent is now installed as a system app on your Honor X6c device.${NC}"
+    echo -e "${GREEN}The device has been rebooted to complete the installation.${NC}"
 }
 
-# Run main process
-main
+# Run main function
+main "$@"

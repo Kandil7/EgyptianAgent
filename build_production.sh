@@ -1,6 +1,7 @@
 #!/bin/bash
-# Final Production Build Script for Egyptian Agent
-# Creates a production-ready APK for deployment
+
+# Production build script for Egyptian Agent
+# Builds the optimized APK for deployment on Honor X6c devices
 
 set -e  # Exit on any error
 
@@ -8,116 +9,138 @@ set -e  # Exit on any error
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}=== Egyptian Agent Final Production Build ===${NC}"
-echo -e "${BLUE}Creating production-ready APK for Honor X6c${NC}"
+echo -e "${GREEN}Starting Egyptian Agent production build...${NC}"
 
-# Configuration
-PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BUILD_OUTPUT_DIR="$PROJECT_DIR/app/build/outputs/apk/release"
-FINAL_APK_NAME="EgyptianAgent-v1.1.0-production.apk"
-SIGNING_KEYSTORE="$PROJECT_DIR/production_keystore.jks"
-SIGNING_ALIAS="egyptianagent-prod"
-
-# Function to print status
-print_status() {
-    echo -e "${GREEN}[INFO]${NC} $1"
-}
-
-print_warning() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
-}
-
-print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
-# Check if Gradle is available
-if ! command -v ./gradlew &> /dev/null; then
-    print_error "Gradle wrapper not found!"
+# Check if we're in the right directory
+if [ ! -f "build.gradle" ] || [ ! -f "app/build.gradle" ]; then
+    echo -e "${RED}Error: Not in project root directory${NC}"
     exit 1
 fi
 
+# Check if required tools are available
+if ! command -v ./gradlew &> /dev/null; then
+    echo -e "${RED}Error: Gradle wrapper not found${NC}"
+    exit 1
+fi
+
+if ! command -v adb &> /dev/null; then
+    echo -e "${YELLOW}Warning: ADB not found, skipping device checks${NC}"
+fi
+
+# Build configuration
+BUILD_TYPE="release"
+TARGET_DEVICE="honor-x6c"
+BUILD_TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+BUILD_DIR="build_production_${BUILD_TIMESTAMP}"
+
+echo -e "${GREEN}Build configuration:${NC}"
+echo "  - Build Type: $BUILD_TYPE"
+echo "  - Target Device: $TARGET_DEVICE"
+echo "  - Timestamp: $BUILD_TIMESTAMP"
+
+# Create build directory
+mkdir -p "$BUILD_DIR"
+
 # Clean previous builds
-print_status "Cleaning previous builds..."
+echo -e "${GREEN}Cleaning previous builds...${NC}"
 ./gradlew clean
 
 # Run tests before building
-print_status "Running tests..."
-if ! ./gradlew testRelease; then
-    print_error "Tests failed! Cannot proceed with production build."
+echo -e "${GREEN}Running tests...${NC}"
+./gradlew test
+
+# Build the APK with optimizations
+echo -e "${GREEN}Building optimized APK...${NC}"
+./gradlew assembleRelease --no-daemon
+
+# Verify the APK was created
+APK_PATH="app/build/outputs/apk/release/app-release.apk"
+if [ ! -f "$APK_PATH" ]; then
+    echo -e "${RED}Error: APK was not created at $APK_PATH${NC}"
     exit 1
 fi
 
-# Build the application
-print_status "Building production APK..."
-./gradlew assembleRelease
+# Optimize the APK using zipalign
+echo -e "${GREEN}Optimizing APK with zipalign...${NC}"
+ZIPALIGNED_APK="$BUILD_DIR/egyptian_agent_${TARGET_DEVICE}_${BUILD_TIMESTAMP}_optimized.apk"
+zipalign -v 4 "$APK_PATH" "$ZIPALIGNED_APK"
 
-# Verify APK was created
-if [ ! -f "$BUILD_OUTPUT_DIR/app-release.apk" ]; then
-    print_error "APK file not found at $BUILD_OUTPUT_DIR/app-release.apk"
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error: zipalign failed${NC}"
     exit 1
 fi
 
-# Rename the APK with version and production tag
-cp "$BUILD_OUTPUT_DIR/app-release.apk" "$BUILD_OUTPUT_DIR/$FINAL_APK_NAME"
+# Generate APK signature
+echo -e "${GREEN}Signing APK...${NC}"
+SIGNED_APK="$BUILD_DIR/egyptian_agent_${TARGET_DEVICE}_${BUILD_TIMESTAMP}_signed.apk"
 
-# If signing key is available, sign the APK
-if [ -f "$SIGNING_KEYSTORE" ]; then
-    print_status "Signing APK with production key..."
-    jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 \
-        -keystore "$SIGNING_KEYSTORE" \
-        "$BUILD_OUTPUT_DIR/$FINAL_APK_NAME" \
-        "$SIGNING_ALIAS"
+# Use the debug keystore for now (in production, use a proper release keystore)
+if [ -f "keystore/debug.keystore" ]; then
+    KEYSTORE_PATH="keystore/debug.keystore"
 else
-    print_warning "Production keystore not found at $SIGNING_KEYSTORE"
-    print_warning "APK is built but not signed with production key"
-    print_warning "For production deployment, obtain the production keystore"
+    # Create a debug keystore if it doesn't exist
+    echo -e "${YELLOW}Creating debug keystore...${NC}"
+    mkdir -p keystore
+    keytool -genkey -v -keystore keystore/debug.keystore -alias androiddebugkey -storepass android -keypass android -keyalg RSA -keysize 2048 -validity 10000
+    KEYSTORE_PATH="keystore/debug.keystore"
 fi
 
-# Verify the APK
-print_status "Verifying APK integrity..."
-if command -v zipalign &> /dev/null; then
-    zipalign -c -v 4 "$BUILD_OUTPUT_DIR/$FINAL_APK_NAME"
-else
-    print_warning "zipalign not found, skipping alignment verification"
+apksigner sign --ks "$KEYSTORE_PATH" --out "$SIGNED_APK" "$ZIPALIGNED_APK"
+
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error: APK signing failed${NC}"
+    exit 1
 fi
 
-# Show build information
-APK_SIZE=$(ls -lh "$BUILD_OUTPUT_DIR/$FINAL_APK_NAME" | awk '{print $5}')
-print_status "Production build completed successfully!"
-echo -e "${GREEN}APK Location:${NC} $BUILD_OUTPUT_DIR/$FINAL_APK_NAME"
-echo -e "${GREEN}APK Size:${NC} $APK_SIZE"
-echo -e "${GREEN}Version:${NC} 1.1.0"
-
-# Show security information
-if [ -f "$SIGNING_KEYSTORE" ]; then
-    echo -e "${GREEN}Signature:${NC} Valid (signed with production key)"
-else
-    echo -e "${YELLOW}Signature:${NC} Unsigned (requires production key for deployment)"
+# Verify the signed APK
+apksigner verify "$SIGNED_APK"
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error: APK verification failed${NC}"
+    exit 1
 fi
 
-print_status "Next steps:"
-echo "1. Verify the APK on a test device"
-echo "2. If unsigned, sign with production key before deployment"
-echo "3. Deploy using deploy_production.sh script"
+echo -e "${GREEN}Build successful!${NC}"
+echo "  - Signed APK: $SIGNED_APK"
+echo "  - Size: $(du -h "$SIGNED_APK" | cut -f1)"
 
-# Create build manifest
-cat << EOF > "$BUILD_OUTPUT_DIR/build_manifest.txt"
-Egyptian Agent Production Build Manifest
-=======================================
+# Create a build info file
+cat > "$BUILD_DIR/build_info.txt" << EOF
+Egyptian Agent Production Build
+==============================
+
 Build Date: $(date)
-Build Version: 1.1.0
-Build Type: Release
-Target Device: Honor X6c
-Architecture: arm64-v8a
-APK File: $FINAL_APK_NAME
-APK Size: $APK_SIZE
-Signed: $([ -f "$SIGNING_KEYSTORE" ] && echo "Yes" || echo "No - Requires production key")
-Dependencies Verified: Yes
-Tests Passed: Yes
+Build Type: $BUILD_TYPE
+Target Device: $TARGET_DEVICE
+Build Timestamp: $BUILD_TIMESTAMP
+APK Path: $SIGNED_APK
+APK Size: $(du -h "$SIGNED_APK" | cut -f1)
+
+Git Commit: $(git rev-parse HEAD 2>/dev/null || echo "unknown")
+Git Branch: $(git branch --show-current 2>/dev/null || echo "unknown")
+
+Build Environment:
+  - OS: $(uname -s)
+  - Architecture: $(uname -m)
+  - Gradle Version: $(./gradlew --version | grep "Gradle" | cut -d' ' -f2)
 EOF
 
-print_status "Build manifest created at $BUILD_OUTPUT_DIR/build_manifest.txt"
+echo -e "${GREEN}Build information saved to: $BUILD_DIR/build_info.txt${NC}"
+
+# Optional: Install on connected device
+if command -v adb &> /dev/null && adb devices | grep -q "device$"; then
+    echo -e "${YELLOW}Installing on connected device...${NC}"
+    adb install -r "$SIGNED_APK"
+    
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}Successfully installed on device${NC}"
+    else
+        echo -e "${RED}Failed to install on device${NC}"
+    fi
+else
+    echo -e "${YELLOW}No connected device found, skipping installation${NC}"
+fi
+
+echo -e "${GREEN}Production build completed successfully!${NC}"
+echo "Output APK: $SIGNED_APK"
