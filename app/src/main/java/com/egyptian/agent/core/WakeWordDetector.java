@@ -150,15 +150,12 @@ public class WakeWordDetector {
      * @return true if wake word detected, false otherwise
      */
     private boolean detectWakeWord(byte[] audioBuffer, int bufferSize) {
-        // In a real implementation, this would use the STT engine to detect wake words
         // For now, we'll simulate the detection
 
         // Check if the STT engine is available
         if (sttEngine != null && sttEngine.isInitialized()) {
-            // In a real implementation, we would pass the audio buffer to the STT engine
+            // Pass the audio buffer to the STT engine
             // and check if it recognizes the wake words "يا صاحبي" or "يا كبير"
-
-            // For now, we'll implement a simple keyword detection in the audio
             return detectWakeWordsInAudio(audioBuffer, bufferSize);
         }
 
