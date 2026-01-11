@@ -11,6 +11,7 @@ import com.egyptian.agent.stt.VoskSTTEngine;
 import com.egyptian.agent.stt.EgyptianNormalizer;
 import com.egyptian.agent.hybrid.HybridOrchestrator;
 import com.egyptian.agent.nlp.IntentResult;
+import com.egyptian.agent.ai.LlamaIntentEngine;
 import com.egyptian.agent.utils.CrashLogger;
 import com.egyptian.agent.utils.SystemAppHelper;
 import com.egyptian.agent.system.SystemPrivilegeManager;
@@ -25,6 +26,7 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
     private WakeWordDetector wakeWordDetector;
     private AudioManager audioManager;
     private HybridOrchestrator hybridOrchestrator;
+    private LlamaIntentEngine llamaIntentEngine;  // New Llama integration
     private ModelManager modelManager;
     private boolean isListening = false;
     private boolean isProcessing = false;
@@ -55,6 +57,7 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
         initializeAudioManager();
         initializeModelBasedOnDeviceClass(); // Initialize models based on device class
         initializeHybridOrchestrator(); // Initialize the new orchestrator
+        initializeLlamaIntentEngine(); // Initialize Llama Intent Engine
         initializeWakeWord();
         initializeForegroundService();
 
@@ -112,6 +115,17 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
             Log.e(TAG, "Failed to initialize Hybrid Orchestrator", e);
             CrashLogger.logError(this, e);
             TTSManager.speak(this, "حصل مشكلة في تهيئة الذكاء الاصطناعي المتقدم");
+        }
+    }
+
+    private void initializeLlamaIntentEngine() {
+        try {
+            llamaIntentEngine = new LlamaIntentEngine(this);
+            Log.i(TAG, "Llama Intent Engine initialized successfully");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to initialize Llama Intent Engine", e);
+            CrashLogger.logError(this, e);
+            TTSManager.speak(this, "حصل مشكلة في تهيئة نموذج لاما");
         }
     }
 
@@ -198,30 +212,68 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
             return;
         }
 
-        // Use the hybrid orchestrator to determine intent
-        if (hybridOrchestrator != null) {
-            // Normalize the command using Egyptian dialect processing
-            String normalizedCommand = EgyptianNormalizer.normalize(command);
+        // Use the Llama Intent Engine for advanced Egyptian dialect processing
+        if (llamaIntentEngine != null && llamaIntentEngine.isReady()) {
+            // Process command through Llama Intent Engine
+            IntentResult result = llamaIntentEngine.processEgyptianSpeech(command);
 
-            // Use the hybrid orchestrator to determine intent
-            hybridOrchestrator.determineIntent(normalizedCommand, result -> {
-                // Process the result on the main thread
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    // If the orchestrator returns unknown, try the Quantum class
-                    if (result.getIntentType() == IntentType.UNKNOWN) {
-                        Quantum quantum = new Quantum(VoiceService.this);
-                        quantum.processCommand(command);
-                        restartWakeWordListening();
-                    } else {
-                        processIntentResult(result, command);
-                    }
-                });
-            });
+            // Process the result
+            if (result.getIntentType() == IntentType.UNKNOWN) {
+                // If Llama doesn't recognize, try hybrid orchestrator as fallback
+                if (hybridOrchestrator != null) {
+                    // Normalize the command using Egyptian dialect processing
+                    String normalizedCommand = EgyptianNormalizer.normalize(command);
+
+                    // Use the hybrid orchestrator to determine intent
+                    hybridOrchestrator.determineIntent(normalizedCommand, hybridResult -> {
+                        // Process the result on the main thread
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            // If the orchestrator returns unknown, try the Quantum class
+                            if (hybridResult.getIntentType() == IntentType.UNKNOWN) {
+                                Quantum quantum = new Quantum(VoiceService.this);
+                                quantum.processCommand(command);
+                                restartWakeWordListening();
+                            } else {
+                                processIntentResult(hybridResult, command);
+                            }
+                        });
+                    });
+                } else {
+                    // Fallback to Quantum class for intent detection
+                    Quantum quantum = new Quantum(this);
+                    quantum.processCommand(command);
+                    restartWakeWordListening();
+                }
+            } else {
+                // Process the result from Llama Intent Engine
+                processIntentResult(result, command);
+            }
         } else {
-            // Fallback to Quantum class for intent detection
-            Quantum quantum = new Quantum(this);
-            quantum.processCommand(command);
-            restartWakeWordListening();
+            // Fallback to hybrid orchestrator if Llama is not ready
+            if (hybridOrchestrator != null) {
+                // Normalize the command using Egyptian dialect processing
+                String normalizedCommand = EgyptianNormalizer.normalize(command);
+
+                // Use the hybrid orchestrator to determine intent
+                hybridOrchestrator.determineIntent(normalizedCommand, result -> {
+                    // Process the result on the main thread
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        // If the orchestrator returns unknown, try the Quantum class
+                        if (result.getIntentType() == IntentType.UNKNOWN) {
+                            Quantum quantum = new Quantum(VoiceService.this);
+                            quantum.processCommand(command);
+                            restartWakeWordListening();
+                        } else {
+                            processIntentResult(result, command);
+                        }
+                    });
+                });
+            } else {
+                // Fallback to Quantum class for intent detection
+                Quantum quantum = new Quantum(this);
+                quantum.processCommand(command);
+                restartWakeWordListening();
+            }
         }
     }
 
@@ -327,6 +379,10 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
 
         if (hybridOrchestrator != null) {
             hybridOrchestrator.destroy();
+        }
+
+        if (llamaIntentEngine != null) {
+            llamaIntentEngine.destroy();
         }
 
         if (audioManager != null) {
