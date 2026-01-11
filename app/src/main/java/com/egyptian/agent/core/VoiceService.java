@@ -164,28 +164,21 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
             hybridOrchestrator.determineIntent(normalizedCommand, result -> {
                 // Process the result on the main thread
                 new Handler(Looper.getMainLooper()).post(() -> {
-                    processIntentResult(result, command);
+                    // If the orchestrator returns unknown, try the Quantum class
+                    if (result.getIntentType() == IntentType.UNKNOWN) {
+                        Quantum quantum = new Quantum(VoiceService.this);
+                        quantum.processCommand(command);
+                        restartWakeWordListening();
+                    } else {
+                        processIntentResult(result, command);
+                    }
                 });
             });
         } else {
-            // Fallback to original processing if orchestrator is not available
-            IntentType intent = IntentRouter.detectIntent(command);
-            switch (intent) {
-                case CALL_CONTACT:
-                    // CallExecutor.handleCommand(this, command);
-                    break;
-                case SEND_WHATSAPP:
-                    // WhatsAppExecutor.handleCommand(this, command);
-                    break;
-                case SET_ALARM:
-                    // AlarmExecutor.handleCommand(this, command);
-                    break;
-                case READ_MISSED_CALLS:
-                    // CallLogExecutor.handleCommand(this, command);
-                    break;
-                default:
-                    handleUnknownCommand(command);
-            }
+            // Fallback to Quantum class for intent detection
+            Quantum quantum = new Quantum(this);
+            quantum.processCommand(command);
+            restartWakeWordListening();
         }
     }
 
@@ -236,7 +229,16 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
                 break;
             case UNKNOWN:
             default:
-                handleUnknownCommand(originalCommand);
+                // Try with Quantum class for additional intent detection
+                Quantum quantum = new Quantum(this);
+                quantum.processCommand(originalCommand);
+                // If still unknown, handle as unknown
+                if (!quantum.getLastContact().isEmpty()) {
+                    // Command was processed by Quantum
+                    restartWakeWordListening();
+                } else {
+                    handleUnknownCommand(originalCommand);
+                }
         }
     }
 

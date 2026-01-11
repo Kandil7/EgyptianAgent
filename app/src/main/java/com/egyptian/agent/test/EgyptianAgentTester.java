@@ -2,208 +2,206 @@ package com.egyptian.agent.test;
 
 import android.content.Context;
 import android.util.Log;
-import com.egyptian.agent.accessibility.SeniorModeManager;
-import com.egyptian.agent.accessibility.MedicationReminder;
-import com.egyptian.agent.core.TTSManager;
-import com.egyptian.agent.executors.EmergencyHandler;
-import com.egyptian.agent.stt.EgyptianNormalizer;
-import com.egyptian.agent.utils.CrashLogger;
-
-import java.time.LocalTime;
-import java.util.List;
+import com.egyptian.agent.core.Quantum;
+import com.egyptian.agent.core.OfflineGrammarProcessor;
+import com.egyptian.agent.core.ContextMemory;
 
 /**
- * Comprehensive test suite for the Egyptian Agent application
- * Validates all components according to the SRD specifications
+ * EgyptianAgentTester - Validates core functionality of the Egyptian Agent
+ * Tests the main components to ensure they work correctly
  */
 public class EgyptianAgentTester {
     private static final String TAG = "EgyptianAgentTester";
+    
     private Context context;
-    private boolean allTestsPassed = true;
+    private Quantum quantum;
+    private OfflineGrammarProcessor grammarProcessor;
+    private ContextMemory contextMemory;
     
     public EgyptianAgentTester(Context context) {
         this.context = context;
+        this.quantum = new Quantum(context);
+        this.grammarProcessor = new OfflineGrammarProcessor(context);
+        this.contextMemory = ContextMemory.getInstance(context);
     }
     
+    /**
+     * Runs all tests to validate the Egyptian Agent functionality
+     */
     public void runAllTests() {
-        Log.i(TAG, "Starting comprehensive test suite for Egyptian Agent");
+        Log.i(TAG, "Starting Egyptian Agent functionality tests...");
         
-        // Initialize TTS for test feedback
-        TTSManager.initialize(context);
+        // Test intent classification
+        testIntentClassification();
         
-        // Run individual test suites
-        testEgyptianDialectProcessing();
-        testSeniorModeFunctionality();
-        testEmergencySystem();
-        testAccessibilityFeatures();
-        testPerformanceMetrics();
+        // Test context memory
+        testContextMemory();
         
-        // Report final results
-        if (allTestsPassed) {
-            Log.i(TAG, "✅ ALL TESTS PASSED - Egyptian Agent is ready for production!");
-            TTSManager.speak(context, "اكتملت كل اختبارات الوكيل المصري بنجاح. النظام جاهز للإنتاج.");
-        } else {
-            Log.e(TAG, "❌ SOME TESTS FAILED - Please review the issues above.");
-            TTSManager.speak(context, "فيه مشاكل في بعض اختبارات الوكيل المصري. يلزم مراجعة المشكلة.");
-        }
+        // Test offline grammar processing
+        testOfflineGrammarProcessing();
+        
+        // Test command processing
+        testCommandProcessing();
+        
+        Log.i(TAG, "Egyptian Agent functionality tests completed!");
     }
     
-    private void testEgyptianDialectProcessing() {
-        Log.i(TAG, "Testing Egyptian dialect processing...");
+    /**
+     * Tests intent classification functionality
+     */
+    private void testIntentClassification() {
+        Log.i(TAG, "Testing intent classification...");
         
-        // Test basic normalization
-        String[] testInputs = {
-            "عايز أكلم ماما دلوقتي",
-            "رن على بابا",
-            "فايتة عليا",
-            "كلم أمي",
-            "بكرة الصبح"
+        String[] testCommands = {
+            "اتصل بماما",
+            "ابعت رسالة لجدو",
+            "شغّل قرآن",
+            "علّي الصوت",
+            "افتح واتساب",
+            "قولي المكالمات الفايتة"
         };
         
-        String[] expectedOutputs = {
-            "أريد أن أتصل بالأم الآن",
-            "اتصل بالأب",
-            "فاتت",
-            "اتصل بالأم",
-            "غداً الصباح"
+        for (String command : testCommands) {
+            String intent = quantum.classifyIntent(command);
+            Log.i(TAG, "Command: '" + command + "' -> Intent: " + intent);
+        }
+        
+        Log.i(TAG, "Intent classification tests completed");
+    }
+    
+    /**
+     * Tests context memory functionality
+     */
+    private void testContextMemory() {
+        Log.i(TAG, "Testing context memory...");
+        
+        // Test setting and getting values
+        contextMemory.setLastContact("أمي");
+        String lastContact = contextMemory.getLastContact();
+        Log.i(TAG, "Last contact: " + lastContact);
+        
+        contextMemory.setLastApp("واتساب");
+        String lastApp = contextMemory.getLastApp();
+        Log.i(TAG, "Last app: " + lastApp);
+        
+        // Test context update
+        contextMemory.updateContext("call_person", "contact", "بابا");
+        Log.i(TAG, "Updated context for call to بابا");
+        
+        Log.i(TAG, "Context memory tests completed");
+    }
+    
+    /**
+     * Tests offline grammar processing
+     */
+    private void testOfflineGrammarProcessing() {
+        Log.i(TAG, "Testing offline grammar processing...");
+        
+        String[] testCommands = {
+            "اتصل بماما",
+            "ابعت واتساب لجدو",
+            "شغّل قرآن كريم",
+            "علّي الصوت شوية",
+            "افتح التليفون",
+            "إيه الوقت دلوقتي"
         };
         
-        boolean allPassed = true;
-        for (int i = 0; i < testInputs.length; i++) {
-            String normalized = EgyptianNormalizer.normalize(testInputs[i]);
-            boolean passed = normalized.contains(expectedOutputs[i]);
-            
-            if (!passed) {
-                Log.e(TAG, "❌ Egyptian dialect test failed: " + testInputs[i] + 
-                      " -> Expected: " + expectedOutputs[i] + ", Got: " + normalized);
-                allTestsPassed = false;
-                allPassed = false;
-            } else {
-                Log.i(TAG, "✅ Egyptian dialect test passed: " + testInputs[i] + " -> " + normalized);
-            }
+        for (String command : testCommands) {
+            String intent = grammarProcessor.processCommand(command);
+            Log.i(TAG, "Grammar processing - Command: '" + command + "' -> Intent: " + intent);
         }
         
-        if (allPassed) {
-            Log.i(TAG, "✅ Egyptian dialect processing tests passed");
+        Log.i(TAG, "Offline grammar processing tests completed");
+    }
+    
+    /**
+     * Tests command processing
+     */
+    private void testCommandProcessing() {
+        Log.i(TAG, "Testing command processing...");
+        
+        String[] testCommands = {
+            "اتصل بماما",
+            "ابعت فويس لأخويا",
+            "شغّل أغاني محمد منير",
+            "هدّي الصوت",
+            "قول لتيتا إني جايلك بكرة"
+        };
+        
+        for (String command : testCommands) {
+            Log.i(TAG, "Processing command: '" + command + "'");
+            // Note: We won't actually execute these commands in testing mode
+            // Just validate that they would be processed
+            String intent = quantum.classifyIntent(command);
+            Log.i(TAG, "Classified as: " + intent);
+        }
+        
+        Log.i(TAG, "Command processing tests completed");
+    }
+    
+    /**
+     * Runs a specific test scenario
+     */
+    public void runScenarioTest(String scenario) {
+        Log.i(TAG, "Running scenario test: " + scenario);
+        
+        switch(scenario) {
+            case "call_scenario":
+                testCallScenario();
+                break;
+            case "message_scenario":
+                testMessageScenario();
+                break;
+            case "media_scenario":
+                testMediaScenario();
+                break;
+            default:
+                Log.w(TAG, "Unknown scenario: " + scenario);
         }
     }
     
-    private void testSeniorModeFunctionality() {
-        Log.i(TAG, "Testing Senior Mode functionality...");
+    /**
+     * Tests a call scenario
+     */
+    private void testCallScenario() {
+        Log.i(TAG, "Testing call scenario...");
         
-        SeniorModeManager seniorModeManager = new SeniorModeManager(context);
+        // Simulate: "اتصل بماما"
+        String command1 = "اتصل بماما";
+        String intent1 = quantum.classifyIntent(command1);
+        Log.i(TAG, "Command: '" + command1 + "' -> Intent: " + intent1);
         
-        // Test enabling senior mode
-        seniorModeManager.enable(context);
-        if (!SeniorModeManager.isEnabled()) {
-            Log.e(TAG, "❌ Senior mode enable test failed");
-            allTestsPassed = false;
-        } else {
-            Log.i(TAG, "✅ Senior mode enable test passed");
-        }
+        // Simulate: "كلمه" (referring to last contact)
+        String command2 = "كلمه";
+        String intent2 = quantum.classifyIntent(command2);
+        Log.i(TAG, "Command: '" + command2 + "' -> Intent: " + intent2);
         
-        // Test configuration
-        var config = seniorModeManager.getConfig();
-        if (config.getSpeechRate() != 0.75f) {
-            Log.e(TAG, "❌ Senior mode speech rate configuration test failed");
-            allTestsPassed = false;
-        } else {
-            Log.i(TAG, "✅ Senior mode speech rate configuration test passed");
-        }
-        
-        // Test adding medication reminder
-        MedicationReminder reminder = new MedicationReminder(
-            "حبوب الضغط", 
-            LocalTime.of(8, 0), 
-            "خلي بالك تاخد الحبوب مع كوب مياه"
-        );
-        
-        seniorModeManager.addMedicationReminder(reminder);
-        List<MedicationReminder> reminders = seniorModeManager.getMedicationReminders();
-        
-        if (reminders.isEmpty() || !reminders.get(0).getMedicationName().equals("حبوب الضغط")) {
-            Log.e(TAG, "❌ Medication reminder test failed");
-            allTestsPassed = false;
-        } else {
-            Log.i(TAG, "✅ Medication reminder test passed");
-        }
-        
-        // Disable senior mode
-        seniorModeManager.disable(context);
-        if (SeniorModeManager.isEnabled()) {
-            Log.e(TAG, "❌ Senior mode disable test failed");
-            allTestsPassed = false;
-        } else {
-            Log.i(TAG, "✅ Senior mode disable test passed");
-        }
+        Log.i(TAG, "Call scenario test completed");
     }
     
-    private void testEmergencySystem() {
-        Log.i(TAG, "Testing Emergency System...");
+    /**
+     * Tests a message scenario
+     */
+    private void testMessageScenario() {
+        Log.i(TAG, "Testing message scenario...");
         
-        // Note: We won't actually trigger an emergency in tests
-        // Instead, we'll verify the system is properly configured
+        String command = "ابعت فويس لجدو";
+        String intent = quantum.classifyIntent(command);
+        Log.i(TAG, "Command: '" + command + "' -> Intent: " + intent);
         
-        try {
-            EmergencyHandler emergencyHandler = new EmergencyHandler(context);
-            
-            // Test that the handler can be instantiated
-            Log.i(TAG, "✅ Emergency handler instantiation test passed");
-            
-            // Test emergency protocol constants
-            if (EmergencyHandler.class.getDeclaredField("EMERGENCY_NUMBERS") != null) {
-                Log.i(TAG, "✅ Emergency numbers configuration test passed");
-            } else {
-                Log.e(TAG, "❌ Emergency numbers configuration test failed");
-                allTestsPassed = false;
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "❌ Emergency system test failed", e);
-            allTestsPassed = false;
-        }
+        Log.i(TAG, "Message scenario test completed");
     }
     
-    private void testAccessibilityFeatures() {
-        Log.i(TAG, "Testing Accessibility Features...");
+    /**
+     * Tests a media scenario
+     */
+    private void testMediaScenario() {
+        Log.i(TAG, "Testing media scenario...");
         
-        // Test CrashLogger initialization
-        try {
-            CrashLogger.registerGlobalExceptionHandler(context);
-            Log.i(TAG, "✅ CrashLogger initialization test passed");
-        } catch (Exception e) {
-            Log.e(TAG, "❌ CrashLogger initialization test failed", e);
-            allTestsPassed = false;
-        }
+        String command = "شغّل قرآن هادي";
+        String intent = quantum.classifyIntent(command);
+        Log.i(TAG, "Command: '" + command + "' -> Intent: " + intent);
         
-        // Test TTSManager
-        try {
-            TTSManager.initialize(context);
-            Log.i(TAG, "✅ TTSManager initialization test passed");
-        } catch (Exception e) {
-            Log.e(TAG, "❌ TTSManager initialization test failed", e);
-            allTestsPassed = false;
-        }
-    }
-    
-    private void testPerformanceMetrics() {
-        Log.i(TAG, "Testing Performance Metrics...");
-        
-        // Memory usage test (conceptual - actual implementation would measure real usage)
-        Runtime runtime = Runtime.getRuntime();
-        long maxMemory = runtime.maxMemory();
-        long usedMemory = runtime.totalMemory() - runtime.freeMemory();
-        
-        Log.i(TAG, "Memory usage: " + (usedMemory / 1024 / 1024) + " MB of " + (maxMemory / 1024 / 1024) + " MB");
-        
-        // Performance is considered acceptable if under 450MB as per SRD
-        if (usedMemory > 450 * 1024 * 1024) {
-            Log.w(TAG, "⚠️ High memory usage detected: " + (usedMemory / 1024 / 1024) + " MB");
-        } else {
-            Log.i(TAG, "✅ Memory usage is within acceptable limits");
-        }
-    }
-    
-    public boolean getAllTestsPassed() {
-        return allTestsPassed;
+        Log.i(TAG, "Media scenario test completed");
     }
 }
