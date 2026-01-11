@@ -117,8 +117,6 @@ public class TTSManager {
      * @return Processed text with Egyptian dialect considerations
      */
     private static String applyEgyptianTransformations(String text) {
-        // In a real implementation, this would apply transformations
-        // specific to Egyptian Arabic pronunciation
         String transformedText = text;
 
         // Example transformations (these would be more extensive in reality):

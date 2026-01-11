@@ -121,8 +121,6 @@ public class VoskSTTEngine {
         this.callback = callback;
         isListening = true;
 
-        // In a real implementation, this would start audio recording
-        // and feed the audio to the recognizer
         startAudioRecording();
     }
 

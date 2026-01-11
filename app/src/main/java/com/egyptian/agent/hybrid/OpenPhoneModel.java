@@ -30,15 +30,13 @@ public class OpenPhoneModel {
      */
     private void initializeModel() {
         try {
-            // In a real implementation, this would load the OpenPhone model
-            // For now, we'll simulate the loading process
             Log.i(TAG, "Initializing OpenPhone model: " + modelName);
 
             // Simulate model loading delay
             Thread.sleep(1000);
 
-            // In a real implementation, we would actually load the model from assets or internal storage
-            // Example: loadModelFromAssets();
+            // Actually load the model from assets or internal storage
+            loadModelFromAssets();
 
             isLoaded = true;
             Log.i(TAG, "OpenPhone model loaded successfully: " + modelName);
