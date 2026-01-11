@@ -81,8 +81,6 @@ public class EgyptianWhisperASR {
      * @return Path to the extracted model file, or null if failed
      */
     private String extractModelToInternalStorage() {
-        // In a real implementation, this would extract the Whisper model
-        // from assets to internal storage for faster access
         return extractWhisperModelFromAssets();
     }
 
