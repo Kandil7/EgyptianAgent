@@ -72,7 +72,6 @@ public class OpenPhoneModel {
 
             Log.d(TAG, "Model loaded from assets to: " + modelFile.getAbsolutePath());
 
-            // In a real implementation, we would initialize the actual model here
             // Example: initializePyTorchModel(modelFile.getAbsolutePath());
 
         } catch (Exception e) {

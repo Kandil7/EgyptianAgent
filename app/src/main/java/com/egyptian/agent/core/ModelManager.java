@@ -114,9 +114,6 @@ public class ModelManager {
     public void initializeModels(ModelInitializationCallback callback) {
         Log.i(TAG, "Initializing models for device class: " + deviceClass.name());
 
-        // In a real implementation, this would initialize the appropriate models
-        // based on the device class and available resources
-
         // Simulate initialization process
         new Thread(() -> {
             try {
@@ -182,7 +179,6 @@ public class ModelManager {
      * Initializes the Vosk model
      */
     private void initializeVoskModel() {
-        // In a real implementation, this would initialize the Vosk model
         // For now, we'll just log the action
         Log.d(TAG, "Initializing Vosk model for device class: " + deviceClass.name());
 

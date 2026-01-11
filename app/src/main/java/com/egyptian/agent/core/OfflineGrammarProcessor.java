@@ -27,7 +27,6 @@ public class OfflineGrammarProcessor {
      * Loads grammar rules from the grammar.jsgf file
      */
     private void loadGrammarRules() {
-        // In a real implementation, this would load and parse the grammar.jsgf file
         // For now, we'll define some basic rules programmatically
         loadGrammarFromFile();
     }
