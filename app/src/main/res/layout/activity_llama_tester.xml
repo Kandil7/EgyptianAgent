@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Llama Model Tester"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="24dp" />
+
+    <EditText
+        android:id="@+id/inputEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Egyptian dialect command (e.g., 'يا حكيم اتصل بماما')"
+        android:minLines="2"
+        android:maxLines="4"
+        android:scrollbars="vertical"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/testButton"
+        android:layout_width="match_content"
+        android:layout_height="wrap_content"
+        android:text="Test Llama Model"
+        android:layout_gravity="center"
+        android:layout_marginBottom="24dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Results:"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/resultTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Results will appear here..."
+            android:textSize="16sp"
+            android:background="#f0f0f0"
+            android:padding="12dp"
+            android:minHeight="100dp" />
+
+    </ScrollView>
+
+</LinearLayout>
