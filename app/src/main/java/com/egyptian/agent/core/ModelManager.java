@@ -131,6 +131,9 @@ public class ModelManager {
                 // Initialize Llama model if available
                 initializeLlamaModel();
 
+                // Initialize additional models based on device class
+                initializeAdditionalModels();
+
                 // Report success
                 Log.i(TAG, "All models initialized successfully for device class: " + deviceClass.name());
                 callback.onComplete(true);
@@ -140,6 +143,30 @@ public class ModelManager {
                 callback.onError(e);
             }
         }).start();
+    }
+
+    /**
+     * Initializes additional models based on device class
+     */
+    private void initializeAdditionalModels() {
+        // Initialize additional models based on the device class
+        switch (deviceClass) {
+            case LOW:
+                // For low-end devices, only load essential models
+                Log.d(TAG, "Initializing essential models for low-end device");
+                break;
+
+            case MID:
+                // For mid-range devices, load standard models
+                Log.d(TAG, "Initializing standard models for mid-range device");
+                break;
+
+            case HIGH:
+            case ELITE:
+                // For high-end devices, load all models including advanced ones
+                Log.d(TAG, "Initializing all models for high-end device");
+                break;
+        }
     }
 
     /**

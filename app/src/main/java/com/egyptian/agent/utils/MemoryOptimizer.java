@@ -122,11 +122,32 @@ public class MemoryOptimizer {
      */
     public static void freeMemory() {
         Log.d(TAG, "Freeing up memory");
-        
+
         // Run garbage collection
         runGarbageCollection();
-        
+
         // Clear any cached data structures if applicable
         // In a real implementation, this would clear non-essential caches
+        clearNonEssentialCaches();
+    }
+
+    /**
+     * Clears non-essential caches to free up memory
+     */
+    private static void clearNonEssentialCaches() {
+        // Clear any application-specific caches that can be regenerated
+        // This is a placeholder implementation - actual implementation would depend on
+        // what specific caches the application maintains
+
+        Log.d(TAG, "Clearing non-essential caches");
+
+        // Example: Clear image cache if present
+        // ImageCache.getInstance().clear();
+
+        // Example: Clear temporary files if present
+        // clearTempFiles();
+
+        // Example: Clear any cached API responses
+        // APICache.getInstance().clear();
     }
 }
