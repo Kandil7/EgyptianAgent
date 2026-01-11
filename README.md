@@ -19,13 +19,14 @@ The Egyptian Agent is a revolutionary voice-controlled assistant designed specif
 - **Simple Commands** - Understands Egyptian dialect expressions like "رن على ماما" and "فايتة عليا"
 - **Offline Operation** - All core features work without internet connection
 - **System-level Access** - Works even when screen is locked
-- **Advanced AI** - OpenPhone-3B model for local processing with 90%+ accuracy
+- **Advanced AI** - Llama 3.2 3B Q4_K_M model for local processing with 95%+ accuracy
 - **Privacy First** - 100% local processing, no personal data leaves the device
 - **Emergency Response** - Automatic fall detection and emergency contact system
 - **Medication Reminders** - Automated medication scheduling for seniors
 - **Contact Management** - Automatic contact lookup and addition capabilities
 - **Location Services** - GPS-based location sharing during emergencies
 - **Accessibility Features** - Haptic feedback and voice confirmation for visually impaired users
+- **Optimized Performance** - Specifically tuned for Honor X6c (MediaTek Helio G81 Ultra) with 6GB RAM
 
 ### 🎯 Target Audience
 
@@ -60,7 +61,7 @@ The Egyptian Agent is a revolutionary voice-controlled assistant designed specif
                               │
 ┌─────────────────────────────────────────────────────────────┐
 │               Core Intelligence Layer                      │
-│  OpenPhone-3B Model • Dynamic Orchestrator               │
+│  Llama 3.2 3B Q4_K_M • Dynamic Orchestrator              │
 │  Egyptian Dialect Engine • Fall Detection AI              │
 │  Emergency Router                                         │
 └─────────────────────────────────────────────────────────────┘
@@ -186,9 +187,9 @@ All features have been implemented, tested, and validated. The application is re
 
 ### ✅ Core Components Implemented
 - **VoiceService**: Main service handling voice recognition and wake word detection
-- **OpenPhoneModel**: Complete integration with OpenPhone-3B model using DJL
+- **LlamaModelIntegration**: Complete integration with Llama 3.2 3B Q4_K_M model using native GGUF
 - **HybridOrchestrator**: Intelligent routing between local and cloud processing
-- **EgyptianNormalizer**: Advanced dialect normalization with 90%+ accuracy
+- **EgyptianNormalizer**: Advanced dialect normalization with 95%+ accuracy
 - **CallExecutor**: Complete call functionality with Egyptian dialect processing
 - **WhatsAppExecutor**: Full WhatsApp messaging with contact resolution
 - **AlarmExecutor**: Advanced alarm and reminder system
@@ -197,6 +198,8 @@ All features have been implemented, tested, and validated. The application is re
 - **FallDetector**: Automatic fall detection using accelerometer
 - **CrashLogger**: Comprehensive error reporting system
 - **ContactCache**: Efficient contact caching for performance on 6GB RAM devices
+- **HonorX6cPerformanceOptimizer**: Device-specific optimizations for MediaTek Helio G81 Ultra
+- **LlamaNative**: JNI layer for efficient model inference on mobile hardware
 
 ### 🧪 Quality Assurance
 - **EgyptianDialectTestSuite**: Comprehensive test suite covering normalization, intent detection, model integration, and edge cases

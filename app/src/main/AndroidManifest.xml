@@ -79,6 +79,12 @@
             android:exported="false"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
 
+        <!-- Llama model tester activity -->
+        <activity
+            android:name=".hybrid.LlamaModelTesterActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
+
         <!-- Voice service (critical component) -->
         <service
             android:name=".core.VoiceService"
