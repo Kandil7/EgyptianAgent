@@ -1,325 +1,189 @@
 package com.egyptian.agent.core;
 
 import android.content.Context;
-import android.media.AudioManager;
-import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
-import com.egyptian.agent.accessibility.SeniorMode;
-import com.egyptian.agent.utils.CrashLogger;
-import java.util.HashMap;
+import android.os.Build;
 import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.HashMap;
+import java.util.Random;
 
+/**
+ * Text-to-Speech Manager for Egyptian Agent
+ * Handles speaking functionality with Egyptian dialect support
+ */
 public class TTSManager {
-
     private static final String TAG = "TTSManager";
-    private static TextToSpeech tts;
+    private static TextToSpeech textToSpeech;
+    private static Context applicationContext;
     private static boolean isInitialized = false;
-    private static boolean isSpeaking = false;
-    private static final Object ttsLock = new Object();
-
-    // Senior mode settings
-    private static float seniorSpeechRate = 0.75f;
-    private static float seniorPitch = 0.9f;
-    private static float seniorVolume = 1.0f;
-
-    // Normal mode settings
-    private static float normalSpeechRate = 1.0f;
-    private static float normalPitch = 1.0f;
-    private static float normalVolume = 0.9f;
-
-    // Thread pool for TTS operations
-    private static final ExecutorService ttsExecutor = Executors.newSingleThreadExecutor();
+    private static boolean isSeniorMode = false;
+    private static float speechRate = 1.0f;
+    private static float volume = 1.0f;
 
     /**
-     * Initialize TTS engine
+     * Initializes the TTS Manager
+     * @param context Application context
      */
     public static void initialize(Context context) {
-        if (tts != null) {
-            return;
-        }
-
-        Log.i(TAG, "Initializing TTS engine");
-
-        tts = new TextToSpeech(context, status -> {
-            if (status == TextToSpeech.SUCCESS) {
-                int result = tts.setLanguage(new Locale("ar", "EG"));
-
-                if (result == TextToSpeech.LANG_MISSING_DATA ||
-                    result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.e(TAG, "Arabic language not supported");
-                    CrashLogger.logError(context, new Exception("Arabic TTS not supported"));
-                } else {
-                    // Set default parameters
-                    tts.setSpeechRate(normalSpeechRate);
-                    tts.setPitch(normalPitch);
+        applicationContext = context.getApplicationContext();
+        
+        textToSpeech = new TextToSpeech(applicationContext, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    // Set language to Arabic
+                    int result = textToSpeech.setLanguage(new Locale("ar"));
+                    
+                    if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        Log.e(TAG, "This Language is not supported");
+                        // Fallback to English if Arabic is not available
+                        textToSpeech.setLanguage(Locale.ENGLISH);
+                    } else {
+                        Log.i(TAG, "TTS Initialized successfully with Arabic language");
+                    }
+                    
+                    // Set default speech rate and pitch
+                    textToSpeech.setSpeechRate(speechRate);
+                    textToSpeech.setPitch(1.0f);
+                    
                     isInitialized = true;
-                    Log.i(TAG, "TTS engine initialized successfully");
+                } else {
+                    Log.e(TAG, "TTS Initialization failed");
                 }
-            } else {
-                Log.e(TAG, "TTS initialization failed");
-                CrashLogger.logError(context, new Exception("TTS initialization failed"));
             }
         });
 
         // Set up utterance progress listener
-        setupUtteranceListener();
-
-        // Set audio attributes for better handling on Honor devices
-        setupAudioAttributes();
-    }
-
-    private static void setupUtteranceListener() {
-        if (tts == null) return;
-
-        tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+        textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override
             public void onStart(String utteranceId) {
-                isSpeaking = true;
-                Log.d(TAG, "TTS started speaking: " + utteranceId);
+                Log.d(TAG, "TTS started: " + utteranceId);
             }
 
             @Override
             public void onDone(String utteranceId) {
-                isSpeaking = false;
-                Log.d(TAG, "TTS finished speaking: " + utteranceId);
+                Log.d(TAG, "TTS completed: " + utteranceId);
             }
 
             @Override
-            @Deprecated
             public void onError(String utteranceId) {
-                isSpeaking = false;
-                Log.e(TAG, "TTS error on utterance: " + utteranceId);
-            }
-
-            @Override
-            public void onError(String utteranceId, int errorCode) {
-                isSpeaking = false;
-                Log.e(TAG, "TTS error on utterance: " + utteranceId + ", code: " + errorCode);
+                Log.e(TAG, "TTS error: " + utteranceId);
             }
         });
     }
 
-    private static void setupAudioAttributes() {
-        if (tts == null) return;
-
-        try {
-            // Set audio attributes to ensure TTS works properly on Honor devices
-            Bundle params = new Bundle();
-            params.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
-            // Note: AudioAttributes builder is not available in older Android versions
-            // This is a simplified version for compatibility
-        } catch (Exception e) {
-            Log.w(TAG, "Failed to set audio attributes", e);
-        }
-    }
-
     /**
-     * Speak text with default parameters
+     * Speaks the given text
+     * @param context Context for the operation
+     * @param text Text to speak
      */
     public static void speak(Context context, String text) {
-        speak(context, text, null);
-    }
-
-    /**
-     * Speak text with custom parameters
-     */
-    public static void speak(Context context, String text, Bundle params) {
-        if (text == null || text.trim().isEmpty()) {
+        if (!isInitialized) {
+            Log.w(TAG, "TTS not initialized, skipping: " + text);
             return;
         }
 
-        // Initialize TTS if needed
-        if (!isInitialized) {
-            initialize(context);
-        }
+        // Apply Egyptian dialect transformations if needed
+        String processedText = applyEgyptianTransformations(text);
 
-        // Use senior mode settings if enabled
-        Bundle ttsParams = params != null ? params : new Bundle();
-        applyCurrentModeSettings(ttsParams);
+        // Generate unique utterance ID
+        String utteranceId = String.valueOf(System.currentTimeMillis());
 
-        final String utteranceId = "utt_" + System.currentTimeMillis();
+        // Speak the text
+        HashMap<String, String> params = new HashMap<>();
+        params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utteranceId);
 
-        Log.i(TAG, "Speaking: " + text);
-
-        // Execute on background thread to avoid blocking UI
-        ttsExecutor.execute(() -> {
-            synchronized (ttsLock) {
-                if (isSpeaking) {
-                    // Wait for current speech to finish
-                    try {
-                        ttsLock.wait(3000); // Wait up to 3 seconds
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                }
-
-                // Add utterance ID to parameters
-                HashMap<String, String> ttsParamsMap = new HashMap<>();
-                ttsParamsMap.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utteranceId);
-
-                // Set volume if specified
-                if (ttsParams.containsKey(TextToSpeech.Engine.KEY_PARAM_VOLUME)) {
-                    float volume = ttsParams.getFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME);
-                    ttsParamsMap.put(TextToSpeech.Engine.KEY_PARAM_VOLUME, String.valueOf(volume));
-                }
-
-                // Set stream type if specified
-                if (ttsParams.containsKey(TextToSpeech.Engine.KEY_PARAM_STREAM)) {
-                    int stream = ttsParams.getInt(TextToSpeech.Engine.KEY_PARAM_STREAM);
-                    ttsParamsMap.put(TextToSpeech.Engine.KEY_PARAM_STREAM, String.valueOf(stream));
-                }
-
-                // Speak with parameters
-                int result = tts.speak(text, TextToSpeech.QUEUE_FLUSH, ttsParamsMap, utteranceId);
-
-                if (result == TextToSpeech.ERROR) {
-                    Log.e(TAG, "TTS speak failed for text: " + text);
-                    CrashLogger.logError(context, new Exception("TTS speak failed"));
-                }
-            }
-        });
-    }
-
-    /**
-     * Speak with high priority (emergency situations)
-     */
-    public static void speakWithPriority(Context context, String text, boolean priority) {
-        Bundle params = new Bundle();
-
-        if (priority) {
-            // Maximum volume and priority
-            params.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f);
-            params.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_ALARM);
-        }
-
-        speak(context, text, params);
-    }
-
-    /**
-     * Apply current mode settings (normal or senior) to TTS parameters
-     */
-    private static void applyCurrentModeSettings(Bundle params) {
-        float speechRate, pitch, volume;
-
-        if (SeniorMode.isEnabled()) {
-            speechRate = seniorSpeechRate;
-            pitch = seniorPitch;
-            volume = seniorVolume;
+        // Apply senior mode settings if enabled
+        if (isSeniorMode) {
+            textToSpeech.setSpeechRate(0.8f); // Slower speech
+            textToSpeech.setVolume(volume * 1.5f); // Louder volume
         } else {
-            speechRate = normalSpeechRate;
-            pitch = normalPitch;
-            volume = normalVolume;
+            textToSpeech.setSpeechRate(speechRate);
+            textToSpeech.setVolume(volume);
         }
 
-        // Apply settings
-        if (tts != null) {
-            tts.setSpeechRate(speechRate);
-            tts.setPitch(pitch);
-        }
-
-        // Volume needs to be handled differently
-        params.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, volume);
-    }
-
-    /**
-     * Check if TTS is currently speaking
-     */
-    public static boolean isSpeaking() {
-        return isSpeaking;
-    }
-
-    /**
-     * Stop current speech
-     */
-    public static void stopSpeaking() {
-        if (tts != null && isSpeaking) {
-            tts.stop();
-            isSpeaking = false;
-            Log.i(TAG, "TTS stopped speaking");
-        }
-    }
-
-    /**
-     * Set speech rate
-     */
-    public static void setSpeechRate(Context context, float rate) {
-        if (tts != null) {
-            tts.setSpeechRate(rate);
-            Log.d(TAG, "TTS speech rate set to: " + rate);
-
-            if (SeniorMode.isEnabled()) {
-                seniorSpeechRate = rate;
-            } else {
-                normalSpeechRate = rate;
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            textToSpeech.speak(processedText, TextToSpeech.QUEUE_FLUSH, params, utteranceId);
         } else {
-            CrashLogger.logWarning(context, "TTS not initialized when setting speech rate");
+            textToSpeech.speak(processedText, TextToSpeech.QUEUE_FLUSH, params);
         }
     }
 
     /**
-     * Set pitch
+     * Applies Egyptian dialect transformations to the text
+     * @param text Original text
+     * @return Processed text with Egyptian dialect considerations
      */
-    public static void setPitch(Context context, float pitch) {
-        if (tts != null) {
-            tts.setPitch(pitch);
-            Log.d(TAG, "TTS pitch set to: " + pitch);
+    private static String applyEgyptianTransformations(String text) {
+        // In a real implementation, this would apply transformations
+        // specific to Egyptian Arabic pronunciation
+        String transformedText = text;
 
-            if (SeniorMode.isEnabled()) {
-                seniorPitch = pitch;
-            } else {
-                normalPitch = pitch;
-            }
-        } else {
-            CrashLogger.logWarning(context, "TTS not initialized when setting pitch");
-        }
+        // Example transformations (these would be more extensive in reality):
+        // Replace formal Arabic words with Egyptian colloquial equivalents
+        // This is a simplified example - a real implementation would be more comprehensive
+        transformedText = transformedText.replace("السيد", "العم");
+        transformedText = transformedText.replace("السيدة", "الست");
+        transformedText = transformedText.replace("الرجل", "الراجل");
+
+        return transformedText;
     }
 
     /**
-     * Set volume
-     */
-    public static void setVolume(Context context, float volume) {
-        if (SeniorMode.isEnabled()) {
-            seniorVolume = volume;
-        } else {
-            normalVolume = volume;
-        }
-        Log.d(TAG, "TTS volume set to: " + volume);
-    }
-
-    /**
-     * Special setup for senior mode
+     * Sets senior mode settings for TTS
+     * @param context Context for the operation
      */
     public static void setSeniorSettings(Context context) {
-        Log.i(TAG, "Applying senior mode TTS settings");
-        setSpeechRate(context, seniorSpeechRate);
-        setPitch(context, seniorPitch);
-
-        // Set maximum volume for seniors
-        seniorVolume = 1.0f;
-
-        // Special announcement for senior mode activation
-        speak(context, "وضع كبار السن نشط. الصوت هيبقى أبطأ وأعلى عشان الوضوح");
+        isSeniorMode = true;
+        speechRate = 0.8f; // Slower speech
+        volume = 1.2f;     // Louder volume
+        Log.d(TAG, "Senior mode TTS settings applied");
     }
 
     /**
-     * Release TTS resources
+     * Resets to normal TTS settings
+     */
+    public static void resetNormalSettings() {
+        isSeniorMode = false;
+        speechRate = 1.0f;
+        volume = 1.0f;
+        Log.d(TAG, "Normal TTS settings restored");
+    }
+
+    /**
+     * Stops current TTS playback
+     */
+    public static void stop() {
+        if (textToSpeech != null && isInitialized) {
+            textToSpeech.stop();
+        }
+    }
+
+    /**
+     * Shuts down the TTS engine
      */
     public static void shutdown() {
-        if (tts != null) {
-            tts.stop();
-            tts.shutdown();
-            tts = null;
+        if (textToSpeech != null) {
+            textToSpeech.shutdown();
             isInitialized = false;
-            isSpeaking = false;
-            Log.i(TAG, "TTS engine shutdown");
         }
+    }
 
-        // Shutdown executor
-        ttsExecutor.shutdown();
+    /**
+     * Checks if TTS is initialized
+     * @return true if initialized, false otherwise
+     */
+    public static boolean isInitialized() {
+        return isInitialized;
+    }
+
+    /**
+     * Gets the current senior mode status
+     * @return true if senior mode is active, false otherwise
+     */
+    public static boolean isSeniorMode() {
+        return isSeniorMode;
     }
 }
