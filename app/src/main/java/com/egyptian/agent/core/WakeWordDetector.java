@@ -23,8 +23,10 @@ public class WakeWordDetector {
     private static final String WAKE_WORD_MODEL_PATH = "model";
 
     private final Context context;
-    private Model wakeWordModel;
-    private Recognizer recognizer;
+    private final DeviceClassDetector.DeviceClass deviceClass;
+    private Model voskModel;
+    private Recognizer voskRecognizer;
+    private PocketSphinxWakeWordDetector pocketSphinxDetector;
     private AudioRecord audioRecord;
     private Thread recordingThread;
     private boolean isRunning = false;
@@ -46,35 +48,22 @@ public class WakeWordDetector {
     public WakeWordDetector(Context context, WakeWordCallback callback) {
         this.context = context;
         this.callback = callback;
+        this.deviceClass = ((MainApplication) context.getApplicationContext()).getDeviceClass();
         initialize();
     }
 
     private void initialize() {
         try {
-            Log.i(TAG, "Initializing wake word detector with model: " + WAKE_WORD_MODEL_PATH);
+            Log.i(TAG, "Initializing wake word detector for device class: " + deviceClass.name());
 
-            // Load the Vosk model
-            wakeWordModel = new Model(WAKE_WORD_MODEL_PATH);
-            recognizer = new Recognizer(wakeWordModel, SAMPLE_RATE);
-
-            // Configure audio recording
-            int minBufferSize = AudioRecord.getMinBufferSize(
-                SAMPLE_RATE,
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT
-            );
-
-            int bufferSize = Math.max(minBufferSize, BUFFER_SIZE * 2);
-
-            audioRecord = new AudioRecord(
-                MediaRecorder.AudioSource.VOICE_RECOGNITION,
-                SAMPLE_RATE,
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT,
-                bufferSize
-            );
-
-            Log.i(TAG, "Wake word detector initialized successfully");
+            // Choose implementation based on device class
+            if (deviceClass == DeviceClassDetector.DeviceClass.LOW) {
+                // Use PocketSphinx for low-end devices (more efficient)
+                initializePocketSphinx();
+            } else {
+                // Use Vosk for higher-end devices (more accurate)
+                initializeVosk();
+            }
         } catch (Exception e) {
             Log.e(TAG, "Failed to initialize wake word detector", e);
             CrashLogger.logError(context, e);
@@ -82,47 +71,107 @@ public class WakeWordDetector {
         }
     }
 
-    public void startListening() {
-        if (isRunning || audioRecord == null) return;
+    private void initializePocketSphinx() throws IOException {
+        Log.i(TAG, "Initializing PocketSphinx wake word detector");
 
-        Log.i(TAG, "Starting wake word detection");
-        isRunning = true;
-        isDetecting = false;
-
-        audioRecord.startRecording();
-
-        recordingThread = new Thread(() -> {
-            byte[] buffer = new byte[BUFFER_SIZE];
-            short[] audioData = new short[BUFFER_SIZE / 2]; // 16-bit audio
-
-            while (isRunning) {
-                try {
-                    int bytesRead = audioRecord.read(buffer, 0, buffer.length);
-
-                    if (bytesRead > 0) {
-                        // Convert byte array to short array for processing
-                        ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(audioData);
-
-                        // Detect silence or noise to optimize processing
-                        if (isSoundPresent(audioData)) {
-                            processAudio(buffer, bytesRead);
-                        }
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "Error during audio recording", e);
-                    CrashLogger.logError(context, e);
+        pocketSphinxDetector = new PocketSphinxWakeWordDetector(context, new PocketSphinxWakeWordDetector.WakeWordCallback() {
+            @Override
+            public void onWakeWordDetected() {
+                Log.i(TAG, "PocketSphinx detected wake word");
+                if (callback != null) {
+                    callback.onWakeWordDetected();
                 }
-            }
-
-            try {
-                audioRecord.stop();
-                audioRecord.release();
-            } catch (Exception e) {
-                Log.e(TAG, "Error stopping audio record", e);
             }
         });
 
-        recordingThread.start();
+        pocketSphinxDetector.initialize();
+        Log.i(TAG, "PocketSphinx wake word detector initialized successfully");
+    }
+
+    private void initializeVosk() throws Exception {
+        Log.i(TAG, "Initializing Vosk wake word detector");
+
+        // Load the Vosk model
+        voskModel = new Model(WAKE_WORD_MODEL_PATH);
+        voskRecognizer = new Recognizer(voskModel, SAMPLE_RATE);
+
+        // Configure audio recording
+        int minBufferSize = AudioRecord.getMinBufferSize(
+            SAMPLE_RATE,
+            AudioFormat.CHANNEL_IN_MONO,
+            AudioFormat.ENCODING_PCM_16BIT
+        );
+
+        int bufferSize = Math.max(minBufferSize, BUFFER_SIZE * 2);
+
+        audioRecord = new AudioRecord(
+            MediaRecorder.AudioSource.VOICE_RECOGNITION,
+            SAMPLE_RATE,
+            AudioFormat.CHANNEL_IN_MONO,
+            AudioFormat.ENCODING_PCM_16BIT,
+            bufferSize
+        );
+
+        Log.i(TAG, "Vosk wake word detector initialized successfully");
+    }
+
+    public void startListening() {
+        if (isRunning) return;
+
+        Log.i(TAG, "Starting wake word detection for device class: " + deviceClass.name());
+
+        if (deviceClass == DeviceClassDetector.DeviceClass.LOW) {
+            // Use PocketSphinx for low-end devices
+            if (pocketSphinxDetector != null) {
+                pocketSphinxDetector.startListening();
+                isRunning = true;
+                Log.i(TAG, "PocketSphinx wake word detection started");
+            }
+        } else {
+            // Use Vosk for higher-end devices
+            if (audioRecord == null) {
+                Log.e(TAG, "AudioRecord not initialized");
+                return;
+            }
+
+            isRunning = true;
+            isDetecting = false;
+
+            audioRecord.startRecording();
+
+            recordingThread = new Thread(() -> {
+                byte[] buffer = new byte[BUFFER_SIZE];
+                short[] audioData = new short[BUFFER_SIZE / 2]; // 16-bit audio
+
+                while (isRunning) {
+                    try {
+                        int bytesRead = audioRecord.read(buffer, 0, buffer.length);
+
+                        if (bytesRead > 0) {
+                            // Convert byte array to short array for processing
+                            ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(audioData);
+
+                            // Detect silence or noise to optimize processing
+                            if (isSoundPresent(audioData)) {
+                                processAudio(buffer, bytesRead);
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error during audio recording", e);
+                        CrashLogger.logError(context, e);
+                    }
+                }
+
+                try {
+                    audioRecord.stop();
+                    audioRecord.release();
+                } catch (Exception e) {
+                    Log.e(TAG, "Error stopping audio record", e);
+                }
+            });
+
+            recordingThread.start();
+        }
     }
 
     private boolean isSoundPresent(short[] audioData) {
@@ -140,8 +189,8 @@ public class WakeWordDetector {
         isDetecting = true;
 
         try {
-            if (recognizer.acceptWaveForm(buffer, bytesRead)) {
-                String result = recognizer.getResult();
+            if (voskRecognizer.acceptWaveForm(buffer, bytesRead)) {
+                String result = voskRecognizer.getResult();
                 processRecognitionResult(result);
             }
         } catch (Exception e) {
@@ -232,32 +281,41 @@ public class WakeWordDetector {
 
     public void stopListening() {
         isRunning = false;
-        try {
-            if (recordingThread != null && recordingThread.isAlive()) {
-                recordingThread.join(1000); // Wait up to 1 second
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
 
-        try {
-            if (audioRecord != null && audioRecord.getState() == AudioRecord.STATE_INITIALIZED) {
-                audioRecord.stop();
-                audioRecord.release();
+        if (deviceClass == DeviceClassDetector.DeviceClass.LOW) {
+            // Use PocketSphinx for low-end devices
+            if (pocketSphinxDetector != null) {
+                pocketSphinxDetector.stopListening();
             }
-        } catch (Exception e) {
-            Log.e(TAG, "Error stopping audio record", e);
-        }
+        } else {
+            // Use Vosk for higher-end devices
+            try {
+                if (recordingThread != null && recordingThread.isAlive()) {
+                    recordingThread.join(1000); // Wait up to 1 second
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
 
-        try {
-            if (recognizer != null) {
-                recognizer.shutdown();
+            try {
+                if (audioRecord != null && audioRecord.getState() == AudioRecord.STATE_INITIALIZED) {
+                    audioRecord.stop();
+                    audioRecord.release();
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error stopping audio record", e);
             }
-            if (wakeWordModel != null) {
-                wakeWordModel.close();
+
+            try {
+                if (voskRecognizer != null) {
+                    voskRecognizer.shutdown();
+                }
+                if (voskModel != null) {
+                    voskModel.close();
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error closing Vosk resources", e);
             }
-        } catch (Exception e) {
-            Log.e(TAG, "Error closing Vosk resources", e);
         }
     }
 
@@ -269,5 +327,9 @@ public class WakeWordDetector {
 
     public void destroy() {
         stopListening();
+
+        if (pocketSphinxDetector != null) {
+            pocketSphinxDetector.destroy();
+        }
     }
 }

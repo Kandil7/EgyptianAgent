@@ -146,6 +146,9 @@ dependencies {
     implementation "dev.rikka.shizuku:api:$rootProject.ext.shizukuVersion"
     implementation "dev.rikka.shizuku:provider:$rootProject.ext.shizukuVersion"
 
+    // PocketSphinx for wake word detection
+    implementation 'edu.cmu.pocketsphinx:pocketsphinx-android:5prealpha-release'
+
     // Special Honor device support
     compileOnly files('libs/honor-system-api.jar')
 }

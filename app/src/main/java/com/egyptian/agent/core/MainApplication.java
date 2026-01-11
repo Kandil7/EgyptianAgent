@@ -15,11 +15,16 @@ public class MainApplication extends Application {
     private PerformanceMonitor performanceMonitor;
     private BackupRestoreManager backupRestoreManager;
     private UserFeedbackSystem userFeedbackSystem;
+    private DeviceClassDetector.DeviceClass deviceClass;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "Egyptian Agent Application starting");
+
+        // Detect device class early in the application lifecycle
+        deviceClass = DeviceClassDetector.detectDevice(this);
+        Log.i(TAG, "Device class detected: " + deviceClass.name());
 
         // Initialize crash logger
         CrashLogger.registerGlobalExceptionHandler(this);
@@ -50,6 +55,11 @@ public class MainApplication extends Application {
     private void initializeServices() {
         // Initialize any background services
         Log.i(TAG, "All services initialized");
+
+        // Log recommended model configuration
+        DeviceClassDetector.ModelConfiguration config =
+            DeviceClassDetector.getRecommendedModelConfig(deviceClass);
+        Log.i(TAG, "Recommended model configuration: " + config.toString());
     }
 
     @Override
@@ -65,5 +75,12 @@ public class MainApplication extends Application {
             userFeedbackSystem.cleanup();
         }
         Log.i(TAG, "Egyptian Agent Application terminated");
+    }
+
+    /**
+     * Get the detected device class for the application
+     */
+    public DeviceClassDetector.DeviceClass getDeviceClass() {
+        return deviceClass;
     }
 }

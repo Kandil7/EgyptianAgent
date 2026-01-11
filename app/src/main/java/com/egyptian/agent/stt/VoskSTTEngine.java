@@ -40,9 +40,7 @@ public class VoskSTTEngine {
     }
 
     public VoskSTTEngine(Context context) throws Exception {
-        this.context = context;
-        this.callback = null;
-        initialize();
+        this(context, null);
     }
 
     public VoskSTTEngine(Context context, STTCallback callback) throws Exception {
@@ -51,15 +49,31 @@ public class VoskSTTEngine {
         initialize();
     }
 
+    public VoskSTTEngine(Context context, String modelPath) throws Exception {
+        this.context = context;
+        this.callback = null;
+        initialize(modelPath);
+    }
+
+    public VoskSTTEngine(Context context, String modelPath, STTCallback callback) throws Exception {
+        this.context = context;
+        this.callback = callback;
+        initialize(modelPath);
+    }
+
     private void initialize() throws Exception {
-        Log.i(TAG, "Initializing Vosk STT Engine");
+        initialize(STT_MODEL_PATH);
+    }
+
+    private void initialize(String modelPath) throws Exception {
+        Log.i(TAG, "Initializing Vosk STT Engine with model: " + modelPath);
 
         try {
-            // Load the Egyptian Arabic model
-            model = new Model(STT_MODEL_PATH);
+            // Load the specified model
+            model = new Model(modelPath);
             recognizer = new Recognizer(model, SAMPLE_RATE);
 
-            Log.i(TAG, "Vosk model loaded successfully");
+            Log.i(TAG, "Vosk model loaded successfully from: " + modelPath);
 
             // Configure audio recording
             int minBufferSize = AudioRecord.getMinBufferSize(
