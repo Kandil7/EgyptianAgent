@@ -16,7 +16,9 @@ import com.egyptian.agent.accessibility.SeniorMode;
 import com.egyptian.agent.core.TTSManager;
 import com.egyptian.agent.stt.EgyptianNormalizer;
 import com.egyptian.agent.utils.ContactCache;
+import com.egyptian.agent.utils.CrashLogger;
 import com.egyptian.agent.utils.VibrationManager;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -211,6 +213,16 @@ public class CallExecutor {
         }
 
         return null;
+    }
+
+    /**
+     * Extracts phone number from voice command
+     */
+    private static String extractNumber(String command) {
+        if (command == null) return "";
+
+        // Remove non-digits to extract phone number
+        return command.replaceAll("[^0-9+]", "");
     }
 
     /**
