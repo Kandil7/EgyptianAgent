@@ -125,6 +125,7 @@ public class PerformanceMonitor {
         if (memoryUsagePercent > 80) {
             Log.w(TAG, "High memory usage detected: " + String.format("%.2f%%", memoryUsagePercent));
             // In a real implementation, this might trigger memory optimizations
+            triggerMemoryOptimizations(context);
         }
     }
     
@@ -133,8 +134,31 @@ public class PerformanceMonitor {
      */
     private void checkCpuUsage() {
         // In a real implementation, this would check actual CPU usage
-        // For now, we'll just log that we're checking
-        Log.d(TAG, "CPU usage check performed");
+        try {
+            // Read CPU usage from system
+            java.lang.management.ManagementFactory managementFactory = java.lang.management.ManagementFactory;
+            java.lang.management.OperatingSystemMXBean operatingSystemMXBean = managementFactory.getOperatingSystemMXBean();
+
+            if (operatingSystemMXBean instanceof java.lang.management.OperatingSystemMXBean) {
+                java.lang.management.OperatingSystemMXBean osBean =
+                    (java.lang.management.OperatingSystemMXBean) operatingSystemMXBean;
+
+                double cpuLoad = osBean.getSystemCpuLoad();
+
+                if (cpuLoad != -1) {
+                    Log.d(TAG, String.format("CPU usage: %.2f%%", cpuLoad * 100));
+
+                    // If CPU usage is high, log a warning
+                    if (cpuLoad > 0.8) { // More than 80% CPU usage
+                        Log.w(TAG, String.format("High CPU usage detected: %.2f%%", cpuLoad * 100));
+                    }
+                } else {
+                    Log.w(TAG, "Unable to determine CPU usage");
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error checking CPU usage", e);
+        }
     }
     
     /**
@@ -142,8 +166,40 @@ public class PerformanceMonitor {
      */
     private void checkTemperature() {
         // In a real implementation, this would check device temperature sensors
-        // For now, we'll just log that we're checking
-        Log.d(TAG, "Temperature check performed");
+        try {
+            android.hardware.SensorManager sensorManager = (android.hardware.SensorManager)
+                context.getSystemService(Context.SENSOR_SERVICE);
+
+            android.hardware.Sensor tempSensor = sensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_TEMPERATURE);
+
+            if (tempSensor != null) {
+                // Register a listener to get temperature readings
+                sensorManager.registerListener(new android.hardware.SensorEventListener() {
+                    @Override
+                    public void onSensorChanged(android.hardware.SensorEvent event) {
+                        float temperature = event.values[0];
+                        Log.d(TAG, String.format("Device temperature: %.2f°C", temperature));
+
+                        // If temperature is high, log a warning
+                        if (temperature > 60.0f) { // High temperature threshold
+                            Log.w(TAG, String.format("High device temperature detected: %.2f°C", temperature));
+                        }
+
+                        // Unregister the listener after getting one reading
+                        sensorManager.unregisterListener(this);
+                    }
+
+                    @Override
+                    public void onAccuracyChanged(android.hardware.Sensor sensor, int accuracy) {
+                        // Handle accuracy changes if needed
+                    }
+                }, tempSensor, android.hardware.SensorManager.SENSOR_DELAY_NORMAL);
+            } else {
+                Log.w(TAG, "Temperature sensor not available on this device");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error checking device temperature", e);
+        }
     }
     
     /**
