@@ -11,6 +11,15 @@ project("llama_native")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Check if llama.cpp exists and set flag accordingly
+if(EXISTS "${CMAKE_SOURCE_DIR}/../../llama.cpp/CMakeLists.txt")
+    set(HAVE_LLAMA_CPP TRUE)
+    message(STATUS "Found llama.cpp, enabling full Llama functionality")
+else()
+    set(HAVE_LLAMA_CPP FALSE)
+    message(WARNING "llama.cpp not found, building with mock implementation")
+endif()
+
 # Create the native library
 add_library(
     # Sets the name of the library.
@@ -26,12 +35,42 @@ add_library(
 # Find required libraries
 find_library(log-lib log)
 
-# Link required libraries
-target_link_libraries(
-    # Specifies the target library.
-    llama_native
+if(HAVE_LLAMA_CPP)
+    # Add llama.cpp as a subdirectory
+    add_subdirectory(${CMAKE_SOURCE_DIR}/../../llama.cpp ${CMAKE_CURRENT_BINARY_DIR}/llama.cpp)
 
-    # Links the target library to the log library
-    # included in the NDK.
-    ${log-lib}
-)
+    # Link with llama libraries
+    target_link_libraries(
+        # Specifies the target library.
+        llama_native
+
+        # Links the target library to the llama library
+        llama
+        ggml
+
+        # Links the target library to the log library
+        # included in the NDK.
+        ${log-lib}
+    )
+
+    # Define preprocessor macro to enable llama.cpp integration
+    target_compile_definitions(llama_native PRIVATE USE_LLAMA_CPP)
+
+    # Include headers
+    target_include_directories(
+        llama_native
+        PRIVATE
+        ${CMAKE_SOURCE_DIR}/../../llama.cpp/common
+        ${CMAKE_SOURCE_DIR}/../../llama.cpp
+    )
+else()
+    # Just link with log library for mock implementation
+    target_link_libraries(
+        # Specifies the target library.
+        llama_native
+
+        # Links the target library to the log library
+        # included in the NDK.
+        ${log-lib}
+    )
+endif()
