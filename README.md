@@ -218,7 +218,7 @@ For full Llama 3.2 3B model functionality, you need to set up the native library
 
 2. **Get the Llama model**: Download `llama-3.2-3b-Q4_K_M.gguf` and place in `app/src/main/assets/model/`
 
-3. **Build native library** (see LLAMA_INTEGRATION_SETUP.md for detailed instructions)
+3. **Build native library** (see documentation/integrations/LLAMA_INTEGRATION_SETUP.md for detailed instructions)
 
 If the native library is not available, the system will automatically fall back to the OpenPhone model while maintaining all functionality.
 

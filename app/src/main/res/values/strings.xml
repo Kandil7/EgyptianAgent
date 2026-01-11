@@ -1,6 +1,15 @@
 <resources>
-    <string name="app_name">الوكيل المصري</string>
-    <string name="app_description">المساعد الصوتي لمصر</string>
-    <string name="voice_service_channel_name">خدمة الصوت</string>
-    <string name="voice_service_channel_description">خدمة التعرف على الأوامر الصوتية</string>
+    <string name="app_name">Egyptian Agent</string>
+    <string name="activate_assistant">Activate Assistant</string>
+    <string name="start_service">Start Voice Service</string>
+    <string name="stop_service">Stop Voice Service</string>
+    <string name="toggle_senior_mode">Toggle Senior Mode</string>
+    <string name="service_status">Service Status: %s</string>
+    <string name="wake_word">Say "يا صاحبي" or "يا كبير" to activate</string>
+    <string name="emergency_call">Emergency Call</string>
+    <string name="call_contact">Call Contact</string>
+    <string name="send_message">Send Message</string>
+    <string name="set_alarm">Set Alarm</string>
+    <string name="read_time">Read Time</string>
+    <string name="read_missed_calls">Read Missed Calls</string>
 </resources>

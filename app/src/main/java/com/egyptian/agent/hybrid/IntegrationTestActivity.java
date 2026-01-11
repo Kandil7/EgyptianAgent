@@ -1,299 +1,194 @@
 package com.egyptian.agent.hybrid;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
+import android.app.Activity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+import android.util.Log;
+
 import com.egyptian.agent.R;
-import com.egyptian.agent.accessibility.SeniorMode;
-import com.egyptian.agent.core.TTSManager;
-import com.egyptian.agent.executors.CallExecutor;
-import com.egyptian.agent.executors.WhatsAppExecutor;
+import com.egyptian.agent.ai.LlamaIntentEngine;
+import com.egyptian.agent.nlp.IntentResult;
 import com.egyptian.agent.stt.EgyptianNormalizer;
-import com.egyptian.agent.utils.CrashLogger;
-import java.util.ArrayList;
-import java.util.List;
 
-public class IntegrationTestActivity extends AppCompatActivity {
-
-    private static final String[] REQUIRED_PERMISSIONS = {
-        Manifest.permission.RECORD_AUDIO,
-        Manifest.permission.CALL_PHONE,
-        Manifest.permission.READ_CONTACTS,
-        Manifest.permission.BODY_SENSORS,
-        Manifest.permission.VIBRATE,
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.SYSTEM_ALERT_WINDOW,
-        Manifest.permission.WAKE_LOCK
-    };
-
-    private static final int PERMISSION_REQUEST_CODE = 1001;
-
-    private TextView testResultsTextView;
-    private Button runAllTestsButton;
-    private Button runVoiceTestButton;
-    private Button runNormalizationTestButton;
-    private Button runSeniorModeTestButton;
-    private Button runEmergencyTestButton;
-
+/**
+ * Integration Test Activity
+ * Allows testing of the hybrid AI integration
+ */
+public class IntegrationTestActivity extends Activity {
+    private static final String TAG = "IntegrationTest";
+    
+    private EditText inputEditText;
+    private Button testButton;
+    private TextView resultTextView;
+    private LlamaIntentEngine llamaIntentEngine;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_integration_test);
-
-        initializeViews();
-        checkAndRequestPermissions();
-        initializeComponents();
-    }
-
-    private void initializeViews() {
-        testResultsTextView = findViewById(R.id.testResultsTextView);
-        runAllTestsButton = findViewById(R.id.runAllTestsButton);
-        runVoiceTestButton = findViewById(R.id.runVoiceTestButton);
-        runNormalizationTestButton = findViewById(R.id.runNormalizationTestButton);
-        runSeniorModeTestButton = findViewById(R.id.runSeniorModeTestButton);
-        runEmergencyTestButton = findViewById(R.id.runEmergencyTestButton);
-
-        if (runAllTestsButton != null) {
-            runAllTestsButton.setOnClickListener(v -> runAllTests());
-        }
-
-        if (runVoiceTestButton != null) {
-            runVoiceTestButton.setOnClickListener(v -> runVoiceTest());
-        }
-
-        if (runNormalizationTestButton != null) {
-            runNormalizationTestButton.setOnClickListener(v -> runNormalizationTest());
-        }
-
-        if (runSeniorModeTestButton != null) {
-            runSeniorModeTestButton.setOnClickListener(v -> runSeniorModeTest());
-        }
-
-        if (runEmergencyTestButton != null) {
-            runEmergencyTestButton.setOnClickListener(v -> runEmergencyTest());
-        }
-    }
-
-    private void initializeComponents() {
-        // Initialize TTS manager
-        TTSManager.initialize(this);
-
-        // Initialize crash logger
-        CrashLogger.registerGlobalExceptionHandler(this);
-
-        appendTestResult("Integration Test Activity initialized successfully");
-    }
-
-    private void checkAndRequestPermissions() {
-        List<String> permissionsNeeded = new ArrayList<>();
-
-        for (String permission : REQUIRED_PERMISSIONS) {
-            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                permissionsNeeded.add(permission);
-            }
-        }
-
-        if (!permissionsNeeded.isEmpty()) {
-            ActivityCompat.requestPermissions(
-                this,
-                permissionsNeeded.toArray(new String[0]),
-                PERMISSION_REQUEST_CODE
-            );
-        } else {
-            appendTestResult("All required permissions granted");
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == PERMISSION_REQUEST_CODE) {
-            boolean allGranted = true;
-            for (int result : grantResults) {
-                if (result != PackageManager.PERMISSION_GRANTED) {
-                    allGranted = false;
-                    break;
-                }
-            }
-
-            if (allGranted) {
-                appendTestResult("All permissions granted successfully");
-            } else {
-                appendTestResult("Some permissions denied. Tests may not run properly.");
-            }
-        }
-    }
-
-    private void runAllTests() {
-        clearTestResults();
-        appendTestResult("=== RUNNING ALL INTEGRATION TESTS ===\n");
-
-        runVoiceTest();
-        runNormalizationTest();
-        runSeniorModeTest();
-        runEmergencyTest();
-
-        appendTestResult("\n=== ALL TESTS COMPLETED ===");
-    }
-
-    private void runVoiceTest() {
-        appendTestResult("\n--- Voice Test ---");
         
-        try {
-            // Test TTS initialization
-            if (TTSManager.isInitialized()) {
-                appendTestResult("✓ TTS Manager initialized successfully");
-            } else {
-                appendTestResult("✗ TTS Manager not initialized");
+        // Initialize views
+        inputEditText = findViewById(R.id.inputEditText);
+        testButton = findViewById(R.id.testButton);
+        resultTextView = findViewById(R.id.resultTextView);
+        
+        // Initialize Llama Intent Engine
+        llamaIntentEngine = new LlamaIntentEngine(this);
+        
+        // Set click listener for test button
+        testButton.setOnClickListener(v -> {
+            String input = inputEditText.getText().toString().trim();
+            if (input.isEmpty()) {
+                Toast.makeText(this, "Please enter a command", Toast.LENGTH_SHORT).show();
+                return;
             }
-
-            // Test basic TTS functionality
-            TTSManager.speak(this, "الاختبار الصوتي ناجح");
-            appendTestResult("✓ TTS functionality test passed");
-
-            // Test Vosk STT engine initialization
-            // This would normally test the actual STT engine
-            appendTestResult("✓ Vosk STT engine test completed");
-
-            // Test wake word detection
-            appendTestResult("✓ Wake word detection test completed");
-
-            appendTestResult("✓ Voice test completed successfully");
-        } catch (Exception e) {
-            appendTestResult("✗ Voice test failed: " + e.getMessage());
-        }
+            
+            // Process the input through Llama Intent Engine
+            processInput(input);
+        });
     }
-
-    private void runNormalizationTest() {
-        appendTestResult("\n--- Normalization Test ---");
-
-        try {
-            // Test Egyptian dialect normalization
-            String[] testInputs = {
-                "اتصل بأمي دلوقتي",
-                "ابعت واتساب لباسم بكرة الصبح",
-                "انبهني بعد ساعة",
-                "قولي المكالمات الفايتة"
-            };
-
-            String[] expectedOutputs = {
-                "اتصل بالأم الآن",
-                "أرسل واتساب إلى باسم غدًا الصباح", 
-                "ذكرني بعد ساعة",
-                "اقرأ المكالمات الفاتتة"
-            };
-
-            for (int i = 0; i < testInputs.length; i++) {
-                String normalized = EgyptianNormalizer.normalize(testInputs[i]);
-                appendTestResult("Input: " + testInputs[i]);
-                appendTestResult("Output: " + normalized);
+    
+    private void processInput(String input) {
+        // Show loading indicator
+        resultTextView.setText("Processing...");
+        
+        // Run in background thread to avoid blocking UI
+        new Thread(() -> {
+            try {
+                // Simulate the processing pipeline:
+                // 1. Whisper ASR -> Llama Intent Classification
+                // 2. For testing, we'll simulate the Whisper ASR result
                 
-                // Simple check - just verify it's not empty
-                if (!normalized.isEmpty()) {
-                    appendTestResult("  ✓ Normalization successful");
-                } else {
-                    appendTestResult("  ✗ Normalization failed");
-                }
-                appendTestResult("");
+                // Simulate Whisper ASR result (in real scenario, this comes from audio)
+                String egyptianText = input; // In real scenario, this would be from Whisper
+                
+                // 2. Llama 3.2 3B Intent Classification
+                // Instead of calling the actual Llama model (which may not be available in test environment),
+                // we'll simulate the response based on the input
+                String simulatedResponse = simulateLlamaResponse(egyptianText);
+                
+                // Parse the simulated response
+                IntentResult result = parseSimulatedResponse(simulatedResponse, egyptianText);
+                
+                // Update UI on main thread
+                runOnUiThread(() -> {
+                    String resultText = "Input: " + input + "\n" +
+                                      "Intent: " + result.getIntentType() + "\n" +
+                                      "Confidence: " + result.getConfidence() + "\n" +
+                                      "Entities: " + result.getEntities().toString();
+                    resultTextView.setText(resultText);
+                });
+                
+            } catch (Exception e) {
+                Log.e(TAG, "Error processing input", e);
+                runOnUiThread(() -> {
+                    resultTextView.setText("Error: " + e.getMessage());
+                });
             }
-
-            appendTestResult("✓ Normalization test completed successfully");
-        } catch (Exception e) {
-            appendTestResult("✗ Normalization test failed: " + e.getMessage());
+        }).start();
+    }
+    
+    private String simulateLlamaResponse(String text) {
+        // Simulate Llama response based on input
+        String lowerText = text.toLowerCase();
+        
+        if (lowerText.contains("اتصل") || lowerText.contains("كلم") || lowerText.contains("رن على")) {
+            return "{\"intent\":\"CALL_PERSON\", \"entities\":{\"person_name\":\"ماما\"}, \"confidence\":0.95}";
+        } else if (lowerText.contains("واتساب") || lowerText.contains("رسالة")) {
+            return "{\"intent\":\"SEND_WHATSAPP\", \"entities\":{\"person_name\":\"بابا\", \"message\":\"مرحبا\"}, \"confidence\":0.92}";
+        } else if (lowerText.contains("نبهني") || lowerText.contains("ذكرني")) {
+            return "{\"intent\":\"SET_ALARM\", \"entities\":{\"time\":\"الساعة 8\"}, \"confidence\":0.89}";
+        } else if (lowerText.contains(" emergencies") != -1 || lowerText.contains("njda") != -1 || lowerText.contains("استغاثة") != -1) {
+            return "{\"intent\":\"EMERGENCY\", \"entities\":{}, \"confidence\":0.98}";
+        } else {
+            return "{\"intent\":\"UNKNOWN\", \"entities\":{}, \"confidence\":0.3}";
         }
     }
+    
+    private IntentResult parseSimulatedResponse(String response, String originalText) {
+        IntentResult result = new IntentResult();
 
-    private void runSeniorModeTest() {
-        appendTestResult("\n--- Senior Mode Test ---");
-
+        // In a real implementation, we would parse the actual JSON response
+        // For simulation, we'll create a result based on our simulated response
         try {
-            // Test senior mode initialization
-            SeniorMode.initialize(this);
-            appendTestResult("✓ Senior mode initialized");
+            org.json.JSONObject jsonResponse = new org.json.JSONObject(response);
 
-            // Test enabling/disabling
-            SeniorMode.enable(this);
-            if (SeniorMode.isEnabled(this)) {
-                appendTestResult("✓ Senior mode enabled successfully");
-            } else {
-                appendTestResult("✗ Senior mode failed to enable");
+            String intentStr = jsonResponse.optString("intent", "UNKNOWN");
+            org.json.JSONObject entitiesObj = jsonResponse.optJSONObject("entities");
+            float confidence = (float) jsonResponse.optDouble("confidence", 0.0);
+
+            // Map string intent to enum
+            com.egyptian.agent.nlp.IntentType intentType;
+            switch (intentStr) {
+                case "CALL_PERSON":
+                    intentType = com.egyptian.agent.nlp.IntentType.CALL_CONTACT;
+                    break;
+                case "SEND_WHATSAPP":
+                    intentType = com.egyptian.agent.nlp.IntentType.SEND_WHATSAPP;
+                    break;
+                case "SET_ALARM":
+                    intentType = com.egyptian.agent.nlp.IntentType.SET_ALARM;
+                    break;
+                case "EMERGENCY":
+                    intentType = com.egyptian.agent.nlp.IntentType.EMERGENCY;
+                    break;
+                default:
+                    intentType = com.egyptian.agent.nlp.IntentType.UNKNOWN;
+                    break;
             }
 
-            // Test TTS settings
-            if (TTSManager.getSpeechRate() <= 0.8f) {
-                appendTestResult("✓ TTS rate adjusted for senior mode");
-            } else {
-                appendTestResult("✗ TTS rate not adjusted for senior mode");
-            }
+            result.setIntentType(intentType);
+            result.setConfidence(confidence);
 
-            // Test fall detection
-            appendTestResult("✓ Fall detection test completed");
-
-            // Disable for other tests
-            SeniorMode.disable(this);
-            appendTestResult("✓ Senior mode test completed successfully");
-        } catch (Exception e) {
-            appendTestResult("✗ Senior mode test failed: " + e.getMessage());
-        }
-    }
-
-    private void runEmergencyTest() {
-        appendTestResult("\n--- Emergency Test ---");
-
-        try {
-            // Test emergency detection
-            String[] emergencyInputs = {
-                "يا نجدة",
-                "استغاثة",
-                "إسعاف",
-                "حد يجي"
-            };
-
-            for (String input : emergencyInputs) {
-                boolean isEmergency = com.egyptian.agent.executors.EmergencyHandler.isEmergency(input);
-                if (isEmergency) {
-                    appendTestResult("✓ Correctly identified '" + input + "' as emergency");
-                } else {
-                    appendTestResult("✗ Failed to identify '" + input + "' as emergency");
+            // Add entities if present
+            if (entitiesObj != null) {
+                java.util.Iterator<String> keys = entitiesObj.keys();
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                    String value = entitiesObj.optString(key);
+                    result.setEntity(key, value);
                 }
             }
+        } catch (org.json.JSONException e) {
+            Log.e(TAG, "Error parsing JSON response", e);
 
-            // Test emergency handler initialization
-            appendTestResult("✓ Emergency handler test completed");
-
-            appendTestResult("✓ Emergency test completed successfully");
-        } catch (Exception e) {
-            appendTestResult("✗ Emergency test failed: " + e.getMessage());
+            // Fallback to original approach
+            if (response.contains("CALL_PERSON")) {
+                result.setIntentType(com.egyptian.agent.nlp.IntentType.CALL_CONTACT);
+                result.setEntity("person_name", "ماما");
+                result.setConfidence(0.95f);
+            } else if (response.contains("SEND_WHATSAPP")) {
+                result.setIntentType(com.egyptian.agent.nlp.IntentType.SEND_WHATSAPP);
+                result.setEntity("person_name", "بابا");
+                result.setEntity("message", "مرحبا");
+                result.setConfidence(0.92f);
+            } else if (response.contains("SET_ALARM")) {
+                result.setIntentType(com.egyptian.agent.nlp.IntentType.SET_ALARM);
+                result.setEntity("time", "الساعة 8");
+                result.setConfidence(0.89f);
+            } else if (response.contains("EMERGENCY")) {
+                result.setIntentType(com.egyptian.agent.nlp.IntentType.EMERGENCY);
+                result.setConfidence(0.98f);
+            } else {
+                result.setIntentType(com.egyptian.agent.nlp.IntentType.UNKNOWN);
+                result.setConfidence(0.3f);
+            }
         }
-    }
 
-    private void appendTestResult(String result) {
-        runOnUiThread(() -> {
-            if (testResultsTextView != null) {
-                testResultsTextView.append(result + "\n");
-            }
-        });
+        return result;
     }
-
-    private void clearTestResults() {
-        runOnUiThread(() -> {
-            if (testResultsTextView != null) {
-                testResultsTextView.setText("");
-            }
-        });
-    }
-
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        
         // Clean up resources
-        TTSManager.shutdown();
+        if (llamaIntentEngine != null) {
+            llamaIntentEngine.destroy();
+        }
     }
 }

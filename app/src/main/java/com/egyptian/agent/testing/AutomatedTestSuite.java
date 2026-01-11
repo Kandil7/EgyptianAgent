@@ -263,11 +263,43 @@ public class AutomatedTestSuite {
         int totalTests = testResults.size();
         long passedTests = testResults.stream().filter(TestResult::isPassed).count();
         long failedTests = totalTests - passedTests;
-        
-        Map<String, Integer> categoryResults = new HashMap<>();
-        // In a real implementation, we would categorize tests and count by category
-        
+
+        Map<String, Integer> categoryResults = categorizeTestsByCategory();
+
         return new TestReport(totalTests, (int) passedTests, (int) failedTests, testResults, categoryResults);
+    }
+
+    /**
+     * Categorizes tests and counts by category
+     */
+    private Map<String, Integer> categorizeTestsByCategory() {
+        Map<String, Integer> categoryResults = new HashMap<>();
+
+        for (TestResult result : testResults) {
+            String testName = result.getTestName();
+
+            // Determine category based on test name
+            String category;
+            if (testName.contains("Intent Classification")) {
+                category = "Intent Classification";
+            } else if (testName.contains("Context Memory")) {
+                category = "Context Memory";
+            } else if (testName.contains("Grammar Processing")) {
+                category = "Grammar Processing";
+            } else if (testName.contains("Egyptian Normalization")) {
+                category = "Egyptian Normalization";
+            } else if (testName.contains("Command Processing")) {
+                category = "Command Processing";
+            } else if (testName.contains("Quantum-ContextMemory Integration")) {
+                category = "Integration";
+            } else {
+                category = "Other";
+            }
+
+            categoryResults.put(category, categoryResults.getOrDefault(category, 0) + 1);
+        }
+
+        return categoryResults;
     }
     
     /**

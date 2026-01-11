@@ -2,131 +2,135 @@ package com.egyptian.agent.utils;
 
 import android.content.Context;
 import android.util.Log;
+
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
 /**
- * Production-grade crash reporting system for Egyptian Agent
- * Logs errors securely while protecting user privacy
+ * Crash Logger
+ * Handles error logging and crash reporting
  */
-public class CrashLogger implements UncaughtExceptionHandler {
+public class CrashLogger {
     private static final String TAG = "CrashLogger";
-    private static final String CRASH_LOG_FILE = "crash_log.txt";
+    private static final String LOG_FILE_NAME = "crash_logs.txt";
     
-    private static CrashLogger instance;
-    private static UncaughtExceptionHandler defaultExceptionHandler;
-    private Context context;
-    
-    private CrashLogger(Context context) {
-        this.context = context.getApplicationContext();
-        defaultExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
-        Thread.setDefaultUncaughtExceptionHandler(this);
-    }
-    
-    public static synchronized void registerGlobalExceptionHandler(Context context) {
-        if (instance == null) {
-            instance = new CrashLogger(context);
-        }
-    }
-    
+    /**
+     * Logs an error with context
+     * @param context Context for the operation
+     * @param throwable The error to log
+     */
     public static void logError(Context context, Throwable throwable) {
-        logError(context, "General Error", throwable);
+        String errorMessage = formatError(throwable);
+        Log.e(TAG, errorMessage, throwable);
+        
+        // Write to file for persistent logging
+        writeToFile(context, errorMessage);
     }
     
+    /**
+     * Logs an error with message
+     * @param context Context for the operation
+     * @param message The error message
+     * @param throwable The error to log
+     */
     public static void logError(Context context, String message, Throwable throwable) {
-        String errorDetails = formatError(message, throwable);
-        Log.e(TAG, errorDetails);
+        String errorMessage = formatError(message, throwable);
+        Log.e(TAG, errorMessage, throwable);
         
-        // Write to secure local log file
-        writeToFile(context, errorDetails);
+        // Write to file for persistent logging
+        writeToFile(context, errorMessage);
     }
     
-    private static String formatError(String message, Throwable throwable) {
+    /**
+     * Formats an error for logging
+     * @param throwable The error to format
+     * @return Formatted error string
+     */
+    private static String formatError(Throwable throwable) {
         StringBuilder sb = new StringBuilder();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-        
-        sb.append("=== CRASH LOG ===\n");
-        sb.append("Timestamp: ").append(sdf.format(new Date())).append("\n");
-        sb.append("Message: ").append(message).append("\n");
-        sb.append("Exception: ").append(throwable.getClass().getName()).append("\n");
-        sb.append("Cause: ").append(throwable.getMessage()).append("\n");
+        sb.append(getTimestamp()).append(" - ");
+        sb.append("Error: ").append(throwable.getMessage()).append("\n");
         sb.append("Stack Trace:\n");
         
         for (StackTraceElement element : throwable.getStackTrace()) {
-            sb.append(element.toString()).append("\n");
+            sb.append("  at ").append(element.toString()).append("\n");
         }
-        
-        sb.append("==================\n\n");
         
         return sb.toString();
     }
     
-    private static void writeToFile(Context context, String errorDetails) {
+    /**
+     * Formats an error with custom message
+     * @param message Custom message
+     * @param throwable The error to format
+     * @return Formatted error string
+     */
+    private static String formatError(String message, Throwable throwable) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getTimestamp()).append(" - ");
+        sb.append("Message: ").append(message).append("\n");
+        sb.append("Error: ").append(throwable.getMessage()).append("\n");
+        sb.append("Stack Trace:\n");
+        
+        for (StackTraceElement element : throwable.getStackTrace()) {
+            sb.append("  at ").append(element.toString()).append("\n");
+        }
+        
+        return sb.toString();
+    }
+    
+    /**
+     * Gets current timestamp
+     * @return Formatted timestamp
+     */
+    private static String getTimestamp() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault());
+        return sdf.format(new Date());
+    }
+    
+    /**
+     * Writes error to file
+     * @param context Context for the operation
+     * @param errorMessage The error message to write
+     */
+    private static void writeToFile(Context context, String errorMessage) {
         try {
-            FileWriter writer = new FileWriter(new java.io.File(context.getFilesDir(), CRASH_LOG_FILE), true);
-            writer.append(errorDetails);
+            File logFile = new File(context.getFilesDir(), LOG_FILE_NAME);
+            FileWriter writer = new FileWriter(logFile, true); // Append mode
+            writer.append(errorMessage);
+            writer.append("\n---\n"); // Separator between logs
             writer.flush();
             writer.close();
         } catch (IOException e) {
-            Log.e(TAG, "Failed to write crash log to file", e);
+            Log.e(TAG, "Failed to write error to file", e);
         }
     }
     
     /**
-     * Retrieves crash logs for diagnostics
+     * Gets the crash log file
+     * @param context Context for the operation
+     * @return The crash log file
      */
-    public static String getRecentLogs(Context context) {
-        try {
-            java.io.File logFile = new java.io.File(context.getFilesDir(), CRASH_LOG_FILE);
-            if (!logFile.exists()) {
-                return "No crash logs found.";
-            }
-            
-            java.util.Scanner scanner = new java.util.Scanner(logFile);
-            StringBuilder content = new StringBuilder();
-            while (scanner.hasNextLine()) {
-                content.append(scanner.nextLine()).append("\n");
-            }
-            scanner.close();
-            
-            return content.toString();
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to read crash logs", e);
-            return "Error reading crash logs: " + e.getMessage();
-        }
+    public static File getLogFile(Context context) {
+        return new File(context.getFilesDir(), LOG_FILE_NAME);
     }
     
     /**
-     * Clears crash logs
+     * Clears the crash log file
+     * @param context Context for the operation
      */
     public static void clearLogs(Context context) {
         try {
-            java.io.File logFile = new java.io.File(context.getFilesDir(), CRASH_LOG_FILE);
+            File logFile = new File(context.getFilesDir(), LOG_FILE_NAME);
             if (logFile.exists()) {
                 logFile.delete();
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to clear crash logs", e);
-        }
-    }
-    
-    @Override
-    public void uncaughtException(Thread thread, Throwable ex) {
-        Log.e(TAG, "Uncaught exception in thread: " + thread.getName(), ex);
-        logError(context, "Uncaught Exception in " + thread.getName(), ex);
-        
-        // Allow the default handler to run as well
-        if (defaultExceptionHandler != null) {
-            defaultExceptionHandler.uncaughtException(thread, ex);
-        } else {
-            // If no default handler, exit gracefully
-            android.os.Process.killProcess(android.os.Process.myPid());
-            System.exit(10);
+            Log.e(TAG, "Failed to clear logs", e);
         }
     }
 }

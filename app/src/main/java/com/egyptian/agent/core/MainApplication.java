@@ -9,6 +9,7 @@ import com.egyptian.agent.security.DataEncryptionManager;
 import com.egyptian.agent.backup.BackupRestoreManager;
 import com.egyptian.agent.feedback.UserFeedbackSystem;
 import com.egyptian.agent.performance.HonorX6cPerformanceOptimizer;
+import com.egyptian.agent.core.DeviceClassDetector;
 
 public class MainApplication extends Application {
 

@@ -1,0 +1,9 @@
+# Whisper Egyptian Model Placeholder
+# This is a placeholder file for the Whisper model fine-tuned for Egyptian Arabic
+# In a real implementation, this would contain the actual Whisper model data
+
+Model: Whisper Egyptian Arabic
+Architecture: Transformer-based ASR
+Language: Egyptian Arabic dialect
+Purpose: Speech-to-text conversion
+Format: Whisper model format

@@ -1,105 +1,85 @@
 package com.egyptian.agent.system;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.util.Log;
 
 import rikka.shizuku.Shizuku;
-import rikka.shizuku.ShizukuProvider;
-import rikka.shizuku.SystemServiceHelper;
 
 /**
- * Manager for system-level privileges using Shizuku API
- * This enables the Egyptian Agent to operate with system-level permissions
- * without requiring full root access in all scenarios
+ * System Privilege Manager
+ * Handles system-level privileges for the application
  */
 public class SystemPrivilegeManager {
     private static final String TAG = "SystemPrivilegeManager";
-    private static boolean isInitialized = false;
-    private static final int REQUEST_CODE = 1001;
-
+    
+    private static boolean hasSystemPrivileges = false;
+    
     /**
-     * Initializes Shizuku for system-level operations
-     * @param context Application context
-     */
-    public static void initialize(Context context) {
-        if (isInitialized) {
-            Log.d(TAG, "Shizuku already initialized");
-            return;
-        }
-
-        // Setup Shizuku callbacks
-        Shizuku.addRequestPermissionResultListener(permissionResultListener);
-        Shizuku.addBinderReceivedListener(binderReceivedListener);
-        
-        Log.i(TAG, "Shizuku system privilege manager initialized");
-        isInitialized = true;
-    }
-
-    /**
-     * Checks if the app has system-level permissions via Shizuku
-     * @return true if system permissions are available
+     * Checks if the app has system privileges
+     * @return true if system privileges are available, false otherwise
      */
     public static boolean hasSystemPrivileges() {
-        if (Shizuku.isPreV11()) {
-            return true; // On pre-v11, we assume privileges are available
-        }
-        return Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED;
+        return hasSystemPrivileges;
     }
-
+    
     /**
-     * Requests system-level permissions via Shizuku
-     * @param context Application context
+     * Requests system privileges for the application
+     * @param context Context for the operation
      */
     public static void requestSystemPrivileges(Context context) {
-        if (hasSystemPrivileges()) {
-            Log.i(TAG, "System privileges already granted");
-            return;
-        }
-
-        if (Shizuku.isPreV11()) {
-            Log.w(TAG, "Running on pre-v11 Shizuku, system privileges may not be needed");
-            return;
-        }
-
         try {
-            Shizuku.requestPermission(REQUEST_CODE);
-            Log.i(TAG, "Requested system privileges via Shizuku");
+            // Check if Shizuku is available
+            if (Shizuku.pingBinder()) {
+                // Request Shizuku permission
+                Shizuku.requestPermission(1); // Use a unique request code
+                Log.d(TAG, "Requested Shizuku permission");
+            } else {
+                Log.w(TAG, "Shizuku not available, system privileges not accessible");
+            }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to request Shizuku permissions", e);
+            Log.e(TAG, "Error requesting system privileges", e);
         }
     }
-
-    // Listener for permission results
-    private static final Shizuku.OnRequestPermissionResultListener permissionResultListener = 
-        new Shizuku.OnRequestPermissionResultListener() {
-            @Override
-            public void onRequestPermissionResult(int requestCode, int grantResult) {
-                if (requestCode == REQUEST_CODE) {
-                    if (grantResult == PackageManager.PERMISSION_GRANTED) {
-                        Log.i(TAG, "System privileges granted via Shizuku");
+    
+    /**
+     * Initializes system privileges
+     * @param context Context for the operation
+     */
+    public static void initialize(Context context) {
+        try {
+            // Set up Shizuku callbacks
+            Shizuku.addRequestPermissionResultListener((requestCode, grantResult) -> {
+                if (requestCode == 1) { // Our request code
+                    if (grantResult == Shizuku.RESULT_SUCCESS) {
+                        Log.i(TAG, "System privileges granted");
+                        hasSystemPrivileges = true;
                     } else {
-                        Log.w(TAG, "System privileges denied via Shizuku");
+                        Log.w(TAG, "System privileges denied");
+                        hasSystemPrivileges = false;
                     }
                 }
+            });
+            
+            // Check if already granted
+            if (Shizuku.checkSelfPermission() == Shizuku.PERMISSION_GRANTED) {
+                hasSystemPrivileges = true;
+                Log.i(TAG, "System privileges already granted");
+            } else {
+                Log.i(TAG, "System privileges not granted, requesting...");
             }
-        };
-
-    // Listener for when Shizuku binder is received
-    private static final Shizuku.OnBinderReceivedListener binderReceivedListener = 
-        new Shizuku.OnBinderReceivedListener() {
-            @Override
-            public void onBinderReceived() {
-                Log.i(TAG, "Shizuku binder received, system service access available");
-            }
-        };
-
+        } catch (Exception e) {
+            Log.e(TAG, "Error initializing system privileges", e);
+        }
+    }
+    
     /**
-     * Cleans up resources and listeners
+     * Cleans up system privilege resources
      */
     public static void cleanup() {
-        Shizuku.removeRequestPermissionResultListener(permissionResultListener);
-        Shizuku.removeBinderReceivedListener(binderReceivedListener);
-        isInitialized = false;
+        try {
+            Shizuku.removeRequestPermissionResultListener((requestCode, grantResult) -> {});
+        } catch (Exception e) {
+            Log.e(TAG, "Error cleaning up system privileges", e);
+        }
     }
 }
