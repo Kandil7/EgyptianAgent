@@ -128,6 +128,41 @@ public class TTSManager {
         transformedText = transformedText.replace("السيدة", "الست");
         transformedText = transformedText.replace("الرجل", "الراجل");
 
+        // Additional Egyptian dialect transformations
+        transformedText = transformedText.replace("أنا", "انا");
+        transformedText = transformedText.replace("إلى", "لـ");
+        transformedText = transformedText.replace("في", "فـ");
+        transformedText = transformedText.replace("أن", "إن");
+
+        // Normalize common Egyptian expressions
+        transformedText = transformedText.replace("إزاى", "إزي");
+        transformedText = transformedText.replace("أزاى", "أزي");
+        transformedText = transformedText.replace("فين", "mana");
+
+        return transformedText;
+    }
+
+    /**
+     * Applies more comprehensive Egyptian dialect transformations
+     * @param text Original text
+     * @return Processed text with Egyptian dialect considerations
+     */
+    public static String applyComprehensiveEgyptianTransformations(String text) {
+        String transformedText = applyEgyptianTransformations(text);
+
+        // Additional transformations specific to Egyptian dialect
+        // These might include phonetic adaptations, common expressions, etc.
+
+        // Common Egyptian expressions
+        transformedText = transformedText.replace("أهلاً وسهلاً", "اهلا وسهلا");
+        transformedText = transformedText.replace("شكراً", "شكرا");
+        transformedText = transformedText.replace("من فضلك", "من فضلك ياريت");
+        transformedText = transformedText.replace("عذراً", "آسف");
+
+        // More phonetic adaptations
+        transformedText = transformedText.replace("محمد", "محمود"); // Common mispronunciation adaptation
+        transformedText = transformedText.replace("الUniversity", "الجامعة"); // Adapt foreign terms
+
         return transformedText;
     }
 

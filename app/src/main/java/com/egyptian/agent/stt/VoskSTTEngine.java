@@ -75,15 +75,33 @@ public class VoskSTTEngine {
     private String extractModelToInternalStorage(String modelPath) {
         // In a real implementation, this would extract the model from assets
         // to internal storage for faster access
-        // For now, we'll return a placeholder path
         try {
-            // This would be the actual implementation:
+            // This is the actual implementation:
             // 1. Check if model already exists in internal storage
+            String fileName = modelPath.substring(modelPath.lastIndexOf('/') + 1);
+            File modelFile = new File(context.getFilesDir(), fileName);
+
+            if (modelFile.exists()) {
+                Log.d(TAG, "Model already exists: " + modelFile.getAbsolutePath());
+                return modelFile.getAbsolutePath();
+            }
+
             // 2. If not, extract from assets
+            InputStream inputStream = context.getAssets().open(modelPath);
+            FileOutputStream outputStream = new FileOutputStream(modelFile);
+
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            inputStream.close();
+            outputStream.close();
+
             // 3. Return the path to the extracted model
-            
-            // For now, return a placeholder
-            return context.getFilesDir() + "/" + modelPath.replace("models/", "").replace(".zip", "");
+            Log.d(TAG, "Model extracted to: " + modelFile.getAbsolutePath());
+            return modelFile.getAbsolutePath();
         } catch (Exception e) {
             Log.e(TAG, "Error extracting model to internal storage", e);
             return null;
@@ -99,14 +117,77 @@ public class VoskSTTEngine {
             Log.e(TAG, "Vosk STT Engine not initialized");
             return;
         }
-        
+
         this.callback = callback;
         isListening = true;
-        
+
         // In a real implementation, this would start audio recording
         // and feed the audio to the recognizer
-        // For now, we'll simulate the process
-        simulateRecognition();
+        startAudioRecording();
+    }
+
+    /**
+     * Starts audio recording and feeds to the Vosk recognizer
+     */
+    private void startAudioRecording() {
+        executorService.execute(() -> {
+            android.media.AudioRecord audioRecord = null;
+            try {
+                int bufferSize = android.media.AudioRecord.getMinBufferSize(
+                    16000, // Sample rate
+                    android.media.AudioFormat.CHANNEL_IN_MONO,
+                    android.media.AudioFormat.ENCODING_PCM_16BIT
+                );
+
+                audioRecord = new android.media.AudioRecord(
+                    android.media.MediaRecorder.AudioSource.VOICE_RECOGNITION,
+                    16000,
+                    android.media.AudioFormat.CHANNEL_IN_MONO,
+                    android.media.AudioFormat.ENCODING_PCM_16BIT,
+                    bufferSize
+                );
+
+                audioRecord.startRecording();
+
+                byte[] buffer = new byte[bufferSize];
+                while (isListening) {
+                    int bytesRead = audioRecord.read(buffer, 0, buffer.length);
+
+                    if (bytesRead > 0) {
+                        // Feed audio data to the recognizer
+                        recognizer.acceptWaveForm(buffer, bytesRead);
+
+                        // Check if we have a partial result
+                        String partialResult = recognizer.getResult();
+                        if (partialResult != null && !partialResult.isEmpty()) {
+                            Log.d(TAG, "Partial result: " + partialResult);
+                        }
+                    }
+                }
+
+                // Get final result
+                String finalResult = recognizer.getFinalResult();
+                Log.d(TAG, "Final recognition result: " + finalResult);
+
+                if (isListening && callback != null && finalResult != null) {
+                    // Parse the result to extract the text
+                    org.json.JSONObject jsonObject = new org.json.JSONObject(finalResult);
+                    String text = jsonObject.getString("text");
+                    callback.onResult(text);
+                }
+
+            } catch (Exception e) {
+                Log.e(TAG, "Error during audio recording and recognition", e);
+                if (callback != null) {
+                    callback.onResult(""); // Indicate error with empty result
+                }
+            } finally {
+                if (audioRecord != null) {
+                    audioRecord.stop();
+                    audioRecord.release();
+                }
+            }
+        });
     }
     
     /**
