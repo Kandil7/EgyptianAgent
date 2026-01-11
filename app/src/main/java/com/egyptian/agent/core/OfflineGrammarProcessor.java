@@ -70,7 +70,7 @@ public class OfflineGrammarProcessor {
      * Parses a rule from JSGF format
      */
     private void parseRuleFromJSGF(String line) {
-        // This is a simplified parser - a real implementation would properly parse JSGF format
+        // In a real implementation, we would properly parse the JSGF grammar
         // For now, we'll just add some example rules
         // Call-related rules
         grammarRules.put("اتصل ب", "CALL_PERSON");

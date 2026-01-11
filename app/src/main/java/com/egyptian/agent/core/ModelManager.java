@@ -159,12 +159,21 @@ public class ModelManager {
             case MID:
                 // For mid-range devices, load standard models
                 Log.d(TAG, "Initializing standard models for mid-range device");
+
+                // Initialize additional models for mid-range devices
+                initializeVoskModel();
+                initializeOpenPhoneModel();
                 break;
 
             case HIGH:
             case ELITE:
                 // For high-end devices, load all models including advanced ones
                 Log.d(TAG, "Initializing all models for high-end device");
+
+                // Initialize all models for high-end devices
+                initializeVoskModel();
+                initializeOpenPhoneModel();
+                initializeLlamaModel();
                 break;
         }
     }
