@@ -1,0 +1,8 @@
+# OpenPhone-3B Model Placeholder
+# This is a placeholder file for the OpenPhone-3B model
+# In a real implementation, this would contain the actual PyTorch model file
+
+Model: OpenPhone-3B
+Framework: PyTorch
+Purpose: Egyptian dialect understanding and intent classification
+Format: TorchScript (.pt)

@@ -1,0 +1,8 @@
+# Vosk Arabic Model Placeholder
+# This is a placeholder file for the Vosk Arabic speech recognition model
+# In a real implementation, this would contain the actual Vosk model data
+
+Model: Vosk Arabic ASR
+Language: Arabic (Egyptian dialect optimized)
+Purpose: Speech-to-text conversion
+Format: Vosk model format

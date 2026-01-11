@@ -1,0 +1,8 @@
+# Llama 3.2 3B Q4_K_M Model Placeholder
+# This is a placeholder file for the Llama 3.2 3B Q4_K_M model
+# In a real implementation, this would contain the actual GGUF model file
+
+Model: Llama 3.2 3B
+Quantization: Q4_K_M
+Purpose: Egyptian dialect understanding and intent classification
+Size: ~1.64GB (actual model would be here)
