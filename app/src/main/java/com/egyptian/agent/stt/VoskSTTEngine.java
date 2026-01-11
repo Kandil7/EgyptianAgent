@@ -7,7 +7,10 @@ import org.vosk.LibVosk;
 import org.vosk.Model;
 import org.vosk.Recognizer;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -73,10 +76,7 @@ public class VoskSTTEngine {
      * @return Path to the extracted model file, or null if failed
      */
     private String extractModelToInternalStorage(String modelPath) {
-        // In a real implementation, this would extract the model from assets
-        // to internal storage for faster access
         try {
-            // This is the actual implementation:
             // 1. Check if model already exists in internal storage
             String fileName = modelPath.substring(modelPath.lastIndexOf('/') + 1);
             File modelFile = new File(context.getFilesDir(), fileName);

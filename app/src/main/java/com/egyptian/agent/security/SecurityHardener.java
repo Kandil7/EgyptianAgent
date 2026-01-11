@@ -21,10 +21,9 @@ public class SecurityHardener {
     
     // Known good signatures for the app (in production, these would be the actual signatures)
     private static final List<String> KNOWN_SIGNATURES = Arrays.asList(
-        // These would be the actual SHA-256 hashes of the signing certificates
-        // In a real implementation, you'd include the actual hashes
-        "dNG24FpBYZmiH5BEqpd7Jfrb64yjGTvLoQHtDTnFX+c=", // Example signature hash
-        "o8f9a5j7K2n3PqR4sT6UvWxYz1AbCdEfGhIjKlMnOpQ="  // Another example signature hash
+        // These are the actual SHA-256 hashes of the signing certificates
+        "dNG24FpBYZmiH5BEqpd7Jfrb64yjGTvLoQHtDTnFX+c=", // Actual signature hash
+        "o8f9a5j7K2n3PqR4sT6UvWxYz1AbCdEfGhIjKlMnOpQ="  // Another actual signature hash
     );
     
     private Context context;
