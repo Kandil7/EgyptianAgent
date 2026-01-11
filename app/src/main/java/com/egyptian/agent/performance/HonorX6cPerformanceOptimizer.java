@@ -189,21 +189,20 @@ public class HonorX6cPerformanceOptimizer {
         // ContactCacheManager.setSize(contactCacheSize);
         // ModelCacheManager.setSize(modelCacheSize * 1024 * 1024); // Convert to bytes
     }
-    }
-    
+
     /**
      * Triggers memory cleanup operations
      */
     private void triggerMemoryCleanup() {
         Log.d(TAG, "Triggering memory cleanup");
-        
+
         try {
             // Clear any caches that can be recreated later
             // This is a placeholder - actual implementation would clear specific caches
-            
+
             // Force garbage collection
             System.gc();
-            
+
             // Sleep briefly to allow GC to complete
             Thread.sleep(100);
         } catch (Exception e) {

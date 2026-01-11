@@ -110,7 +110,6 @@ public class MainActivity extends Activity {
      * Updates the service status display
      */
     private void updateServiceStatus() {
-        // In a real implementation, this would check if the service is running
         boolean isServiceRunning = isMyServiceRunning(VoiceService.class);
         if (isServiceRunning) {
             statusTextView.setText("Egyptian Agent is running\nService is active");
