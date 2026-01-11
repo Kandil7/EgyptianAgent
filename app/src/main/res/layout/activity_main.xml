@@ -65,6 +65,7 @@
         android:backgroundTint="#4CAF50" />
 
     <TextView
+        android:id="@+id/instructionsTitleTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="التعليمات:"
@@ -74,6 +75,7 @@
         android:textColor="#212121" />
 
     <TextView
+        android:id="@+id/instructionsTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="• قول \"يا كبير\" أو \"يا صاحبي\" لتفعيل المساعد\n• في وضع كبار السن، الصوت يكون أبطأ وأعلى\n• في حالات الطوارئ، قول \"نجدة\" أو \"استغاثة\""

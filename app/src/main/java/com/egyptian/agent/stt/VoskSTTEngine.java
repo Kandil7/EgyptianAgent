@@ -23,8 +23,10 @@ public class VoskSTTEngine {
     private static final String STT_MODEL_PATH = "model";
 
     private final Context context;
-    private Model model;
-    private Recognizer recognizer;
+    private final DeviceClassDetector.DeviceClass deviceClass;
+    private Model voskModel;
+    private Recognizer voskRecognizer;
+    private WhisperASREngine whisperEngine;
     private AudioRecord audioRecord;
     private Thread recordingThread;
     private boolean isListening = false;
@@ -41,48 +43,75 @@ public class VoskSTTEngine {
 
     public VoskSTTEngine(Context context) throws Exception {
         this.context = context;
+        this.deviceClass = ((MainApplication) context.getApplicationContext()).getDeviceClass();
         this.callback = null;
         initialize();
     }
 
     public VoskSTTEngine(Context context, STTCallback callback) throws Exception {
         this.context = context;
+        this.deviceClass = ((MainApplication) context.getApplicationContext()).getDeviceClass();
         this.callback = callback;
         initialize();
     }
 
+    public VoskSTTEngine(Context context, String modelPath) throws Exception {
+        this.context = context;
+        this.deviceClass = ((MainApplication) context.getApplicationContext()).getDeviceClass();
+        this.callback = null;
+        initialize(modelPath);
+    }
+
+    public VoskSTTEngine(Context context, String modelPath, STTCallback callback) throws Exception {
+        this.context = context;
+        this.deviceClass = ((MainApplication) context.getApplicationContext()).getDeviceClass();
+        this.callback = callback;
+        initialize(modelPath);
+    }
+
     private void initialize() throws Exception {
-        Log.i(TAG, "Initializing Vosk STT Engine");
+        initialize(STT_MODEL_PATH);
+    }
+
+    private void initialize(String modelPath) throws Exception {
+        Log.i(TAG, "Initializing STT Engine for device class: " + deviceClass.name() +
+              " with model: " + modelPath);
 
         try {
-            // Load the Egyptian Arabic model
-            model = new Model(STT_MODEL_PATH);
-            recognizer = new Recognizer(model, SAMPLE_RATE);
+            if (deviceClass == DeviceClassDetector.DeviceClass.LOW) {
+                // For low-end devices, use Whisper which is more efficient
+                whisperEngine = new WhisperASREngine(context, modelPath);
+                whisperEngine.initialize();
+                Log.i(TAG, "Whisper ASR engine initialized for low-end device");
+            } else {
+                // For higher-end devices, use Vosk
+                voskModel = new Model(modelPath);
+                voskRecognizer = new Recognizer(voskModel, SAMPLE_RATE);
 
-            Log.i(TAG, "Vosk model loaded successfully");
+                Log.i(TAG, "Vosk model loaded successfully from: " + modelPath);
 
-            // Configure audio recording
-            int minBufferSize = AudioRecord.getMinBufferSize(
-                SAMPLE_RATE,
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT
-            );
+                // Configure audio recording
+                int minBufferSize = AudioRecord.getMinBufferSize(
+                    SAMPLE_RATE,
+                    AudioFormat.CHANNEL_IN_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT
+                );
 
-            int bufferSize = Math.max(minBufferSize, BUFFER_SIZE);
+                int bufferSize = Math.max(minBufferSize, BUFFER_SIZE);
 
-            audioRecord = new AudioRecord(
-                MediaRecorder.AudioSource.VOICE_RECOGNITION,
-                SAMPLE_RATE,
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT,
-                bufferSize
-            );
+                audioRecord = new AudioRecord(
+                    MediaRecorder.AudioSource.VOICE_RECOGNITION,
+                    SAMPLE_RATE,
+                    AudioFormat.CHANNEL_IN_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT,
+                    bufferSize
+                );
 
-            // Load custom vocabulary
-            VocabularyManager.loadCustomWords(recognizer);
-
+                // Load custom vocabulary
+                VocabularyManager.loadCustomWords(voskRecognizer);
+            }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to initialize Vosk engine", e);
+            Log.e(TAG, "Failed to initialize STT engine", e);
             CrashLogger.logError(context, e);
             throw new Exception("Failed to initialize speech recognition engine", e);
         }
@@ -93,59 +122,82 @@ public class VoskSTTEngine {
     }
 
     public void startListening(STTCallback customCallback) {
-        if (isListening) return;
-
-        Log.i(TAG, "Starting STT listening");
-        isListening = true;
-        isProcessing = false;
+        Log.i(TAG, "Starting STT listening for device class: " + deviceClass.name());
 
         // Use custom callback if provided, otherwise use the default one
         final STTCallback effectiveCallback = customCallback != null ? customCallback : this.callback;
 
-        try {
-            audioRecord.startRecording();
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to start audio recording", e);
-            CrashLogger.logError(context, e);
-            isListening = false;
-            if (effectiveCallback != null) {
-                effectiveCallback.onError(e);
-            }
-            return;
-        }
-
-        recordingThread = new Thread(() -> {
-            byte[] buffer = new byte[BUFFER_SIZE];
-
-            while (isListening) {
-                try {
-                    int bytesRead = audioRecord.read(buffer, 0, buffer.length);
-
-                    if (bytesRead > 0 && !isProcessing) {
-                        isProcessing = true;
-                        byte[] audioChunk = new byte[bytesRead];
-                        System.arraycopy(buffer, 0, audioChunk, 0, bytesRead);
-
-                        // Process audio on background thread
-                        processingExecutor.execute(() -> {
-                            try {
-                                processAudio(audioChunk, bytesRead, effectiveCallback);
-                            } finally {
-                                isProcessing = false;
-                            }
-                        });
+        if (deviceClass == DeviceClassDetector.DeviceClass.LOW) {
+            // Use Whisper for low-end devices
+            if (whisperEngine != null) {
+                whisperEngine.startListening(new WhisperASREngine.ASRCallback() {
+                    @Override
+                    public void onResult(String text) {
+                        if (effectiveCallback != null) {
+                            effectiveCallback.onResult(text);
+                        }
                     }
-                } catch (Exception e) {
-                    Log.e(TAG, "Error during audio recording", e);
-                    CrashLogger.logError(context, e);
-                    isListening = false;
+
+                    @Override
+                    public void onError(Exception error) {
+                        if (effectiveCallback != null) {
+                            effectiveCallback.onError(error);
+                        }
+                    }
+                });
+            }
+        } else {
+            // Use Vosk for higher-end devices
+            if (isListening) return;
+
+            isListening = true;
+            isProcessing = false;
+
+            try {
+                audioRecord.startRecording();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to start audio recording", e);
+                CrashLogger.logError(context, e);
+                isListening = false;
+                if (effectiveCallback != null) {
+                    effectiveCallback.onError(e);
                 }
+                return;
             }
 
-            cleanupRecording();
-        });
+            recordingThread = new Thread(() -> {
+                byte[] buffer = new byte[BUFFER_SIZE];
 
-        recordingThread.start();
+                while (isListening) {
+                    try {
+                        int bytesRead = audioRecord.read(buffer, 0, buffer.length);
+
+                        if (bytesRead > 0 && !isProcessing) {
+                            isProcessing = true;
+                            byte[] audioChunk = new byte[bytesRead];
+                            System.arraycopy(buffer, 0, audioChunk, 0, bytesRead);
+
+                            // Process audio on background thread
+                            processingExecutor.execute(() -> {
+                                try {
+                                    processAudio(audioChunk, bytesRead, effectiveCallback);
+                                } finally {
+                                    isProcessing = false;
+                                }
+                            });
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error during audio recording", e);
+                        CrashLogger.logError(context, e);
+                        isListening = false;
+                    }
+                }
+
+                cleanupRecording();
+            });
+
+            recordingThread.start();
+        }
     }
 
     private void processAudio(byte[] buffer, int bytesRead, STTCallback callback) {
@@ -217,16 +269,24 @@ public class VoskSTTEngine {
     }
 
     public void stopListening() {
-        isListening = false;
-        try {
-            if (recordingThread != null && recordingThread.isAlive()) {
-                recordingThread.join(2000); // Wait up to 2 seconds
+        if (deviceClass == DeviceClassDetector.DeviceClass.LOW) {
+            // Use Whisper for low-end devices
+            if (whisperEngine != null) {
+                whisperEngine.stopListening();
             }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        } else {
+            // Use Vosk for higher-end devices
+            isListening = false;
+            try {
+                if (recordingThread != null && recordingThread.isAlive()) {
+                    recordingThread.join(2000); // Wait up to 2 seconds
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
 
-        cleanupRecording();
+            cleanupRecording();
+        }
     }
 
     private void cleanupRecording() {
@@ -270,16 +330,25 @@ public class VoskSTTEngine {
         processingExecutor.shutdown();
 
         try {
-            if (recognizer != null) {
-                recognizer.shutdown();
-                recognizer = null;
-            }
-            if (model != null) {
-                model.close();
-                model = null;
+            if (deviceClass == DeviceClassDetector.DeviceClass.LOW) {
+                // Clean up Whisper resources for low-end devices
+                if (whisperEngine != null) {
+                    whisperEngine.destroy();
+                    whisperEngine = null;
+                }
+            } else {
+                // Clean up Vosk resources for higher-end devices
+                if (voskRecognizer != null) {
+                    voskRecognizer.shutdown();
+                    voskRecognizer = null;
+                }
+                if (voskModel != null) {
+                    voskModel.close();
+                    voskModel = null;
+                }
             }
         } catch (Exception e) {
-            Log.e(TAG, "Error closing Vosk resources", e);
+            Log.e(TAG, "Error closing ASR resources", e);
         }
 
         System.gc(); // Request garbage collection to free memory

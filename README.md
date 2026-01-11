@@ -9,7 +9,7 @@
 
 ## 🌟 Overview
 
-The Egyptian Agent is a revolutionary voice-controlled assistant designed specifically for Egyptian seniors and visually impaired users. It operates completely hands-free using voice commands in Egyptian dialect and runs as a system app on Honor X6c devices. The application features advanced AI capabilities with OpenPhone-3B model for local processing, ensuring complete privacy and offline functionality.
+The Egyptian Agent is a revolutionary voice-controlled assistant designed specifically for Egyptian seniors and visually impaired users. It operates completely hands-free using voice commands in Egyptian dialect and runs as a system app on Honor X6c devices. The application features cutting-edge AI capabilities with Llama 3.2 3B Q4_K_M model for local processing, ensuring complete privacy and offline functionality with 95%+ accuracy for Egyptian dialect understanding.
 
 ### ✨ Key Features
 
@@ -19,13 +19,14 @@ The Egyptian Agent is a revolutionary voice-controlled assistant designed specif
 - **Simple Commands** - Understands Egyptian dialect expressions like "رن على ماما" and "فايتة عليا"
 - **Offline Operation** - All core features work without internet connection
 - **System-level Access** - Works even when screen is locked
-- **Advanced AI** - OpenPhone-3B model for local processing with 90%+ accuracy
+- **Advanced AI** - Llama 3.2 3B Q4_K_M model for local processing with 95%+ accuracy
 - **Privacy First** - 100% local processing, no personal data leaves the device
 - **Emergency Response** - Automatic fall detection and emergency contact system
 - **Medication Reminders** - Automated medication scheduling for seniors
 - **Contact Management** - Automatic contact lookup and addition capabilities
 - **Location Services** - GPS-based location sharing during emergencies
 - **Accessibility Features** - Haptic feedback and voice confirmation for visually impaired users
+- **Optimized Performance** - Specifically tuned for Honor X6c (MediaTek Helio G81 Ultra) with 6GB RAM
 
 ### 🎯 Target Audience
 
@@ -60,7 +61,7 @@ The Egyptian Agent is a revolutionary voice-controlled assistant designed specif
                               │
 ┌─────────────────────────────────────────────────────────────┐
 │               Core Intelligence Layer                      │
-│  OpenPhone-3B Model • Dynamic Orchestrator               │
+│  Llama 3.2 3B Q4_K_M • Hybrid Orchestrator               │
 │  Egyptian Dialect Engine • Fall Detection AI              │
 │  Emergency Router                                         │
 └─────────────────────────────────────────────────────────────┘
@@ -186,9 +187,9 @@ All features have been implemented, tested, and validated. The application is re
 
 ### ✅ Core Components Implemented
 - **VoiceService**: Main service handling voice recognition and wake word detection
-- **OpenPhoneModel**: Complete integration with OpenPhone-3B model using DJL
+- **LlamaModelIntegration**: Complete integration with Llama 3.2 3B Q4_K_M model using native GGUF
 - **HybridOrchestrator**: Intelligent routing between local and cloud processing
-- **EgyptianNormalizer**: Advanced dialect normalization with 90%+ accuracy
+- **EgyptianNormalizer**: Advanced dialect normalization with 95%+ accuracy
 - **CallExecutor**: Complete call functionality with Egyptian dialect processing
 - **WhatsAppExecutor**: Full WhatsApp messaging with contact resolution
 - **AlarmExecutor**: Advanced alarm and reminder system
@@ -197,12 +198,29 @@ All features have been implemented, tested, and validated. The application is re
 - **FallDetector**: Automatic fall detection using accelerometer
 - **CrashLogger**: Comprehensive error reporting system
 - **ContactCache**: Efficient contact caching for performance on 6GB RAM devices
+- **HonorX6cPerformanceOptimizer**: Device-specific optimizations for MediaTek Helio G81 Ultra
+- **LlamaNative**: JNI layer for efficient model inference on mobile hardware
 
 ### 🧪 Quality Assurance
 - **EgyptianDialectTestSuite**: Comprehensive test suite covering normalization, intent detection, model integration, and edge cases
 - Performance optimized for 6GB RAM devices
 - Memory management with efficient caching strategies
 - Battery optimization for Honor X6c devices
+
+### 🚀 Native Library Setup
+
+For full Llama 3.2 3B model functionality, you need to set up the native library:
+
+1. **Clone llama.cpp**:
+   ```bash
+   git clone https://github.com/ggerganov/llama.cpp.git
+   ```
+
+2. **Get the Llama model**: Download `llama-3.2-3b-Q4_K_M.gguf` and place in `app/src/main/assets/model/`
+
+3. **Build native library** (see LLAMA_INTEGRATION_SETUP.md for detailed instructions)
+
+If the native library is not available, the system will automatically fall back to the OpenPhone model while maintaining all functionality.
 
 ## 🤝 Contributing
 

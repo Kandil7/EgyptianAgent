@@ -8,6 +8,7 @@ import com.egyptian.agent.performance.PerformanceMonitor;
 import com.egyptian.agent.security.DataEncryptionManager;
 import com.egyptian.agent.backup.BackupRestoreManager;
 import com.egyptian.agent.feedback.UserFeedbackSystem;
+import com.egyptian.agent.performance.HonorX6cPerformanceOptimizer;
 
 public class MainApplication extends Application {
 
@@ -15,11 +16,17 @@ public class MainApplication extends Application {
     private PerformanceMonitor performanceMonitor;
     private BackupRestoreManager backupRestoreManager;
     private UserFeedbackSystem userFeedbackSystem;
+    private DeviceClassDetector.DeviceClass deviceClass;
+    private HonorX6cPerformanceOptimizer performanceOptimizer;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "Egyptian Agent Application starting");
+
+        // Detect device class early in the application lifecycle
+        deviceClass = DeviceClassDetector.detectDevice(this);
+        Log.i(TAG, "Device class detected: " + deviceClass.name());
 
         // Initialize crash logger
         CrashLogger.registerGlobalExceptionHandler(this);
@@ -33,6 +40,17 @@ public class MainApplication extends Application {
         // Initialize performance monitoring
         performanceMonitor = PerformanceMonitor.getInstance(this);
         performanceMonitor.startMonitoring();
+
+        // Initialize performance optimizer for Honor X6c
+        performanceOptimizer = new HonorX6cPerformanceOptimizer(this);
+
+        // Check if we're running on Honor X6c and apply optimizations
+        if (HonorX6cPerformanceOptimizer.isHonorX6c()) {
+            Log.i(TAG, "Honor X6c device detected, applying optimizations");
+            performanceOptimizer.optimizeForHonorX6c();
+        } else {
+            Log.w(TAG, "Non-Honor X6c device detected, skipping device-specific optimizations");
+        }
 
         // Initialize backup/restore manager
         backupRestoreManager = BackupRestoreManager.getInstance(this);
@@ -50,6 +68,11 @@ public class MainApplication extends Application {
     private void initializeServices() {
         // Initialize any background services
         Log.i(TAG, "All services initialized");
+
+        // Log recommended model configuration
+        DeviceClassDetector.ModelConfiguration config =
+            DeviceClassDetector.getRecommendedModelConfig(deviceClass);
+        Log.i(TAG, "Recommended model configuration: " + config.toString());
     }
 
     @Override
@@ -64,6 +87,16 @@ public class MainApplication extends Application {
         if (userFeedbackSystem != null) {
             userFeedbackSystem.cleanup();
         }
+        if (performanceOptimizer != null) {
+            performanceOptimizer.disableOptimizations();
+        }
         Log.i(TAG, "Egyptian Agent Application terminated");
+    }
+
+    /**
+     * Get the detected device class for the application
+     */
+    public DeviceClassDetector.DeviceClass getDeviceClass() {
+        return deviceClass;
     }
 }

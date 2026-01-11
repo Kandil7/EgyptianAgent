@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.egyptian.agent">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Critical permissions for system app -->
     <uses-permission android:name="android.permission.CALL_PHONE" />
@@ -77,6 +76,12 @@
         <!-- Integration test activity -->
         <activity
             android:name=".hybrid.IntegrationTestActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
+
+        <!-- Llama model tester activity -->
+        <activity
+            android:name=".hybrid.LlamaModelTesterActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
 

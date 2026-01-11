@@ -114,7 +114,6 @@ public class TTSManager {
             // This is a simplified version for compatibility
         } catch (Exception e) {
             Log.w(TAG, "Failed to set audio attributes", e);
-            CrashLogger.logWarning(context, "TTS audio attributes setup failed");
         }
     }
 

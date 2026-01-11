@@ -25,6 +25,7 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
     private WakeWordDetector wakeWordDetector;
     private AudioManager audioManager;
     private HybridOrchestrator hybridOrchestrator;
+    private ModelManager modelManager;
     private boolean isListening = false;
     private boolean isProcessing = false;
     private Handler mainHandler;
@@ -46,10 +47,13 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
             Log.i(TAG, "System privileges already available");
         }
 
+        // Initialize model manager based on device class
+        modelManager = new ModelManager(this);
+
         // Critical initialization sequence for Honor X6c
         initializeWakeLock();
         initializeAudioManager();
-        initializeSTTEngine();
+        initializeModelBasedOnDeviceClass(); // Initialize models based on device class
         initializeHybridOrchestrator(); // Initialize the new orchestrator
         initializeWakeWord();
         initializeForegroundService();
@@ -70,6 +74,36 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
         wakeLock.acquire(10 * 60 * 1000L /*10 minutes*/);
     }
 
+    private void initializeModelBasedOnDeviceClass() {
+        Log.i(TAG, "Initializing models based on device class: " +
+              modelManager.getDeviceClass().name());
+
+        // Initialize models asynchronously based on device class
+        modelManager.initializeModels(new ModelManager.ModelInitializationCallback() {
+            @Override
+            public void onComplete(boolean success) {
+                if (success) {
+                    Log.i(TAG, "All models initialized successfully for device class: " +
+                          modelManager.getDeviceClass().name());
+
+                    // Initialize STT engine with appropriate model
+                    initializeSTTEngine();
+                } else {
+                    Log.e(TAG, "Failed to initialize all models, using fallback");
+                    initializeSTTEngine(); // Initialize with default/fallback models
+                    TTSManager.speak(VoiceService.this, "تحذير: بعض النماذج لم تتحمل بشكل كامل");
+                }
+            }
+
+            @Override
+            public void onError(Exception error) {
+                Log.e(TAG, "Error initializing models", error);
+                initializeSTTEngine(); // Initialize with default/fallback models
+                TTSManager.speak(VoiceService.this, "حصل مشكلة في تهيئة النماذج. بستخدم الإعدادات الافتراضية");
+            }
+        });
+    }
+
     private void initializeHybridOrchestrator() {
         try {
             hybridOrchestrator = new HybridOrchestrator(this);
@@ -88,8 +122,17 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
 
     private void initializeSTTEngine() {
         try {
-            sttEngine = new VoskSTTEngine(this);
-            Log.i(TAG, "Vosk STT Engine initialized successfully");
+            // Use the appropriate model based on device class
+            String modelPath = modelManager.getAsrModelPath();
+            if (modelPath != null) {
+                // Initialize with the specific model for this device class
+                sttEngine = new VoskSTTEngine(this, modelPath);
+                Log.i(TAG, "STT Engine initialized with model: " + modelPath);
+            } else {
+                // Fallback to default initialization
+                sttEngine = new VoskSTTEngine(this);
+                Log.i(TAG, "STT Engine initialized with default model");
+            }
         } catch (Exception e) {
             Log.e(TAG, "Failed to initialize STT engine", e);
             CrashLogger.logError(this, e);
@@ -164,28 +207,21 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
             hybridOrchestrator.determineIntent(normalizedCommand, result -> {
                 // Process the result on the main thread
                 new Handler(Looper.getMainLooper()).post(() -> {
-                    processIntentResult(result, command);
+                    // If the orchestrator returns unknown, try the Quantum class
+                    if (result.getIntentType() == IntentType.UNKNOWN) {
+                        Quantum quantum = new Quantum(VoiceService.this);
+                        quantum.processCommand(command);
+                        restartWakeWordListening();
+                    } else {
+                        processIntentResult(result, command);
+                    }
                 });
             });
         } else {
-            // Fallback to original processing if orchestrator is not available
-            IntentType intent = IntentRouter.detectIntent(command);
-            switch (intent) {
-                case CALL_CONTACT:
-                    // CallExecutor.handleCommand(this, command);
-                    break;
-                case SEND_WHATSAPP:
-                    // WhatsAppExecutor.handleCommand(this, command);
-                    break;
-                case SET_ALARM:
-                    // AlarmExecutor.handleCommand(this, command);
-                    break;
-                case READ_MISSED_CALLS:
-                    // CallLogExecutor.handleCommand(this, command);
-                    break;
-                default:
-                    handleUnknownCommand(command);
-            }
+            // Fallback to Quantum class for intent detection
+            Quantum quantum = new Quantum(this);
+            quantum.processCommand(command);
+            restartWakeWordListening();
         }
     }
 
@@ -236,7 +272,16 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
                 break;
             case UNKNOWN:
             default:
-                handleUnknownCommand(originalCommand);
+                // Try with Quantum class for additional intent detection
+                Quantum quantum = new Quantum(this);
+                quantum.processCommand(originalCommand);
+                // If still unknown, handle as unknown
+                if (!quantum.getLastContact().isEmpty()) {
+                    // Command was processed by Quantum
+                    restartWakeWordListening();
+                } else {
+                    handleUnknownCommand(originalCommand);
+                }
         }
     }
 

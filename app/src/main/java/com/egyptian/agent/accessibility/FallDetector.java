@@ -1,6 +1,9 @@
 package com.egyptian.agent.accessibility;
 
+import android.Manifest;
+import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -8,10 +11,12 @@ import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import androidx.core.app.ActivityCompat;
 import com.egyptian.agent.core.TTSManager;
 import com.egyptian.agent.executors.EmergencyHandler;
-import com.egyptian.agent.core.VibrationManager;
 import com.egyptian.agent.utils.CrashLogger;
+import com.egyptian.agent.utils.SpeechConfirmation;
+import com.egyptian.agent.utils.VibrationManager;
 
 public class FallDetector implements SensorEventListener {
 

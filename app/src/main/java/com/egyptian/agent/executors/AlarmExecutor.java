@@ -8,6 +8,7 @@ import android.util.Log;
 import com.egyptian.agent.accessibility.SeniorMode;
 import com.egyptian.agent.core.TTSManager;
 import com.egyptian.agent.stt.EgyptianNormalizer;
+import com.egyptian.agent.utils.SpeechConfirmation;
 import com.egyptian.agent.utils.VibrationManager;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
