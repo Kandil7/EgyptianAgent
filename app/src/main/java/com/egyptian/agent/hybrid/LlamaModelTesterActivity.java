@@ -107,31 +107,74 @@ public class LlamaModelTesterActivity extends Activity {
     
     private IntentResult parseSimulatedResponse(String response, String originalText) {
         IntentResult result = new IntentResult();
-        
+
         // In a real implementation, we would parse the actual JSON response
         // For simulation, we'll create a result based on our simulated response
-        
-        if (response.contains("CALL_PERSON")) {
-            result.setIntentType(com.egyptian.agent.nlp.IntentType.CALL_CONTACT);
-            result.setEntity("person_name", "ماما");
-            result.setConfidence(0.95f);
-        } else if (response.contains("SEND_WHATSAPP")) {
-            result.setIntentType(com.egyptian.agent.nlp.IntentType.SEND_WHATSAPP);
-            result.setEntity("person_name", "بابا");
-            result.setEntity("message", "مرحبا");
-            result.setConfidence(0.92f);
-        } else if (response.contains("SET_ALARM")) {
-            result.setIntentType(com.egyptian.agent.nlp.IntentType.SET_ALARM);
-            result.setEntity("time", "الساعة 8");
-            result.setConfidence(0.89f);
-        } else if (response.contains("EMERGENCY")) {
-            result.setIntentType(com.egyptian.agent.nlp.IntentType.EMERGENCY);
-            result.setConfidence(0.98f);
-        } else {
-            result.setIntentType(com.egyptian.agent.nlp.IntentType.UNKNOWN);
-            result.setConfidence(0.3f);
+        try {
+            org.json.JSONObject jsonResponse = new org.json.JSONObject(response);
+
+            String intentStr = jsonResponse.optString("intent", "UNKNOWN");
+            org.json.JSONObject entitiesObj = jsonResponse.optJSONObject("entities");
+            float confidence = (float) jsonResponse.optDouble("confidence", 0.0);
+
+            // Map string intent to enum
+            com.egyptian.agent.nlp.IntentType intentType;
+            switch (intentStr) {
+                case "CALL_PERSON":
+                    intentType = com.egyptian.agent.nlp.IntentType.CALL_CONTACT;
+                    break;
+                case "SEND_WHATSAPP":
+                    intentType = com.egyptian.agent.nlp.IntentType.SEND_WHATSAPP;
+                    break;
+                case "SET_ALARM":
+                    intentType = com.egyptian.agent.nlp.IntentType.SET_ALARM;
+                    break;
+                case "EMERGENCY":
+                    intentType = com.egyptian.agent.nlp.IntentType.EMERGENCY;
+                    break;
+                default:
+                    intentType = com.egyptian.agent.nlp.IntentType.UNKNOWN;
+                    break;
+            }
+
+            result.setIntentType(intentType);
+            result.setConfidence(confidence);
+
+            // Add entities if present
+            if (entitiesObj != null) {
+                java.util.Iterator<String> keys = entitiesObj.keys();
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                    String value = entitiesObj.optString(key);
+                    result.setEntity(key, value);
+                }
+            }
+        } catch (org.json.JSONException e) {
+            Log.e(TAG, "Error parsing JSON response", e);
+
+            // Fallback to original approach
+            if (response.contains("CALL_PERSON")) {
+                result.setIntentType(com.egyptian.agent.nlp.IntentType.CALL_CONTACT);
+                result.setEntity("person_name", "ماما");
+                result.setConfidence(0.95f);
+            } else if (response.contains("SEND_WHATSAPP")) {
+                result.setIntentType(com.egyptian.agent.nlp.IntentType.SEND_WHATSAPP);
+                result.setEntity("person_name", "بابا");
+                result.setEntity("message", "مرحبا");
+                result.setConfidence(0.92f);
+            } else if (response.contains("SET_ALARM")) {
+                result.setIntentType(com.egyptian.agent.nlp.IntentType.SET_ALARM);
+                result.setEntity("time", "الساعة 8");
+                result.setConfidence(0.89f);
+            } else if (response.contains("EMERGENCY")) {
+                result.setIntentType(com.egyptian.agent.nlp.IntentType.EMERGENCY);
+                result.setConfidence(0.98f);
+            } else {
+                result.setIntentType(com.egyptian.agent.nlp.IntentType.UNKNOWN);
+                result.setConfidence(0.3f);
+            }
         }
-        
+
         return result;
     }
     

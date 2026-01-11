@@ -109,8 +109,27 @@ public class MainActivity extends Activity {
      */
     private void updateServiceStatus() {
         // In a real implementation, this would check if the service is running
-        // For now, we'll just update the text
-        statusTextView.setText("Egyptian Agent is ready\nTap buttons to control service");
+        boolean isServiceRunning = isMyServiceRunning(VoiceService.class);
+        if (isServiceRunning) {
+            statusTextView.setText("Egyptian Agent is running\nService is active");
+        } else {
+            statusTextView.setText("Egyptian Agent is ready\nService is not running");
+        }
+    }
+
+    /**
+     * Checks if a service is currently running
+     * @param serviceClass The class of the service to check
+     * @return true if the service is running, false otherwise
+     */
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        android.app.ActivityManager manager = (android.app.ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (android.app.ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
     
     /**
