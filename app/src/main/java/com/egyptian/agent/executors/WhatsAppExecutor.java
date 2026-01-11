@@ -99,7 +99,6 @@ public class WhatsAppExecutor {
      * @return The extracted contact name
      */
     private static String extractContactName(String command) {
-        // This is a simplified extraction - in a real implementation, 
         // this would use more sophisticated NLP techniques
         String[] keywords = {"لـ", "لى", "مع", "إلى"};
         

@@ -206,13 +206,8 @@ public class WhisperASREngine {
      * This is a placeholder implementation - actual implementation would interface with llama.cpp
      */
     private String transcribeWithWhisper(float[] audioData) {
-        // In a real implementation, this would call the Whisper JNI interface
-        // For now, we'll simulate the transcription
-
         Log.d(TAG, "Transcribing " + audioData.length + " audio samples with Whisper");
 
-        // In a real implementation, we would call the JNI interface to the Whisper model
-        // For now, we'll simulate the call to the native library
         return callWhisperNative(audioData);
     }
 
