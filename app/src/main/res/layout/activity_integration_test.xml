@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/testResultsTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Test results will appear here..."
+                android:textSize="14sp"
+                android:fontFamily="monospace"
+                android:background="#f0f0f0"
+                android:padding="12dp"
+                android:scrollbars="vertical" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="16dp">
+
+        <Button
+            android:id="@+id/runAllTestsButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Run All Tests"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/runVoiceTestButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Run Voice Test"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/runNormalizationTestButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Run Normalization Test"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/runSeniorModeTestButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Run Senior Mode Test"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/runEmergencyTestButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Run Emergency Test"
+            android:layout_marginBottom="8dp" />
+
+    </LinearLayout>
+
+</LinearLayout>
