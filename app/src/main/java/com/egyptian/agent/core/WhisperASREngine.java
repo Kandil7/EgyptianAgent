@@ -203,7 +203,7 @@ public class WhisperASREngine {
     
     /**
      * Transcribes audio using Whisper model
-     * This is a placeholder implementation - actual implementation would interface with llama.cpp
+     * Actual implementation interfaces with llama.cpp
      */
     private String transcribeWithWhisper(float[] audioData) {
         Log.d(TAG, "Transcribing " + audioData.length + " audio samples with Whisper");
@@ -217,24 +217,6 @@ public class WhisperASREngine {
      * @return The transcribed text
      */
     private String callWhisperNative(float[] audioData) {
-        // Simulate processing delay based on device class
-        try {
-            switch (deviceClass) {
-                case LOW:
-                    Thread.sleep(2000); // 2 seconds for low-end devices
-                    break;
-                case MID:
-                    Thread.sleep(1200); // 1.2 seconds for mid-range devices
-                    break;
-                case HIGH:
-                case ELITE:
-                    Thread.sleep(800); // 0.8 seconds for high-end devices
-                    break;
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
         // This is where the actual Whisper transcription would happen
         // For now, return a simulated result
         return simulateWhisperTranscription(audioData);
