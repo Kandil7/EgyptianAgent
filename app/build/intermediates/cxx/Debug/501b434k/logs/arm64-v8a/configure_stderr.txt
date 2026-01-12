@@ -1,0 +1,8 @@
+CMake Warning at CMakeLists.txt:20 (message):
+  llama.cpp not found, building with mock implementation
+
+
+CMake Warning at CMakeLists.txt:29 (message):
+  faster-whisper not found, building without Whisper ASR
+
+
