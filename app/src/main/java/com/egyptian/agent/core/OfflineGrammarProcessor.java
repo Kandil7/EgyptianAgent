@@ -66,7 +66,6 @@ public class OfflineGrammarProcessor {
      * Parses a rule from JSGF format
      */
     private void parseRuleFromJSGF(String line) {
-        // In a real implementation, we would properly parse the JSGF grammar
         // For now, we'll implement a basic JSGF parser
 
         // Example JSGF format: "public <rule_name> = (اتصل | كلّم | عايز أكلم) <person>;"

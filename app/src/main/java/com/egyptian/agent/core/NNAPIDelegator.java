@@ -177,7 +177,6 @@ public class NNAPIDelegator {
      * Applies actual NNAPI delegation to a model
      */
     private boolean applyActualNNAPIDelegation(Object modelObject) {
-        // In a real implementation, this would apply the actual NNAPI delegation
         // For TensorFlow Lite models, this would involve creating an NnApiDelegate
         // and setting it on the Interpreter
         try {
