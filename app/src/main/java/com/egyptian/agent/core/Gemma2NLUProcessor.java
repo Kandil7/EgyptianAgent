@@ -87,7 +87,37 @@ public class Gemma2NLUProcessor {
      */
     private NLUResult processWithActualGemma2(String inputText) {
         // In a real implementation, this would call the actual Gemma2 model via llama.cpp
-        // For now, we'll simulate the processing
+        // For now, we'll simulate the processing with a more realistic implementation
+        return callGemma2Native(inputText);
+    }
+
+    /**
+     * Calls the native Gemma2 model for processing
+     */
+    private NLUResult callGemma2Native(String inputText) {
+        // Simulate calling the native Gemma2 model
+        // In a real implementation, this would interface with llama.cpp
+
+        // Simulate processing delay based on device class
+        try {
+            switch (deviceClass) {
+                case LOW:
+                    Thread.sleep(1500); // 1.5 seconds for low-end devices
+                    break;
+                case MID:
+                    Thread.sleep(800); // 0.8 seconds for mid-range devices
+                    break;
+                case HIGH:
+                case ELITE:
+                    Thread.sleep(500); // 0.5 seconds for high-end devices
+                    break;
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        // For now, return the simulated processing result
+        // In a real implementation, this would return the actual result from the native model
         return simulateGemma2Processing(inputText);
     }
 

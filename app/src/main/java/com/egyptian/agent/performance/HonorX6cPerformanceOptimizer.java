@@ -183,9 +183,9 @@ public class HonorX6cPerformanceOptimizer {
         Log.d(TAG, String.format("Configured caches - Contact cache: %d items, Model cache: %d MB",
                                  contactCacheSize, modelCacheSize));
 
-        // In a real implementation, we would set these values in the respective cache managers
-        // ContactCacheManager.setSize(contactCacheSize);
-        // ModelCacheManager.setSize(modelCacheSize * 1024 * 1024); // Convert to bytes
+        // Set these values in the respective cache managers
+        com.egyptian.agent.utils.ContactCacheManager.setSize(contactCacheSize);
+        com.egyptian.agent.core.ModelCacheManager.setSize(modelCacheSize * 1024 * 1024); // Convert to bytes
     }
 
     /**
