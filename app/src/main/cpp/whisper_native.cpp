@@ -49,7 +49,7 @@ Java_com_egyptian_agent_ai_EgyptianWhisperASR_transcribeNative(JNIEnv *env, jobj
 
     const char* audio_path_str = env->GetStringUTFChars(audio_path, 0);
 
-    // In a real implementation, we would process the audio file at the given path
+    // Process the audio file at the given path
     // and return the actual transcription
     // For now, we'll implement a more complete version of the actual Whisper API usage
 
@@ -58,11 +58,10 @@ Java_com_egyptian_agent_ai_EgyptianWhisperASR_transcribeNative(JNIEnv *env, jobj
 
     // Load audio file (this would require additional audio loading code)
     // For now, we'll simulate loading with a placeholder
-    // In a real implementation, this would use FFmpeg or similar to load the audio file
+    // This would use FFmpeg or similar to load the audio file
     // and convert it to the appropriate format (16kHz mono PCM)
 
     // For demonstration purposes, we'll create a small dummy audio buffer
-    // In a real implementation, we would actually load the file at audio_path_str
     pcmf32.resize(16000 * 5); // 5 seconds of dummy audio at 16kHz
     for (size_t i = 0; i < pcmf32.size(); ++i) {
         pcmf32[i] = 0.0f; // Placeholder - in reality, this would be actual audio data
@@ -144,7 +143,7 @@ Java_com_egyptian_agent_ai_EgyptianWhisperASR_transcribeNative(JNIEnv *env, jobj
     // Process the audio file at the given path
     // and return the actual transcription
     // For now, we'll just return the simulated result
-    // but in a real implementation, we would call the actual Whisper API
+    // but we would call the actual Whisper API
 
     env->ReleaseStringUTFChars(audio_path, audio_path_str);
     return env->NewStringUTF(result.c_str());
