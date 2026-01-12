@@ -226,7 +226,6 @@ public class WhisperASREngine {
      * Simulates Whisper transcription for demonstration purposes
      */
     private String simulateWhisperTranscription(float[] audioData) {
-        // In a real implementation, this would call the actual Whisper model
         // For simulation, we'll return a placeholder based on some characteristics of the audio
 
         // Just for simulation purposes, return some common Egyptian phrases
