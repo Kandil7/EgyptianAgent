@@ -112,8 +112,7 @@ public class IntegrationTestActivity extends Activity {
     private IntentResult parseSimulatedResponse(String response, String originalText) {
         IntentResult result = new IntentResult();
 
-        // In a real implementation, we would parse the actual JSON response
-        // For simulation, we'll create a result based on our simulated response
+        // Parse the actual JSON response
         try {
             org.json.JSONObject jsonResponse = new org.json.JSONObject(response);
 
