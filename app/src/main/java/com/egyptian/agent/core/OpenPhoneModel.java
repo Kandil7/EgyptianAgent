@@ -185,7 +185,6 @@ public class OpenPhoneModel {
             return "Model not loaded";
         }
 
-        // In a real implementation, this would return actual model metadata
         return getActualModelMetadata();
     }
 
