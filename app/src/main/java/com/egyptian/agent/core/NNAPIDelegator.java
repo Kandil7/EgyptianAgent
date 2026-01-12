@@ -159,10 +159,10 @@ public class NNAPIDelegator {
             Log.w(TAG, "NNAPI not initialized or not supported, skipping delegation");
             return false;
         }
-        
+
         Log.d(TAG, "Applying NNAPI delegation to model");
 
-        // In a real implementation, this would apply NNAPI delegation to the model
+        // Apply NNAPI delegation to the model
         // For example, with TensorFlow Lite:
         // tfliteOptions.setUseNNAPI(true);
         //
@@ -178,11 +178,31 @@ public class NNAPIDelegator {
      */
     private boolean applyActualNNAPIDelegation(Object modelObject) {
         // In a real implementation, this would apply the actual NNAPI delegation
-        // For now, we'll just return true to indicate delegation is ready
-        return true;
+        // For TensorFlow Lite models, this would involve creating an NnApiDelegate
+        // and setting it on the Interpreter
+        try {
+            // Check if this is a TensorFlow Lite interpreter
+            if (modelObject.getClass().getName().contains("Interpreter")) {
+                // Create NNAPI delegate
+                Class<?> delegateClass = Class.forName("org.tensorflow.lite.nnapi.NnApiDelegate");
+                Object delegate = delegateClass.newInstance();
+
+                // Apply the delegate to the interpreter
+                java.lang.reflect.Method addDelegateMethod = modelObject.getClass()
+                    .getMethod("addDelegate", Object.class);
+                addDelegateMethod.invoke(modelObject, delegate);
+
+                Log.i(TAG, "NNAPI delegation applied to TensorFlow Lite model");
+                return true;
+            }
+            // For other model types, implement similar delegation approaches
+        } catch (Exception e) {
+            Log.e(TAG, "Error applying NNAPI delegation", e);
+        }
+
+        return false;
     }
-    }
-    
+
     /**
      * Checks if NNAPI delegation is available
      */
