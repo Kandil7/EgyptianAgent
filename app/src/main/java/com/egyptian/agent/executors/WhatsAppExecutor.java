@@ -146,7 +146,6 @@ public class WhatsAppExecutor {
      */
     private static void sendWhatsAppMessage(Context context, String recipient, String message) {
         try {
-            // In a real implementation, we would need to get the phone number for the recipient
             // First, try to get the contact's phone number from the contacts
             String phoneNumber = getPhoneNumberForContact(context, recipient);
 
