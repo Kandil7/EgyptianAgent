@@ -170,12 +170,28 @@ public class WakeWordDetector {
      * @return true if wake word detected, false otherwise
      */
     private boolean detectWakeWordsInAudio(byte[] audioBuffer, int bufferSize) {
-        // This is a simplified implementation for demonstration
-        // In a real implementation, we would use the STT engine to convert audio to text
+        // Use the STT engine to convert audio to text
         // and then check for wake words
+        try {
+            // Convert byte buffer to audio data that can be processed
+            // This is a simplified approach - in reality, you'd need to properly decode the audio
 
-        // For now, we'll just return false to avoid constant triggering
-        // In a real implementation, this would analyze the audio properly
+            // Use a keyword spotting approach by converting to text first
+            String recognizedText = sttEngine.recognizeAudio(audioBuffer, bufferSize);
+
+            if (recognizedText != null) {
+                // Check for wake words in the recognized text
+                String lowerText = recognizedText.toLowerCase();
+
+                // Check for "يا صاحبي" (ya sa7bi) or "يا كبير" (ya kabeer)
+                return lowerText.contains("يا صاحبي") || lowerText.contains("يا كبير") ||
+                       lowerText.contains("ya sa7bi") || lowerText.contains("ya kabeer") ||
+                       lowerText.contains("ya7ya") || lowerText.contains("big friend");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error during wake word detection", e);
+        }
+
         return false;
     }
 

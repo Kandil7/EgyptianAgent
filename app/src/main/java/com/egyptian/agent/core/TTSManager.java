@@ -161,6 +161,34 @@ public class TTSManager {
         transformedText = transformedText.replace("محمد", "محمود"); // Common mispronunciation adaptation
         transformedText = transformedText.replace("الUniversity", "الجامعة"); // Adapt foreign terms
 
+        // Additional Egyptian dialect transformations
+        // Verb conjugations and informal expressions
+        transformedText = transformedText.replace("أريد", "عايز");
+        transformedText = transformedText.replace("أريدي", "عايزة"); // Feminine form
+        transformedText = transformedText.replace("يريد", "عايز");
+        transformedText = transformedText.replace("تريد", "عايزة");
+        transformedText = transformedText.replace("أحب", "بحب");
+        transformedText = transformedText.replace("أكره", "مبيحبش");
+        transformedText = transformedText.replace("لا أعرف", "ماعرفش");
+        transformedText = transformedText.replace("لا أستطيع", "ماقدرش");
+        transformedText = transformedText.replace("متى", "إمتى");
+        transformedText = transformedText.replace("أين", "فين");
+        transformedText = transformedText.replace("لماذا", "ليه");
+        transformedText = transformedText.replace("الآن", "دلوقتي");
+        transformedText = transformedText.replace("غداً", "بكرة");
+        transformedText = transformedText.replace("البارحة", "النهاردة");
+        transformedText = transformedText.replace("البارحة", "امبارح");
+
+        // Common Egyptian colloquial phrases
+        transformedText = transformedText.replace("كيف الحال", "إزيك");
+        transformedText = transformedText.replace("كيف حالك", "إزيك");
+        transformedText = transformedText.replace("كيف حالها", "إزيها");
+        transformedText = transformedText.replace("كيف حاله", "إزيه");
+        transformedText = transformedText.replace("هل تسمعني", "الله يسمعك");
+        transformedText = transformedText.replace("أراك لاحقاً", "بلاش");
+        transformedText = transformedText.replace("لا بأس", "أكيد");
+        transformedText = transformedText.replace("ربما", "ممكن");
+
         return transformedText;
     }
 

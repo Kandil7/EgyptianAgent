@@ -88,24 +88,79 @@ public class VoskSTTEngine {
 
             // 2. If not, extract from assets
             InputStream inputStream = context.getAssets().open(modelPath);
-            FileOutputStream outputStream = new FileOutputStream(modelFile);
 
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
+            // Handle compressed model files (common for Vosk models)
+            if (modelPath.endsWith(".zip")) {
+                // Extract the ZIP file to a directory
+                String modelName = fileName.substring(0, fileName.lastIndexOf('.'));
+                File modelDir = new File(context.getFilesDir(), modelName);
+
+                if (!modelDir.exists()) {
+                    modelDir.mkdirs();
+                }
+
+                // Extract ZIP contents to the model directory
+                extractZip(inputStream, modelDir);
+
+                // Return the directory path (Vosk expects a directory, not a file)
+                Log.d(TAG, "Model extracted to: " + modelDir.getAbsolutePath());
+                return modelDir.getAbsolutePath();
+            } else {
+                // Handle uncompressed model files
+                FileOutputStream outputStream = new FileOutputStream(modelFile);
+
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+
+                inputStream.close();
+                outputStream.close();
+
+                // 3. Return the path to the extracted model
+                Log.d(TAG, "Model extracted to: " + modelFile.getAbsolutePath());
+                return modelFile.getAbsolutePath();
             }
-
-            inputStream.close();
-            outputStream.close();
-
-            // 3. Return the path to the extracted model
-            Log.d(TAG, "Model extracted to: " + modelFile.getAbsolutePath());
-            return modelFile.getAbsolutePath();
         } catch (Exception e) {
             Log.e(TAG, "Error extracting model to internal storage", e);
             return null;
         }
+    }
+
+    /**
+     * Extracts a ZIP file to the specified directory
+     * @param inputStream Stream containing the ZIP file
+     * @param outputDir Directory to extract to
+     */
+    private void extractZip(InputStream inputStream, File outputDir) throws IOException {
+        java.util.zip.ZipInputStream zipInputStream = new java.util.zip.ZipInputStream(inputStream);
+        java.util.zip.ZipEntry entry;
+
+        while ((entry = zipInputStream.getNextEntry()) != null) {
+            File outputFile = new File(outputDir, entry.getName());
+
+            if (entry.isDirectory()) {
+                outputFile.mkdirs();
+            } else {
+                // Ensure parent directories exist
+                outputFile.getParentFile().mkdirs();
+
+                // Extract file
+                FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = zipInputStream.read(buffer)) != -1) {
+                    fileOutputStream.write(buffer, 0, bytesRead);
+                }
+                fileOutputStream.close();
+            }
+
+            zipInputStream.closeEntry();
+        }
+
+        zipInputStream.close();
+        inputStream.close();
     }
     
     /**
@@ -255,6 +310,40 @@ public class VoskSTTEngine {
         Log.i(TAG, "Vosk STT Engine destroyed");
     }
     
+    /**
+     * Recognizes audio from a byte buffer
+     * @param audioBuffer The audio data buffer
+     * @param bufferSize Size of the buffer
+     * @return Recognized text or null if not available
+     */
+    public String recognizeAudio(byte[] audioBuffer, int bufferSize) {
+        if (!isInitialized || recognizer == null) {
+            Log.e(TAG, "Recognizer not initialized");
+            return null;
+        }
+
+        try {
+            // Feed audio data to the recognizer
+            recognizer.acceptWaveForm(audioBuffer, bufferSize);
+
+            // Get the result
+            String result = recognizer.getResult();
+            if (result != null && !result.isEmpty()) {
+                try {
+                    org.json.JSONObject jsonObject = new org.json.JSONObject(result);
+                    return jsonObject.getString("text");
+                } catch (org.json.JSONException e) {
+                    Log.e(TAG, "Error parsing recognition result", e);
+                    return null;
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error recognizing audio", e);
+        }
+
+        return null;
+    }
+
     /**
      * Callback interface for STT results
      */
