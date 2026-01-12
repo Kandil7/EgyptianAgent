@@ -110,7 +110,31 @@ public class EgyptianWhisperASR {
 
         // Extract model from assets
         try {
-            java.io.InputStream inputStream = context.getAssets().open("models/whisper/" + modelFileName);
+            // Try different possible asset paths for the Whisper model
+            String[] possiblePaths = {
+                "models/whisper/" + modelFileName,
+                "models/whisper-egy/" + modelFileName,
+                "assets/models/whisper/" + modelFileName,
+                modelFileName
+            };
+
+            java.io.InputStream inputStream = null;
+            for (String path : possiblePaths) {
+                try {
+                    inputStream = context.getAssets().open(path);
+                    Log.d(TAG, "Found Whisper model at: " + path);
+                    break;
+                } catch (Exception e) {
+                    Log.d(TAG, "Model not found at: " + path);
+                    continue;
+                }
+            }
+
+            if (inputStream == null) {
+                Log.e(TAG, "Whisper model not found in any expected asset location");
+                return null;
+            }
+
             java.io.FileOutputStream outputStream = new java.io.FileOutputStream(modelFile);
 
             byte[] buffer = new byte[4096];
