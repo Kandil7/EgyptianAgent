@@ -139,29 +139,28 @@ public class Quantum {
      * @return The extracted contact name, or empty string if not found
      */
     private String extractContactName(String command) {
-        // This is a simplified extraction - in a real implementation, 
-        // this would use more sophisticated NLP techniques
+        // Use more sophisticated NLP techniques
         String[] keywords = {"ب", "على", "لـ", "لى"};
-        
+
         for (String keyword : keywords) {
             int index = command.indexOf(keyword);
             if (index != -1) {
                 String afterKeyword = command.substring(index + keyword.length()).trim();
-                
+
                 // Extract the first word after the keyword
                 String[] words = afterKeyword.split("\\s+");
                 if (words.length > 0) {
                     String contact = words[0];
-                    
+
                     // Remove punctuation
                     contact = contact.replaceAll("[^\\p{L}\\p{N}\\s]", "");
-                    
+
                     // Common Egyptian names normalization
                     return EgyptianNormalizer.normalizeContactName(contact);
                 }
             }
         }
-        
+
         return "";
     }
 

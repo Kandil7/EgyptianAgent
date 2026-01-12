@@ -113,7 +113,7 @@ public class EgyptianDialectAccuracyTester {
         // Since the analyzeText method is asynchronous, we'll use a synchronous approach for testing
         // In a real scenario, you'd need to handle this asynchronously
 
-        // In a real implementation, you'd need to use a latch or callback to wait for the async result
+        // Use a latch or callback to wait for the async result
         // For now, we'll implement a synchronous version for testing purposes
         return analyzeCommandSync(command);
     }
@@ -122,15 +122,41 @@ public class EgyptianDialectAccuracyTester {
      * Synchronous version of command analysis for testing purposes
      */
     private IntentResult analyzeCommandSync(String command) {
-        // This is a simplified synchronous implementation for testing
-        // In a real implementation, this would properly wait for the async result
+        // Properly wait for the async result
         try {
-            // Simulate the async processing by calling the actual model
-            // and waiting for a result (this is a simplified version)
+            // Create a CountDownLatch to wait for the async result
+            final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+            final IntentResult[] resultHolder = new IntentResult[1];
 
-            // For testing purposes, we'll use the mock implementation
-            // but in a real implementation, we would properly wait for the async result
-            return mockAnalyzeCommand(command);
+            // Call the async method and wait for completion
+            modelIntegration.analyzeText(command, new OpenPhoneIntegration.AnalysisCallback() {
+                @Override
+                public void onSuccess(IntentResult result) {
+                    resultHolder[0] = result;
+                    latch.countDown();
+                }
+
+                @Override
+                public void onError(Exception error) {
+                    resultHolder[0] = new IntentResult();
+                    resultHolder[0].setIntentType(com.egyptian.agent.nlp.IntentType.UNKNOWN);
+                    resultHolder[0].setConfidence(0.0f);
+                    latch.countDown();
+                }
+            });
+
+            // Wait for the result with a timeout
+            latch.await(10, java.util.concurrent.TimeUnit.SECONDS);
+
+            if (resultHolder[0] != null) {
+                return resultHolder[0];
+            } else {
+                // If timeout occurred, return a default result
+                IntentResult result = new IntentResult();
+                result.setIntentType(com.egyptian.agent.nlp.IntentType.UNKNOWN);
+                result.setConfidence(0.0f);
+                return result;
+            }
         } catch (Exception e) {
             Log.e(TAG, "Error in synchronous command analysis", e);
             IntentResult result = new IntentResult();
@@ -142,36 +168,35 @@ public class EgyptianDialectAccuracyTester {
     
     /**
      * Mock implementation to simulate command analysis
-     * In a real implementation, this would wait for the async result
      */
     private IntentResult mockAnalyzeCommand(String command) {
         IntentResult result = new IntentResult();
-        
+
         // Simple keyword matching for mock purposes
         String lowerCmd = command.toLowerCase();
-        
-        if (lowerCmd.contains("اتصل") || lowerCmd.contains("كلم") || lowerCmd.contains("رن") || 
+
+        if (lowerCmd.contains("اتصل") || lowerCmd.contains("كلم") || lowerCmd.contains("رن") ||
             lowerCmd.contains("call") || lowerCmd.contains("connect")) {
             result.setIntentType(IntentType.CALL_CONTACT);
-        } else if (lowerCmd.contains("واتساب") || lowerCmd.contains("رسالة") || 
+        } else if (lowerCmd.contains("واتساب") || lowerCmd.contains("رسالة") ||
                    lowerCmd.contains("whats") || lowerCmd.contains("message")) {
             result.setIntentType(IntentType.SEND_WHATSAPP);
-        } else if (lowerCmd.contains("نبه") || lowerCmd.contains("انبه") || 
+        } else if (lowerCmd.contains("نبه") || lowerCmd.contains("انبه") ||
                    lowerCmd.contains("alarm") || lowerCmd.contains("remind")) {
             result.setIntentType(IntentType.SET_ALARM);
-        } else if (lowerCmd.contains("وقت") || lowerCmd.contains("ساعة") || 
+        } else if (lowerCmd.contains("وقت") || lowerCmd.contains("ساعة") ||
                    lowerCmd.contains("time") || lowerCmd.contains("hour")) {
             result.setIntentType(IntentType.READ_TIME);
-        } else if (lowerCmd.contains("نجدة") || lowerCmd.contains("استغاثة") || 
+        } else if (lowerCmd.contains("نجدة") || lowerCmd.contains("استغاثة") ||
                    lowerCmd.contains("emergency") || lowerCmd.contains("help")) {
             result.setIntentType(IntentType.EMERGENCY);
         } else {
             result.setIntentType(IntentType.UNKNOWN);
         }
-        
+
         // Set a confidence based on how strong the match is
         result.setConfidence(determineMockConfidence(command, result.getIntentType()));
-        
+
         return result;
     }
     

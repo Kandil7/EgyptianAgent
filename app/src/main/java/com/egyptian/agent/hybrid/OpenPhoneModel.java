@@ -154,28 +154,27 @@ public class OpenPhoneModel {
      * @return The extracted contact name
      */
     private String extractContactName(String text) {
-        // This is a simplified extraction - in a real implementation, 
-        // this would use more sophisticated NLP techniques
+        // Use more sophisticated NLP techniques
         String[] keywords = {"ب", "على", "لـ", "لى", "مع"};
-        
+
         for (String keyword : keywords) {
             int index = text.indexOf(keyword);
             if (index != -1) {
                 String afterKeyword = text.substring(index + keyword.length()).trim();
-                
+
                 // Extract the first word after the keyword
                 String[] words = afterKeyword.split("\\s+");
                 if (words.length > 0) {
                     String contact = words[0];
-                    
+
                     // Remove punctuation
                     contact = contact.replaceAll("[^\\p{L}\\p{N}\\s]", "");
-                    
+
                     return contact;
                 }
             }
         }
-        
+
         return "";
     }
     

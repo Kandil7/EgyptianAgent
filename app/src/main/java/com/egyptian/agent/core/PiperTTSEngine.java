@@ -188,6 +188,8 @@ public class PiperTTSEngine {
      * Speaks text using the actual Piper TTS via JNI
      */
     private void speakWithActualPiperTTS(String text, TTSCompletionCallback callback) {
+        // For now, we'll use the fallback TTS
+        // this would interface with the native Piper TTS library
         speakWithFallbackTTS(text, callback);
     }
     

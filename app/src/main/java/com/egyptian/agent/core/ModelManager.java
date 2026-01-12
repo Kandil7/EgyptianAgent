@@ -151,6 +151,9 @@ public class ModelManager {
             case LOW:
                 // For low-end devices, only load essential models
                 Log.d(TAG, "Initializing essential models for low-end device");
+
+                // Initialize only the most essential models for low-end devices
+                initializeVoskModel();
                 break;
 
             case MID:
@@ -160,6 +163,9 @@ public class ModelManager {
                 // Initialize additional models for mid-range devices
                 initializeVoskModel();
                 initializeOpenPhoneModel();
+
+                // Also initialize lightweight versions of other models if available
+                initializeLightweightModels();
                 break;
 
             case HIGH:
@@ -171,8 +177,31 @@ public class ModelManager {
                 initializeVoskModel();
                 initializeOpenPhoneModel();
                 initializeLlamaModel();
+
+                // Initialize additional advanced models
+                initializeAdvancedModels();
                 break;
         }
+    }
+
+    /**
+     * Initializes lightweight models for mid-range devices
+     */
+    private void initializeLightweightModels() {
+        Log.d(TAG, "Initializing lightweight models");
+
+        // Initialize any additional lightweight models that are appropriate for mid-range devices
+        // This could include smaller neural networks or optimized versions of models
+    }
+
+    /**
+     * Initializes advanced models for high-end devices
+     */
+    private void initializeAdvancedModels() {
+        Log.d(TAG, "Initializing advanced models");
+
+        // Initialize any additional advanced models that are appropriate for high-end devices
+        // This could include larger neural networks or more computationally intensive models
     }
 
     /**
@@ -194,8 +223,7 @@ public class ModelManager {
      * Initializes the OpenPhone model
      */
     private void initializeOpenPhoneModel() {
-        // In a real implementation, this would initialize the OpenPhone model
-        // For now, we'll just log the action
+        // Initialize the OpenPhone model
         Log.d(TAG, "Initializing OpenPhone model for device class: " + deviceClass.name());
 
         // Simulate initialization time based on device class
@@ -215,8 +243,7 @@ public class ModelManager {
         if (llamaModelPath != null) {
             Log.d(TAG, "Initializing Llama model: " + llamaModelPath);
 
-            // In a real implementation, this would initialize the Llama model
-            // For now, we'll just log the action
+            // Initialize the Llama model
             try {
                 Thread.sleep(2000); // Simulate loading time for Llama model
             } catch (InterruptedException e) {

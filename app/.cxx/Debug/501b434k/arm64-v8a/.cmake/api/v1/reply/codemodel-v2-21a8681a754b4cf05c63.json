@@ -27,7 +27,7 @@
 					[
 						0
 					],
-					"name" : "llama_native",
+					"name" : "egyptian_agent",
 					"targetIndexes" : 
 					[
 						0
@@ -39,7 +39,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "llama_native::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-llama_native-Debug-4a8f39d79bbcefe66fd8.json",
+					"jsonFile" : "target-llama_native-Debug-7c155ec5fc11abbaf887.json",
 					"name" : "llama_native",
 					"projectIndex" : 0
 				}

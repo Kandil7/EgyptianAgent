@@ -212,8 +212,8 @@ public class EmergencyHandler {
      * @return Array of emergency contact numbers
      */
     private static String[] getEmergencyContacts(Context context) {
-        // In a real implementation, this would retrieve emergency contacts from shared preferences
-        // or a database where the user has configured their emergency contacts
+        // Retrieve emergency contacts from shared preferences
+        // where the user has configured their emergency contacts
         android.content.SharedPreferences prefs = context.getSharedPreferences("emergency_contacts", Context.MODE_PRIVATE);
         String contactsStr = prefs.getString("contacts", "");
 
@@ -255,16 +255,73 @@ public class EmergencyHandler {
      * @param context Context for the operation
      */
     private static void notifyGuardians(Context context) {
-        // In a real implementation, this would notify configured emergency contacts
-        // For now, we'll just log the action
         Log.d(TAG, "Notifying emergency guardians");
-        
-        // This would typically:
-        // 1. Get emergency contacts from app settings
-        // 2. Send SMS or make calls to these contacts
-        // 3. Share location with them
-        // 4. Log the emergency event
-        
+
+        // Get emergency contacts from app settings
+        String[] emergencyContacts = getEmergencyContacts(context);
+
+        if (emergencyContacts != null && emergencyContacts.length > 0) {
+            // Send SMS or make calls to these contacts
+            for (String contactNumber : emergencyContacts) {
+                sendEmergencyNotification(context, contactNumber);
+            }
+        } else {
+            Log.w(TAG, "No emergency contacts configured");
+        }
+
+        // Share location with them
+        shareLocation(context);
+
+        // Log the emergency event
+        logEmergencyEvent(context);
+
         TTSManager.speak(context, "تم إخطار جهات الاتصال الطارئة");
+    }
+
+    /**
+     * Sends an emergency notification to a contact
+     * @param context Context for the operation
+     * @param contactNumber The contact number to notify
+     */
+    private static void sendEmergencyNotification(Context context, String contactNumber) {
+        try {
+            String message = "Egyptian Agent Emergency Alert: Emergency situation detected. Location and assistance required.";
+
+            if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.SEND_SMS)
+                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                Log.w(TAG, "SMS permission not granted for emergency notification");
+                return;
+            }
+
+            android.telephony.SmsManager smsManager = android.telephony.SmsManager.getDefault();
+            smsManager.sendTextMessage(contactNumber, null, message, null, null);
+
+            Log.d(TAG, "Emergency notification sent to: " + contactNumber);
+        } catch (Exception e) {
+            Log.e(TAG, "Error sending emergency notification to: " + contactNumber, e);
+        }
+    }
+
+    /**
+     * Logs the emergency event
+     * @param context Context for the operation
+     */
+    private static void logEmergencyEvent(Context context) {
+        // Log the emergency event to a local file or database
+        try {
+            java.io.FileOutputStream fos = context.openFileOutput("emergency_log.txt", Context.MODE_APPEND);
+            java.io.OutputStreamWriter writer = new java.io.OutputStreamWriter(fos);
+
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault());
+            String timestamp = sdf.format(new java.util.Date());
+
+            writer.write("Emergency event at: " + timestamp + "\n");
+            writer.close();
+            fos.close();
+
+            Log.d(TAG, "Emergency event logged");
+        } catch (Exception e) {
+            Log.e(TAG, "Error logging emergency event", e);
+        }
     }
 }

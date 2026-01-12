@@ -1,13 +1,7 @@
 package com.egyptian.agent.core;
 
 import android.content.Context;
-import android.speech.tts.TextToSpeech;
-import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
-import android.os.Build;
-import java.util.Locale;
-import java.util.HashMap;
-import java.util.Random;
 
 /**
  * Text-to-Speech Manager for Egyptian Agent
@@ -15,11 +9,12 @@ import java.util.Random;
  */
 public class TTSManager {
     private static final String TAG = "TTSManager";
-    private static TextToSpeech textToSpeech;
+    private static TTSEngine ttsEngine;
     private static Context applicationContext;
     private static boolean isInitialized = false;
     private static boolean isSeniorMode = false;
     private static float speechRate = 1.0f;
+    private static float pitch = 1.0f;
     private static float volume = 1.0f;
 
     /**
@@ -28,50 +23,12 @@ public class TTSManager {
      */
     public static void initialize(Context context) {
         applicationContext = context.getApplicationContext();
-        
-        textToSpeech = new TextToSpeech(applicationContext, new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                if (status == TextToSpeech.SUCCESS) {
-                    // Set language to Arabic
-                    int result = textToSpeech.setLanguage(new Locale("ar"));
-                    
-                    if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                        Log.e(TAG, "This Language is not supported");
-                        // Fallback to English if Arabic is not available
-                        textToSpeech.setLanguage(Locale.ENGLISH);
-                    } else {
-                        Log.i(TAG, "TTS Initialized successfully with Arabic language");
-                    }
-                    
-                    // Set default speech rate and pitch
-                    textToSpeech.setSpeechRate(speechRate);
-                    textToSpeech.setPitch(1.0f);
-                    
-                    isInitialized = true;
-                } else {
-                    Log.e(TAG, "TTS Initialization failed");
-                }
-            }
-        });
 
-        // Set up utterance progress listener
-        textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-            @Override
-            public void onStart(String utteranceId) {
-                Log.d(TAG, "TTS started: " + utteranceId);
-            }
+        ttsEngine = new TTSEngine();
+        ttsEngine.initialize(context);
 
-            @Override
-            public void onDone(String utteranceId) {
-                Log.d(TAG, "TTS completed: " + utteranceId);
-            }
-
-            @Override
-            public void onError(String utteranceId) {
-                Log.e(TAG, "TTS error: " + utteranceId);
-            }
-        });
+        isInitialized = true;
+        Log.i(TAG, "TTS Manager initialized successfully");
     }
 
     /**
@@ -88,27 +45,24 @@ public class TTSManager {
         // Apply Egyptian dialect transformations if needed
         String processedText = applyEgyptianTransformations(text);
 
-        // Generate unique utterance ID
-        String utteranceId = String.valueOf(System.currentTimeMillis());
+        // Create speech parameters
+        TTSEngine.SpeechParams params = new TTSEngine.SpeechParams();
+        params.setRate(speechRate);
+        params.setPitch(pitch);
+        params.setVolume(isSeniorMode ? volume * 1.5f : volume);
 
         // Speak the text
-        HashMap<String, String> params = new HashMap<>();
-        params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utteranceId);
+        ttsEngine.speak(processedText, params, new TTSEngine.SpeechCallback() {
+            @Override
+            public void onCompleted() {
+                Log.d(TAG, "TTS completed: " + processedText);
+            }
 
-        // Apply senior mode settings if enabled
-        if (isSeniorMode) {
-            textToSpeech.setSpeechRate(0.8f); // Slower speech
-            textToSpeech.setVolume(volume * 1.5f); // Louder volume
-        } else {
-            textToSpeech.setSpeechRate(speechRate);
-            textToSpeech.setVolume(volume);
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            textToSpeech.speak(processedText, TextToSpeech.QUEUE_FLUSH, params, utteranceId);
-        } else {
-            textToSpeech.speak(processedText, TextToSpeech.QUEUE_FLUSH, params);
-        }
+            @Override
+            public void onError(String errorMessage) {
+                Log.e(TAG, "TTS error: " + errorMessage);
+            }
+        });
     }
 
     /**
@@ -161,7 +115,71 @@ public class TTSManager {
         transformedText = transformedText.replace("محمد", "محمود"); // Common mispronunciation adaptation
         transformedText = transformedText.replace("الUniversity", "الجامعة"); // Adapt foreign terms
 
+        // Additional Egyptian dialect transformations
+        // Verb conjugations and informal expressions
+        transformedText = transformedText.replace("أريد", "عايز");
+        transformedText = transformedText.replace("أريدي", "عايزة"); // Feminine form
+        transformedText = transformedText.replace("يريد", "عايز");
+        transformedText = transformedText.replace("تريد", "عايزة");
+        transformedText = transformedText.replace("أحب", "بحب");
+        transformedText = transformedText.replace("أكره", "مبيحبش");
+        transformedText = transformedText.replace("لا أعرف", "ماعرفش");
+        transformedText = transformedText.replace("لا أستطيع", "ماقدرش");
+        transformedText = transformedText.replace("متى", "إمتى");
+        transformedText = transformedText.replace("أين", "فين");
+        transformedText = transformedText.replace("لماذا", "ليه");
+        transformedText = transformedText.replace("الآن", "دلوقتي");
+        transformedText = transformedText.replace("غداً", "بكرة");
+        transformedText = transformedText.replace("البارحة", "النهاردة");
+        transformedText = transformedText.replace("البارحة", "امبارح");
+
+        // Common Egyptian colloquial phrases
+        transformedText = transformedText.replace("كيف الحال", "إزيك");
+        transformedText = transformedText.replace("كيف حالك", "إزيك");
+        transformedText = transformedText.replace("كيف حالها", "إزيها");
+        transformedText = transformedText.replace("كيف حاله", "إزيه");
+        transformedText = transformedText.replace("هل تسمعني", "الله يسمعك");
+        transformedText = transformedText.replace("أراك لاحقاً", "بلاش");
+        transformedText = transformedText.replace("لا بأس", "أكيد");
+        transformedText = transformedText.replace("ربما", "ممكن");
+
         return transformedText;
+    }
+
+    /**
+     * Sets speech rate for TTS
+     * @param context Context for the operation
+     * @param rate The speech rate (1.0 = normal, <1.0 = slower, >1.0 = faster)
+     */
+    public static void setSpeechRate(Context context, float rate) {
+        speechRate = rate;
+        if (ttsEngine != null && isInitialized) {
+            // We'll apply this rate in the speak method
+        }
+        Log.d(TAG, "Speech rate set to: " + rate);
+    }
+
+    /**
+     * Sets pitch for TTS
+     * @param context Context for the operation
+     * @param p The pitch (1.0 = normal, <1.0 = lower, >1.0 = higher)
+     */
+    public static void setPitch(Context context, float p) {
+        pitch = p;
+        if (ttsEngine != null && isInitialized) {
+            // We'll apply this pitch in the speak method
+        }
+        Log.d(TAG, "Pitch set to: " + p);
+    }
+
+    /**
+     * Sets volume for TTS
+     * @param context Context for the operation
+     * @param vol The volume (1.0 = normal, <1.0 = quieter, >1.0 = louder)
+     */
+    public static void setVolume(Context context, float vol) {
+        volume = vol;
+        Log.d(TAG, "Volume set to: " + vol);
     }
 
     /**
@@ -173,6 +191,11 @@ public class TTSManager {
         speechRate = 0.8f; // Slower speech
         volume = 1.2f;     // Louder volume
         Log.d(TAG, "Senior mode TTS settings applied");
+
+        // Apply settings to current TTS engine if available
+        if (ttsEngine != null && isInitialized) {
+            ttsEngine.setVoiceType(TTSEngine.VoiceType.SENIOR);
+        }
     }
 
     /**
@@ -181,16 +204,22 @@ public class TTSManager {
     public static void resetNormalSettings() {
         isSeniorMode = false;
         speechRate = 1.0f;
+        pitch = 1.0f;
         volume = 1.0f;
         Log.d(TAG, "Normal TTS settings restored");
+
+        // Apply settings to current TTS engine if available
+        if (ttsEngine != null && isInitialized) {
+            ttsEngine.setVoiceType(TTSEngine.VoiceType.NORMAL);
+        }
     }
 
     /**
      * Stops current TTS playback
      */
     public static void stop() {
-        if (textToSpeech != null && isInitialized) {
-            textToSpeech.stop();
+        if (ttsEngine != null && isInitialized) {
+            ttsEngine.stopSpeaking();
         }
     }
 
@@ -198,8 +227,8 @@ public class TTSManager {
      * Shuts down the TTS engine
      */
     public static void shutdown() {
-        if (textToSpeech != null) {
-            textToSpeech.shutdown();
+        if (ttsEngine != null) {
+            // No explicit shutdown method in TTSEngine interface
             isInitialized = false;
         }
     }
