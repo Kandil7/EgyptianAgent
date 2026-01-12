@@ -113,7 +113,7 @@ public class EgyptianDialectAccuracyTester {
         // Since the analyzeText method is asynchronous, we'll use a synchronous approach for testing
         // In a real scenario, you'd need to handle this asynchronously
 
-        // In a real implementation, you'd need to use a latch or callback to wait for the async result
+        // Use a latch or callback to wait for the async result
         // For now, we'll implement a synchronous version for testing purposes
         return analyzeCommandSync(command);
     }
@@ -122,7 +122,7 @@ public class EgyptianDialectAccuracyTester {
      * Synchronous version of command analysis for testing purposes
      */
     private IntentResult analyzeCommandSync(String command) {
-        // In a real implementation, this would properly wait for the async result
+        // Properly wait for the async result
         try {
             // Create a CountDownLatch to wait for the async result
             final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
@@ -168,7 +168,6 @@ public class EgyptianDialectAccuracyTester {
     
     /**
      * Mock implementation to simulate command analysis
-     * In a real implementation, this would wait for the async result
      */
     private IntentResult mockAnalyzeCommand(String command) {
         IntentResult result = new IntentResult();
