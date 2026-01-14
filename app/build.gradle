@@ -109,6 +109,9 @@ dependencies {
     // Java Native Access for Vosk
     implementation 'net.java.dev.jna:jna:5.13.0@aar'
 
+    // Google Cloud Speech for Live Transcribe
+    implementation 'com.google.cloud:speech:2.25.0'
+
     // Networking for LLM fallback
     implementation "com.squareup.okhttp3:okhttp:$rootProject.ext.okhttpVersion"
     implementation "com.squareup.retrofit2:retrofit:$rootProject.ext.retrofitVersion"
