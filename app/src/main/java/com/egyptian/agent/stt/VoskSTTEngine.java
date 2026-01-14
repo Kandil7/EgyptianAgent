@@ -345,6 +345,47 @@ public class VoskSTTEngine {
     }
 
     /**
+     * Recognizes audio from a file path
+     * @param audioFilePath Path to the audio file
+     * @return Recognized text or null if not available
+     */
+    public String recognizeFromFile(String audioFilePath) {
+        if (!isInitialized || recognizer == null) {
+            Log.e(TAG, "Recognizer not initialized");
+            return null;
+        }
+
+        try {
+            // Read audio file
+            java.io.FileInputStream fis = new java.io.FileInputStream(audioFilePath);
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+
+            // Process audio in chunks
+            while ((bytesRead = fis.read(buffer)) != -1) {
+                recognizer.acceptWaveForm(buffer, bytesRead);
+            }
+            fis.close();
+
+            // Get the final result
+            String finalResult = recognizer.getFinalResult();
+            if (finalResult != null && !finalResult.isEmpty()) {
+                try {
+                    org.json.JSONObject jsonObject = new org.json.JSONObject(finalResult);
+                    return jsonObject.getString("text");
+                } catch (org.json.JSONException e) {
+                    Log.e(TAG, "Error parsing final recognition result", e);
+                    return null;
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error recognizing audio from file: " + audioFilePath, e);
+        }
+
+        return null;
+    }
+
+    /**
      * Callback interface for STT results
      */
     public interface STTCallback {
