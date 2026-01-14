@@ -12,6 +12,7 @@ import com.egyptian.agent.stt.EgyptianNormalizer;
 import com.egyptian.agent.hybrid.HybridOrchestrator;
 import com.egyptian.agent.nlp.IntentResult;
 import com.egyptian.agent.ai.LlamaIntentEngine;
+import com.egyptian.agent.hybrid.HybridASR;
 import com.egyptian.agent.utils.CrashLogger;
 import com.egyptian.agent.utils.SystemAppHelper;
 import com.egyptian.agent.system.SystemPrivilegeManager;
@@ -23,6 +24,7 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
     private static final int NOTIFICATION_ID = 1;
 
     private VoskSTTEngine sttEngine;
+    private HybridASR hybridASR;  // New Hybrid ASR engine
     private WakeWordDetector wakeWordDetector;
     private AudioManager audioManager;
     private HybridOrchestrator hybridOrchestrator;
@@ -58,6 +60,7 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
         initializeModelBasedOnDeviceClass(); // Initialize models based on device class
         initializeHybridOrchestrator(); // Initialize the new orchestrator
         initializeLlamaIntentEngine(); // Initialize Llama Intent Engine
+        initializeHybridASR(); // Initialize the new Hybrid ASR engine
         initializeWakeWord();
         initializeForegroundService();
 
@@ -129,6 +132,17 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
         }
     }
 
+    private void initializeHybridASR() {
+        try {
+            hybridASR = new HybridASR(this);
+            Log.i(TAG, "Hybrid ASR engine initialized successfully");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to initialize Hybrid ASR engine", e);
+            CrashLogger.logError(this, e);
+            TTSManager.speak(this, "حصل مشكلة في تهيئة محرك التعرف على الكلام الهجين");
+        }
+    }
+
     private void initializeAudioManager() {
         audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         audioManager.requestAudioFocus(this, AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
@@ -189,6 +203,7 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
         }
 
         // Start listening for command
+        // Using the original VoskSTTEngine for real-time listening
         sttEngine.startListening(result -> {
             handleUserCommand(result);
             isListening = false;
@@ -383,6 +398,10 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
 
         if (llamaIntentEngine != null) {
             llamaIntentEngine.destroy();
+        }
+
+        if (hybridASR != null) {
+            hybridASR.destroy();
         }
 
         if (audioManager != null) {
