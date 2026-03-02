@@ -7,6 +7,7 @@ import com.egyptian.agent.nlp.IntentResult;
 import com.egyptian.agent.stt.EgyptianNormalizer;
 import com.egyptian.agent.utils.MemoryOptimizer;
 import com.egyptian.agent.utils.CrashLogger;
+import com.egyptian.agent.llm.LlamaEngine;
 import org.json.JSONObject;
 import java.io.File;
 import java.util.Map;
@@ -24,8 +25,7 @@ public class LlamaIntentEngine {
     private static final float MIN_CONFIDENCE_THRESHOLD = 0.85f; // Higher threshold for accuracy
 
     private ExecutorService inferenceExecutor;
-    private boolean isModelLoaded = false;
-    private long lastInferenceTime = 0;
+    private LlamaEngine llamaEngine;
     private Context context;
     private EgyptianWhisperASR whisperASR;
 
@@ -33,39 +33,13 @@ public class LlamaIntentEngine {
         this.context = context;
         inferenceExecutor = Executors.newSingleThreadExecutor();
         this.whisperASR = new EgyptianWhisperASR(context);
+        this.llamaEngine = new LlamaEngine(context);
 
-        // Load the Llama model in the background
-        new Thread(() -> {
-            try {
-                Log.i(TAG, "Loading Llama 3.2 3B Q4_K_M model for Egyptian dialect...");
-
-                // Initialize the Llama model
-                int result = LlamaNative.initializeModel(context, "llama-3.2-3b-Q4_K_M.gguf");
-
-                if (result == 0) {
-                    isModelLoaded = true;
-                    Log.i(TAG, "Llama 3.2 3B model loaded successfully");
-
-                    // Verify model with a simple Egyptian dialect test
-                    String testResponse = LlamaNative.infer("Egyptian Arabic: Classify this command: \"يا حكيم اتصل بماما\". Intent:", 64);
-                    Log.d(TAG, "Model test response: " + testResponse);
-                    
-                    // Warm up the model
-                    warmUpModel();
-                } else {
-                    Log.e(TAG, "Failed to load Llama model, result: " + result);
-                    TTSManager.speak(context, "تحذير: مشكلة في تحميل نموذج لاما. بستخدم الإعدادات الافتراضية");
-                }
-
-                // Check memory constraints for the device
-                MemoryOptimizer.checkMemoryConstraints(context);
-
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to load Llama model", e);
-                CrashLogger.logError(context, e);
-                TTSManager.speak(context, "حصل مشكلة في تشغيل نموذج لاما. المزايا الأساسية شغالة");
-            }
-        }).start();
+        // LlamaEngine loads asynchronously in its constructor
+        // We can check status via isReady()
+        
+        // Check memory constraints for the device
+        MemoryOptimizer.checkMemoryConstraints(context);
     }
 
     /**
@@ -74,7 +48,7 @@ public class LlamaIntentEngine {
      * @return IntentResult with parsed command
      */
     public IntentResult processEgyptianSpeech(String audioPath) {
-        if (!isModelLoaded) {
+        if (!llamaEngine.isReady()) {
             Log.w(TAG, "Llama model not loaded yet, using fallback");
             return fallbackProcessing(audioPath);
         }
@@ -89,7 +63,7 @@ public class LlamaIntentEngine {
             
             // 2. Llama 3.2 3B Intent Classification
             String prompt = createClassificationPrompt(normalizedText);
-            String intentJson = LlamaNative.infer(prompt, 128);
+            String intentJson = llamaEngine.generateResponse(prompt, 128);
             
             Log.d(TAG, "Llama classification result: " + intentJson);
 
@@ -129,8 +103,12 @@ public class LlamaIntentEngine {
 
         try {
             // Try to parse as JSON first
-            if (rawResponse.trim().startsWith("{") && rawResponse.trim().endsWith("}")) {
-                JSONObject jsonResponse = new JSONObject(rawResponse.trim());
+            int jsonStart = rawResponse.indexOf("{");
+            int jsonEnd = rawResponse.lastIndexOf("}");
+            
+            if (jsonStart >= 0 && jsonEnd > jsonStart) {
+                String jsonStr = rawResponse.substring(jsonStart, jsonEnd + 1);
+                JSONObject jsonResponse = new JSONObject(jsonStr);
 
                 // Extract intent
                 String intentStr = jsonResponse.optString("intent", "UNKNOWN");
@@ -139,7 +117,9 @@ public class LlamaIntentEngine {
                 // Extract entities
                 if (jsonResponse.has("entities")) {
                     JSONObject entities = jsonResponse.getJSONObject("entities");
-                    for (String key : entities.keySet()) {
+                    java.util.Iterator<String> keys = entities.keys();
+                    while(keys.hasNext()) {
+                        String key = keys.next();
                         result.setEntity(key, entities.getString(key));
                     }
                 }
@@ -186,14 +166,7 @@ public class LlamaIntentEngine {
      * Warms up the model to ensure it's ready for inference
      */
     private void warmUpModel() {
-        try {
-            // Run a simple test to warm up the model
-            String warmupPrompt = "Egyptian Arabic: Classify this command: \"اتصل بأمي\". Intent: CALL_PERSON";
-            String warmupResult = LlamaNative.infer(warmupPrompt, 32);
-            Log.d(TAG, "Model warmed up with result: " + warmupResult);
-        } catch (Exception e) {
-            Log.e(TAG, "Error warming up model", e);
-        }
+        // LlamaEngine handles its own warmup
     }
 
     /**
@@ -278,7 +251,7 @@ public class LlamaIntentEngine {
      * @return True if loaded, false otherwise
      */
     public boolean isReady() {
-        return isModelLoaded && whisperASR.isReady();
+        return llamaEngine.isReady() && whisperASR.isReady();
     }
 
     /**
@@ -289,8 +262,9 @@ public class LlamaIntentEngine {
             inferenceExecutor.shutdownNow();
         }
 
-        // Unload the native model
-        LlamaNative.unloadModel();
+        if (llamaEngine != null) {
+            llamaEngine.destroy();
+        }
         
         // Clean up Whisper ASR
         whisperASR.cleanup();

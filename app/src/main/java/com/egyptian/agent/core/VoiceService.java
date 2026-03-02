@@ -7,6 +7,8 @@ import android.speech.tts.*;
 import android.util.*;
 import com.egyptian.agent.accessibility.SeniorMode;
 import com.egyptian.agent.executors.EmergencyHandler;
+import com.egyptian.agent.asr.ASREngineInterface;
+import com.egyptian.agent.asr.WhisperASREngine;
 import com.egyptian.agent.stt.VoskSTTEngine;
 import com.egyptian.agent.stt.EgyptianNormalizer;
 import com.egyptian.agent.hybrid.HybridOrchestrator;
@@ -22,7 +24,7 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
     private static final String TAG = "VoiceService";
     private static final int NOTIFICATION_ID = 1;
 
-    private VoskSTTEngine sttEngine;
+    private ASREngineInterface sttEngine;
     private WakeWordDetector wakeWordDetector;
     private AudioManager audioManager;
     private HybridOrchestrator hybridOrchestrator;
@@ -136,17 +138,25 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
 
     private void initializeSTTEngine() {
         try {
-            // Use the appropriate model based on device class
+            // Get configured model path
             String modelPath = modelManager.getAsrModelPath();
-            if (modelPath != null) {
-                // Initialize with the specific model for this device class
+            
+            // Prefer Whisper if available and supported by device
+            if (modelManager.supportsWhisper() && modelPath != null && modelPath.contains("whisper")) {
+                sttEngine = new WhisperASREngine(this, modelPath);
+                Log.i(TAG, "STT Engine initialized with Whisper: " + modelPath);
+            } else if (modelPath != null) {
+                // Fallback to Vosk
                 sttEngine = new VoskSTTEngine(this, modelPath);
-                Log.i(TAG, "STT Engine initialized with model: " + modelPath);
+                Log.i(TAG, "STT Engine initialized with Vosk: " + modelPath);
             } else {
-                // Fallback to default initialization
+                // Default fallback
                 sttEngine = new VoskSTTEngine(this);
-                Log.i(TAG, "STT Engine initialized with default model");
+                Log.i(TAG, "STT Engine initialized with default Vosk model");
             }
+            
+            sttEngine.initialize();
+            
         } catch (Exception e) {
             Log.e(TAG, "Failed to initialize STT engine", e);
             CrashLogger.logError(this, e);
@@ -189,16 +199,38 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
         }
 
         // Start listening for command
-        sttEngine.startListening(result -> {
-            handleUserCommand(result);
-            isListening = false;
-            isProcessing = false;
-            restartWakeWordListening();
+        sttEngine.startListening(new ASREngineInterface.RecognitionCallback() {
+            @Override
+            public void onResult(com.egyptian.agent.asr.ASRResult result) {
+                handleUserCommand(result.getText());
+                isListening = false;
+                isProcessing = false;
+                restartWakeWordListening();
+            }
+
+            @Override
+            public void onError(Exception error) {
+                Log.e(TAG, "Recognition error", error);
+                TTSManager.speak(VoiceService.this, "عفواً، مسمعتش كويس");
+                isListening = false;
+                isProcessing = false;
+                restartWakeWordListening();
+            }
+
+            @Override
+            public void onPartialResult(com.egyptian.agent.asr.ASRResult partialResult) {
+                // Optional: Show UI feedback
+            }
         });
     }
 
     private void handleUserCommand(String command) {
         Log.i(TAG, "User command: " + command);
+
+        if (command == null || command.isEmpty()) {
+            TTSManager.speak(this, "مسمعتش حاجة");
+            return;
+        }
 
         // Emergency detection first (safety critical)
         if (EmergencyHandler.isEmergency(command)) {
@@ -401,13 +433,9 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
     @Override
     public void onAudioFocusChange(int focusChange) {
         if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
-            if (sttEngine != null) {
-                sttEngine.pauseListening();
-            }
+            // sttEngine.pauseListening(); // pauseListening not in interface, rely on stop/start logic
         } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
-            if (isListening && sttEngine != null) {
-                sttEngine.resumeListening();
-            }
+            // if (isListening) sttEngine.resumeListening();
         }
     }
 
@@ -453,6 +481,12 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
                 .setPriority(NotificationCompat.PRIORITY_LOW);
 
             startForeground(NOTIFICATION_ID, builder.build());
+        }
+        
+        private void startForeground(int id, Notification notification) {
+            if (context instanceof Service) {
+                ((Service) context).startForeground(id, notification);
+            }
         }
     }
 }
