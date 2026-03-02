@@ -21,7 +21,6 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.DEVICE_POWER" />
 
     <!-- Senior accessibility permissions -->
     <uses-permission android:name="android.permission.BODY_SENSORS" />
@@ -35,12 +34,11 @@
 
     <!-- Special permissions for Honor devices -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
-        tools:ignore="ProtectedPermissions" />
 
-    <!-- Permissions for OpenPhone model processing -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Custom permissions for exported components -->
+    <permission android:name="com.egyptian.agent.PERMISSION_VOICE_SERVICE" />
+    <permission android:name="com.egyptian.agent.PERMISSION_BOOT" />
+    <permission android:name="com.egyptian.agent.PERMISSION_EMERGENCY" />
 
     <!-- Hardware features -->
     <uses-feature android:name="android.hardware.microphone" android:required="true" />

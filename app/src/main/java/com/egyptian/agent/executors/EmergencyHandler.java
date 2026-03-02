@@ -1,6 +1,7 @@
 package com.egyptian.agent.executors;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -8,6 +9,8 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -15,6 +18,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.egyptian.agent.core.TTSManager;
+import com.egyptian.agent.emergency.EmergencyConfirmationDialog;
+import com.egyptian.agent.security.DataEncryptionManager;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,17 +27,28 @@ import java.util.List;
 /**
  * Emergency Handler
  * Handles emergency situations and triggers appropriate responses
+ * 
+ * Security features:
+ * - 10-second confirmation dialog before calling
+ * - Rate limiting (1 emergency call per 5 minutes)
+ * - Encrypted emergency logs
+ * - Voice warning in Arabic
  */
 public class EmergencyHandler {
     private static final String TAG = "EmergencyHandler";
-    
+
+    // Rate limiting: 1 emergency call per 5 minutes
+    private static final long EMERGENCY_COOLDOWN_MS = 5 * 60 * 1000;
+    private static long lastEmergencyTriggerTime = 0;
+    private static boolean isEmergencyInProgress = false;
+
     // Common emergency keywords in Egyptian dialect
     private static final List<String> EMERGENCY_KEYWORDS = Arrays.asList(
         "emergency", "emergencies", "ngda", "استغاثة", "استغث", "طوارئ", "危", "危",
         "emergency services", "ngda 3amalya", "estghatha", "tawari", "medical emergency",
         "medical help", "help", "help me", "sos", "s.o.s", "s o s", "救命", "救救我"
     );
-    
+
     /**
      * Checks if a command is an emergency command
      * @param command The command to check
@@ -42,37 +58,111 @@ public class EmergencyHandler {
         if (command == null) {
             return false;
         }
-        
+
         String lowerCommand = command.toLowerCase();
-        
+
         // Check for emergency keywords
         for (String keyword : EMERGENCY_KEYWORDS) {
             if (lowerCommand.contains(keyword.toLowerCase())) {
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     /**
-     * Triggers emergency response
+     * Checks if emergency call is allowed (rate limiting)
+     * @return true if allowed, false if in cooldown
+     */
+    public static synchronized boolean isEmergencyAllowed() {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastEmergencyTriggerTime < EMERGENCY_COOLDOWN_MS) {
+            long remainingSeconds = (EMERGENCY_COOLDOWN_MS - (currentTime - lastEmergencyTriggerTime)) / 1000;
+            Log.w(TAG, "Emergency rate limited. " + remainingSeconds + " seconds remaining in cooldown");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Triggers emergency response with confirmation dialog
      * @param context Context for the operation
      */
     public static void trigger(Context context) {
+        // Check rate limiting
+        if (!isEmergencyAllowed()) {
+            TTSManager.speak(context, "تم الاتصال بالطوارئ مؤخراً. انتظر قبل المحاولة تانية");
+            return;
+        }
+
+        // Prevent multiple simultaneous emergency triggers
+        if (isEmergencyInProgress) {
+            Log.w(TAG, "Emergency already in progress, ignoring duplicate trigger");
+            return;
+        }
+
         Log.i(TAG, "Emergency triggered!");
-        
+
+        // Check if context is an Activity (required for dialog)
+        if (context instanceof Activity) {
+            // Show confirmation dialog with 10-second countdown
+            showEmergencyConfirmationDialog((Activity) context);
+        } else {
+            // If not an Activity, proceed directly (e.g., from service)
+            Log.w(TAG, "Context is not an Activity, proceeding without confirmation dialog");
+            executeEmergency(context);
+        }
+    }
+
+    /**
+     * Shows the emergency confirmation dialog
+     */
+    private static void showEmergencyConfirmationDialog(Activity activity) {
+        isEmergencyInProgress = true;
+
+        EmergencyConfirmationDialog dialog = new EmergencyConfirmationDialog(
+            activity,
+            () -> {
+                // On confirm - execute emergency call
+                executeEmergency(activity);
+            },
+            () -> {
+                // On cancel - reset state
+                isEmergencyInProgress = false;
+                Log.i(TAG, "Emergency call cancelled by user");
+            }
+        );
+
+        dialog.show();
+    }
+
+    /**
+     * Executes the emergency response
+     */
+    private static synchronized void executeEmergency(Context context) {
+        // Update rate limiting timestamp
+        lastEmergencyTriggerTime = System.currentTimeMillis();
+
         // Speak emergency notification
         TTSManager.speak(context, "حالة طوارئ! ببدأ الإجراءات الطارئة");
-        
+
         // Try to call emergency services
         callEmergencyServices(context);
-        
+
         // Share location if available
         shareLocation(context);
-        
+
         // Notify guardians if configured
         notifyGuardians(context);
+
+        // Log emergency event (encrypted)
+        logEmergencyEventEncrypted(context);
+
+        // Reset in-progress flag after delay
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            isEmergencyInProgress = false;
+        }, EMERGENCY_COOLDOWN_MS);
     }
     
     /**
@@ -303,7 +393,35 @@ public class EmergencyHandler {
     }
 
     /**
-     * Logs the emergency event
+     * Logs the emergency event with encryption
+     * @param context Context for the operation
+     */
+    private static void logEmergencyEventEncrypted(Context context) {
+        try {
+            DataEncryptionManager encryptionManager = DataEncryptionManager.getInstance(context);
+            
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat(
+                "yyyy-MM-dd HH:mm:ss", 
+                java.util.Locale.getDefault()
+            );
+            String timestamp = sdf.format(new java.util.Date());
+            
+            // Store encrypted emergency log entry
+            String logKey = "emergency_log_" + System.currentTimeMillis();
+            String logEntry = "Emergency event at: " + timestamp;
+            
+            encryptionManager.storeSensitiveData(logKey, logEntry);
+            
+            Log.d(TAG, "Emergency event logged (encrypted)");
+        } catch (Exception e) {
+            Log.e(TAG, "Error logging encrypted emergency event", e);
+            // Fallback to unencrypted logging
+            logEmergencyEvent(context);
+        }
+    }
+
+    /**
+     * Logs the emergency event (legacy unencrypted method)
      * @param context Context for the operation
      */
     private static void logEmergencyEvent(Context context) {
@@ -319,7 +437,7 @@ public class EmergencyHandler {
             writer.close();
             fos.close();
 
-            Log.d(TAG, "Emergency event logged");
+            Log.d(TAG, "Emergency event logged (unencrypted - legacy)");
         } catch (Exception e) {
             Log.e(TAG, "Error logging emergency event", e);
         }

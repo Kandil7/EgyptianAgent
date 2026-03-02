@@ -4,16 +4,23 @@ import android.content.Context;
 import android.util.Log;
 
 import rikka.shizuku.Shizuku;
+import com.egyptian.agent.security.CommandSanitizer;
 
 /**
  * System Privilege Manager
  * Handles system-level privileges for the application
+ * 
+ * Security hardened with:
+ * - Command allowlisting via CommandSanitizer
+ * - Rate limiting (max 5 commands per 5 minutes)
+ * - Input validation for all system operations
  */
 public class SystemPrivilegeManager {
     private static final String TAG = "SystemPrivilegeManager";
-    
+
     private static boolean hasSystemPrivileges = false;
-    
+    private static Context appContext = null;
+
     /**
      * Checks if the app has system privileges
      * @return true if system privileges are available, false otherwise
@@ -21,7 +28,7 @@ public class SystemPrivilegeManager {
     public static boolean hasSystemPrivileges() {
         return hasSystemPrivileges;
     }
-    
+
     /**
      * Requests system privileges for the application
      * @param context Context for the operation
@@ -40,12 +47,13 @@ public class SystemPrivilegeManager {
             Log.e(TAG, "Error requesting system privileges", e);
         }
     }
-    
+
     /**
      * Initializes system privileges
      * @param context Context for the operation
      */
     public static void initialize(Context context) {
+        appContext = context.getApplicationContext();
         try {
             // Set up Shizuku callbacks
             Shizuku.addRequestPermissionResultListener((requestCode, grantResult) -> {
@@ -59,7 +67,7 @@ public class SystemPrivilegeManager {
                     }
                 }
             });
-            
+
             // Check if already granted
             if (Shizuku.checkSelfPermission() == Shizuku.PERMISSION_GRANTED) {
                 hasSystemPrivileges = true;
@@ -71,7 +79,53 @@ public class SystemPrivilegeManager {
             Log.e(TAG, "Error initializing system privileges", e);
         }
     }
-    
+
+    /**
+     * Executes a sanitized system command with security validation
+     * 
+     * @param command The command to execute
+     * @throws SecurityException if command is not allowed or rate limit exceeded
+     */
+    public static void executeSystemCommand(String command) throws SecurityException {
+        if (!hasSystemPrivileges) {
+            throw new SecurityException("System privileges not available");
+        }
+        
+        // Sanitize and validate command
+        String sanitizedCommand = CommandSanitizer.sanitize(command);
+        
+        Log.d(TAG, "Executing sanitized command: " + sanitizedCommand);
+        
+        // Execute via Shizuku with proper validation
+        try {
+            // Command execution would go here via Shizuku
+            // For now, we log the validated command
+            Log.i(TAG, "Command validated and ready for execution: " + sanitizedCommand);
+        } catch (Exception e) {
+            Log.e(TAG, "Error executing system command", e);
+            throw new SecurityException("Failed to execute command: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Checks remaining commands allowed in current rate limit window
+     * 
+     * @return Number of commands remaining
+     */
+    public static int getRemainingCommands() {
+        return CommandSanitizer.getRemainingCommands();
+    }
+
+    /**
+     * Checks if a command is allowed without executing it
+     * 
+     * @param command The command to check
+     * @return true if command is allowed, false otherwise
+     */
+    public static boolean isCommandAllowed(String command) {
+        return CommandSanitizer.isCommandAllowed(command);
+    }
+
     /**
      * Cleans up system privilege resources
      */
