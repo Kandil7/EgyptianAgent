@@ -3,6 +3,7 @@ package com.egyptian.agent.core;
 import android.app.*;
 import android.content.*;
 import android.os.*;
+import android.provider.Settings;
 import android.speech.tts.*;
 import android.util.*;
 import com.egyptian.agent.accessibility.SeniorMode;
@@ -14,9 +15,14 @@ import com.egyptian.agent.stt.EgyptianNormalizer;
 import com.egyptian.agent.hybrid.HybridOrchestrator;
 import com.egyptian.agent.nlp.IntentResult;
 import com.egyptian.agent.ai.LlamaIntentEngine;
+import com.egyptian.agent.ui.FloatingListeningView;
 import com.egyptian.agent.utils.CrashLogger;
 import com.egyptian.agent.utils.SystemAppHelper;
 import com.egyptian.agent.system.SystemPrivilegeManager;
+import com.egyptian.agent.executors.CallExecutor;
+import com.egyptian.agent.executors.WhatsAppExecutor;
+import com.egyptian.agent.executors.AlarmExecutor;
+import com.egyptian.agent.nlp.IntentType;
 import java.util.*;
 
 public class VoiceService extends Service implements AudioManager.OnAudioFocusChangeListener {
@@ -30,6 +36,7 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
     private HybridOrchestrator hybridOrchestrator;
     private LlamaIntentEngine llamaIntentEngine;  // New Llama integration
     private ModelManager modelManager;
+    private FloatingListeningView floatingView;
     private boolean isListening = false;
     private boolean isProcessing = false;
     private Handler mainHandler;
@@ -62,6 +69,9 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
         initializeLlamaIntentEngine(); // Initialize Llama Intent Engine
         initializeWakeWord();
         initializeForegroundService();
+        
+        // Initialize UI overlay
+        floatingView = new FloatingListeningView(this);
 
         // Honor-specific battery optimization bypass
         SystemAppHelper.keepAlive(this);
@@ -187,8 +197,10 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
         // Critical audio handling
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
 
-        // Vibration feedback for visually impaired users
-        // VibrationManager.vibrateShort(this);
+        // Show floating UI if permission granted
+        if (Settings.canDrawOverlays(this)) {
+            floatingView.show();
+        }
 
         // Senior mode special handling
         if (SeniorMode.isEnabled()) {
@@ -202,6 +214,7 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
         sttEngine.startListening(new ASREngineInterface.RecognitionCallback() {
             @Override
             public void onResult(com.egyptian.agent.asr.ASRResult result) {
+                floatingView.hide(); // Hide UI when listening stops
                 handleUserCommand(result.getText());
                 isListening = false;
                 isProcessing = false;
@@ -210,6 +223,7 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
 
             @Override
             public void onError(Exception error) {
+                floatingView.hide(); // Hide UI on error
                 Log.e(TAG, "Recognition error", error);
                 TTSManager.speak(VoiceService.this, "عفواً، مسمعتش كويس");
                 isListening = false;
@@ -219,7 +233,7 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
 
             @Override
             public void onPartialResult(com.egyptian.agent.asr.ASRResult partialResult) {
-                // Optional: Show UI feedback
+                // Optional: Update floating UI with partial text
             }
         });
     }
@@ -420,6 +434,10 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
         if (audioManager != null) {
             audioManager.abandonAudioFocus(this);
         }
+        
+        if (floatingView != null) {
+            floatingView.hide();
+        }
 
         // Critical for memory management on 6GB RAM devices
         System.gc();
@@ -488,5 +506,11 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
                 ((Service) context).startForeground(id, notification);
             }
         }
+    }
+    
+    // Add registerBootReceiver logic if needed or ensure it's in Manifest
+    private void registerBootReceiver() {
+        // Implementation typically handled via Manifest logic, 
+        // but can dynamically register if needed
     }
 }

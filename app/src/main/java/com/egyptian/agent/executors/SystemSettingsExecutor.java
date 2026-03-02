@@ -7,9 +7,11 @@ import android.provider.Settings;
 import android.util.Log;
 import com.egyptian.agent.core.TTSManager;
 import com.egyptian.agent.utils.CrashLogger;
+import com.topjohnwu.superuser.Shell;
 
 /**
  * Executor for system settings commands like brightness, volume, etc.
+ * Uses Root access (libsu) for direct control when available.
  */
 public class SystemSettingsExecutor {
     private static final String TAG = "SystemSettingsExecutor";
@@ -47,8 +49,26 @@ public class SystemSettingsExecutor {
         }
     }
 
+    private static boolean isRootAvailable() {
+        return Shell.rootAccess();
+    }
+
     private static void adjustBrightness(Context context, boolean increase) {
         try {
+            if (isRootAvailable()) {
+                // Use root to set brightness directly
+                int current = 128; // Default fallback
+                try {
+                    String res = Shell.cmd("settings get system screen_brightness").exec().getOut().get(0);
+                    current = Integer.parseInt(res);
+                } catch (Exception e) {}
+                
+                int newValue = increase ? Math.min(current + 50, 255) : Math.max(current - 50, 0);
+                Shell.cmd("settings put system screen_brightness " + newValue).submit();
+                TTSManager.speak(context, increase ? "عليت الإضاءة" : "وطيت الإضاءة");
+                return;
+            }
+
             // Check if we have system-level permissions
             if (Settings.System.canWrite(context)) {
                 int currentBrightness = Settings.System.getInt(
@@ -110,45 +130,89 @@ public class SystemSettingsExecutor {
     }
 
     private static void toggleAirplaneMode(Context context) {
-        // Airplane mode requires system-level permissions and is restricted
-        TTSManager.speak(context, "الوضع الطيران مظبط من الإعدادات");
+        if (isRootAvailable()) {
+            // Toggle airplane mode using root
+            // 1 = on, 0 = off. We need to check current state.
+            try {
+                String current = Shell.cmd("settings get global airplane_mode_on").exec().getOut().get(0);
+                boolean isOn = "1".equals(current);
+                String newState = isOn ? "0" : "1";
+                
+                Shell.cmd(
+                    "settings put global airplane_mode_on " + newState,
+                    "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state " + (isOn ? "false" : "true")
+                ).submit();
+                
+                TTSManager.speak(context, isOn ? "قفلت وضع الطيران" : "شغلت وضع الطيران");
+            } catch (Exception e) {
+                Log.e(TAG, "Error checking airplane mode", e);
+                TTSManager.speak(context, "مش عارف أحدد وضع الطيران");
+            }
+        } else {
+            TTSManager.speak(context, "الوضع الطيران مظبط من الإعدادات عشان ماعنديش روت");
+            Intent intent = new Intent(Settings.ACTION_AIRPLANE_MODE_SETTINGS);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        }
     }
 
     private static void toggleWiFi(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // For Android 10+, use the new API
-            Intent intent = new Intent(Settings.Panel.ACTION_WIFI);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
+        if (isRootAvailable()) {
+            // Try enabling/disabling via svc
+            android.net.wifi.WifiManager wifiManager = (android.net.wifi.WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            boolean isEnabled = wifiManager.isWifiEnabled();
+            
+            String cmd = isEnabled ? "disable" : "enable";
+            Shell.cmd("svc wifi " + cmd).submit();
+            TTSManager.speak(context, isEnabled ? "قفلت الواي فاي" : "شغلت الواي فاي");
         } else {
-            // For older versions, we need system-level permissions
-            TTSManager.speak(context, "الواي فاي مظبط من الإعدادات");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                Intent intent = new Intent(Settings.Panel.ACTION_WIFI);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            } else {
+                TTSManager.speak(context, "الواي فاي مظبط من الإعدادات");
+            }
         }
     }
 
     private static void toggleBluetooth(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // For Android 10+, use the new API
-            Intent intent = new Intent(Settings.Panel.ACTION_BLUETOOTH);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
+        if (isRootAvailable()) {
+            Shell.cmd("svc bluetooth toggle").submit(); // Works on many roms
+            TTSManager.speak(context, "غيرت حالة البلوتوث");
         } else {
-            // For older versions, we need special permissions
-            TTSManager.speak(context, "البلوتوث مظبط من الإعدادات");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                Intent intent = new Intent(Settings.Panel.ACTION_BLUETOOTH);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            } else {
+                TTSManager.speak(context, "البلوتوث مظبط من الإعدادات");
+            }
         }
     }
 
     private static void toggleLocation(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // For Android 10+, use the new API
-            Intent intent = new Intent(Settings.Panel.ACTION_LOCATION);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
+        if (isRootAvailable()) {
+            // settings put secure location_mode 3 (high accuracy) or 0 (off)
+            try {
+                String current = Shell.cmd("settings get secure location_mode").exec().getOut().get(0);
+                boolean isOn = !"0".equals(current);
+                String newState = isOn ? "0" : "3";
+                Shell.cmd("settings put secure location_mode " + newState).submit();
+                TTSManager.speak(context, isOn ? "قفلت الموقع" : "شغلت الموقع");
+            } catch (Exception e) {
+                Log.e(TAG, "Error toggling location", e);
+            }
         } else {
-            // For older versions, open location settings
-            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                Intent intent = new Intent(Settings.Panel.ACTION_LOCATION);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            } else {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            }
         }
     }
 }

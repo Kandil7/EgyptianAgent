@@ -168,6 +168,204 @@ android {
         disable 'MissingTranslation', 'ExtraTranslation'
         warning 'InvalidPackage'
     }
+
+    // Test configuration
+    testOptions {
+        unitTests {
+            includeAndroidResources = true  // Enable Robolectric
+            returnDefaultValues = true
+            all {
+                useJUnitPlatform()  // Enable JUnit 5
+                testLogging {
+                    events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
+                    exceptionFormat 'full'
+                    showCauses true
+                    showExceptions true
+                    showStackTraces true
+                    showStandardStreams true
+                }
+                // Set max heap size for tests
+                maxHeapSize = '2g'
+                // Enable parallel execution
+                maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+                // Fail fast option
+                failFast = false
+                // Enable coverage
+                jacoco {
+                    includeNoLocationClasses = true
+                    excludes = ['jdk.internal.*']
+                }
+            }
+        }
+        androidTest {
+            useAndroidXTest = true
+        }
+    }
+}
+
+// ===========================================
+// JaCoCo Code Coverage Configuration
+// ===========================================
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion = '0.8.12'
+    reportsDirectory = layout.buildDirectory.dir('reports/jacoco')
+}
+
+tasks.withType(Test).configureEach {
+    jacoco.includeNoLocationClasses = true
+    jacoco.excludes = ['jdk.internal.*']
+}
+
+// Task to generate combined code coverage report
+tasks.register('jacocoTestReport', JacocoReport) {
+    dependsOn 'testDebugUnitTest', 'createDebugUnitTestCoverageReport'
+    
+    group = 'Reporting'
+    description = 'Generate JaCoCo code coverage report for unit tests'
+    
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+        xml.destination = file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+        html.destination = file("${buildDir}/reports/jacoco/test/html")
+    }
+    
+    // Source directories
+    def fileFilter = [
+        '**/R.class',
+        '**/R$*.class',
+        '**/BuildConfig.*',
+        '**/Manifest*.*',
+        '**/*Test*.*',
+        'android/**/*.*',
+        '**/*Lambda*.*',
+        '**/*Builder.*',
+        '**/*Binding.*',
+        '**/*Module.*',
+        '**/*Factory.*',
+        '**/*_MembersInjector.*',
+        '**/*_Impl.*',
+        '**/*_Provide*Factory*.*',
+        '**/*Companion.*',
+        '**/*$Result.*',
+        '**/*$WhenMappings.*'
+    ]
+    
+    def debugTree = fileTree(dir: "${buildDir}/intermediates/javac/debug/classes", excludes: fileFilter)
+    def kotlinDebugTree = fileTree(dir: "${buildDir}/tmp/kotlin-classes/debug", excludes: fileFilter)
+    
+    sourceDirectories.from = files([
+        "${projectDir}/src/main/java",
+        "${projectDir}/src/main/kotlin"
+    ])
+    
+    classDirectories.from = files([debugTree, kotlinDebugTree])
+    
+    executionData.from = fileTree(dir: project.buildDir, includes: [
+        'jacoco/testDebugUnitTest.exec',
+        'jacoco/test.exec',
+        'outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec',
+        'outputs/code_coverage/debugAndroidTest/connected/**.ec'
+    ])
+    
+    doLast {
+        println "Coverage report generated at: ${reports.html.destination}"
+    }
+}
+
+// Task to generate Android test coverage
+tasks.register('jacocoAndroidTestReport', JacocoReport) {
+    dependsOn 'connectedDebugAndroidTest'
+    
+    group = 'Reporting'
+    description = 'Generate JaCoCo code coverage report for Android tests'
+    
+    reports {
+        xml.required = true
+        html.required = true
+        xml.destination = file("${buildDir}/reports/jacoco/androidTest/jacocoAndroidTestReport.xml")
+        html.destination = file("${buildDir}/reports/jacoco/androidTest/html")
+    }
+    
+    def fileFilter = [
+        '**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*',
+        '**/*Test*.*', 'android/**/*.*'
+    ]
+    
+    def debugTree = fileTree(dir: "${buildDir}/intermediates/javac/debug/classes", excludes: fileFilter)
+    def kotlinDebugTree = fileTree(dir: "${buildDir}/tmp/kotlin-classes/debug", excludes: fileFilter)
+    
+    sourceDirectories.from = files(["${projectDir}/src/main/java", "${projectDir}/src/main/kotlin"])
+    classDirectories.from = files([debugTree, kotlinDebugTree])
+    executionData.from = fileTree(dir: project.buildDir, includes: [
+        'outputs/code_coverage/debugAndroidTest/connected/**.ec'
+    ])
+}
+
+// Combined coverage task
+tasks.register('jacocoFullReport', JacocoReport) {
+    dependsOn 'testDebugUnitTest', 'connectedDebugAndroidTest'
+    
+    group = 'Reporting'
+    description = 'Generate combined JaCoCo coverage report'
+    
+    reports {
+        xml.required = true
+        html.required = true
+        xml.destination = file("${buildDir}/reports/jacoco/full/jacocoFullReport.xml")
+        html.destination = file("${buildDir}/reports/jacoco/full/html")
+    }
+    
+    def fileFilter = [
+        '**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*',
+        '**/*Test*.*', 'android/**/*.*'
+    ]
+    
+    def debugTree = fileTree(dir: "${buildDir}/intermediates/javac/debug/classes", excludes: fileFilter)
+    def kotlinDebugTree = fileTree(dir: "${buildDir}/tmp/kotlin-classes/debug", excludes: fileFilter)
+    
+    sourceDirectories.from = files(["${projectDir}/src/main/java", "${projectDir}/src/main/kotlin"])
+    classDirectories.from = files([debugTree, kotlinDebugTree])
+    executionData.from = fileTree(dir: project.buildDir, includes: [
+        'jacoco/testDebugUnitTest.exec',
+        'outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec',
+        'outputs/code_coverage/debugAndroidTest/connected/**.ec'
+    ])
+}
+
+// Coverage verification task with thresholds
+tasks.register('jacocoCoverageVerification', JacocoCoverageVerification) {
+    dependsOn 'testDebugUnitTest'
+    
+    group = 'Verification'
+    description = 'Verify code coverage meets minimum thresholds'
+    
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.80  // 80% minimum coverage
+            }
+        }
+        rule {
+            enabled = true
+            element = 'CLASS'
+            includes = ['com.egyptian.agent.nlu.*', 'com.egyptian.agent.executor.*']
+            
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.90  // 90% for critical classes
+            }
+        }
+    }
+    
+    executionData.from = fileTree(dir: project.buildDir, includes: [
+        'jacoco/testDebugUnitTest.exec',
+        'outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec'
+    ])
 }
 
 // Core library desugaring for Java 8+ APIs on older Android versions
@@ -228,15 +426,63 @@ dependencies {
     implementation "dev.rikka.shizuku:api:$rootProject.ext.shizukuVersion"
     implementation "dev.rikka.shizuku:provider:$rootProject.ext.shizukuVersion"
 
-    // Testing dependencies
+    // ===========================================
+    // Testing Dependencies - Comprehensive Suite
+    // ===========================================
+    
+    // --- JUnit 5 (Jupiter) for Unit Tests ---
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.4'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.11.4'
+    
+    // JUnit 4 legacy support
     testImplementation 'junit:junit:4.13.2'
+    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.11.4'
+    
+    // --- Mockito for Mocking ---
     testImplementation 'org.mockito:mockito-core:5.14.2'
     testImplementation 'org.mockito.kotlin:mockito-kotlin:5.4.0'
+    testImplementation 'org.mockito:mockito-inline:5.2.0'  // For final class mocking
+    
+    // --- Robolectric for Android Simulation ---
+    testImplementation 'org.robolectric:robolectric:4.14.1'
+    testImplementation 'org.robolectric:shadows-httpclient:4.14.1'
+    
+    // --- Coroutines Testing ---
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0'
+    testImplementation 'app.cash.turbine:turbine:1.2.0'  // Flow testing
+    
+    // --- AndroidX Test Libraries ---
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.ext:junit-ktx:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.6.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-intents:3.6.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-accessibility:3.6.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-web:3.6.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-idling-resource:3.6.1'
     androidTestImplementation 'androidx.test:runner:1.6.2'
     androidTestImplementation 'androidx.test:rules:1.6.1'
+    androidTestImplementation 'androidx.test:core:1.6.1'
+    androidTestImplementation 'androidx.test:core-ktx:1.6.1'
+    androidTestImplementation 'androidx.test:monitor:1.7.2'
+    
+    // --- UI Automator for Cross-App Testing ---
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.3.0'
+    
+    // --- Truth for Fluent Assertions ---
+    testImplementation 'com.google.truth:truth:1.4.4'
+    androidTestImplementation 'com.google.truth:truth:1.4.4'
+    
+    // --- AssertJ for Additional Assertions ---
+    testImplementation 'org.assertj:assertj-core:3.27.3'
+    
+    // --- Benchmarking ---
+    androidTestImplementation 'androidx.benchmark:benchmark-junit4:1.3.3'
+    androidTestImplementation 'androidx.benchmark:benchmark-macro-junit4:1.3.3'
+    
+    // --- Coverage Support ---
+    testImplementation 'org.jacoco:org.jacoco.core:0.8.12'
 
     // Special Honor device support (compile only - provided by system)
     compileOnly files('libs/honor-system-api.jar')

@@ -1,0 +1,1506 @@
+{
+  "metadata": {
+    "name": "Egyptian Dialect Test Corpus",
+    "version": "1.0.0",
+    "description": "Comprehensive test corpus for Egyptian Arabic dialect recognition and intent classification",
+    "totalPhrases": 250,
+    "coverage": {
+      "intents": ["EMERGENCY", "CALL_CONTACT", "SEND_WHATSAPP", "SET_ALARM", "READ_TIME", "GREETING", "THANK_YOU", "GOODBYE", "TOGGLE_WIFI", "TOGGLE_BLUETOOTH", "OPEN_APP", "UNKNOWN"],
+      "regions": ["Cairo", "Alexandria", "Delta", "Upper Egypt"],
+      "ageGroups": ["Young", "Adult", "Senior"],
+      "dialectLevels": ["Heavy Dialect", "Moderate Dialect", "MSA-influenced"]
+    }
+  },
+  "testPhrases": [
+    {
+      "id": "EMG001",
+      "intent": "EMERGENCY",
+      "phrase": "نجدة",
+      "normalized": "نجدة",
+      "expectedConfidence": 0.95,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "EMG002",
+      "intent": "EMERGENCY",
+      "phrase": "استغاثة",
+      "normalized": "استغاثة",
+      "expectedConfidence": 0.95,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "EMG003",
+      "intent": "EMERGENCY",
+      "phrase": "في حد يجي",
+      "normalized": "أحتاج مساعدة",
+      "expectedConfidence": 0.85,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "EMG004",
+      "intent": "EMERGENCY",
+      "phrase": "محتاج مساعدة",
+      "normalized": "أحتاج مساعدة",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "EMG005",
+      "intent": "EMERGENCY",
+      "phrase": "ساعدني",
+      "normalized": "ساعدني",
+      "expectedConfidence": 0.92,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "EMG006",
+      "intent": "EMERGENCY",
+      "phrase": "انقذني",
+      "normalized": "أنقذني",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "EMG007",
+      "intent": "EMERGENCY",
+      "phrase": "حاجة طارئة",
+      "normalized": "حالة طارئة",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "EMG008",
+      "intent": "EMERGENCY",
+      "phrase": "أنا في خطر",
+      "normalized": "أنا في خطر",
+      "expectedConfidence": 0.85,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "EMG009",
+      "intent": "EMERGENCY",
+      "phrase": "يا نجدة",
+      "normalized": "نجدة",
+      "expectedConfidence": 0.93,
+      "region": "Alexandria",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "EMG010",
+      "intent": "EMERGENCY",
+      "phrase": "emergency help",
+      "normalized": "emergency help",
+      "expectedConfidence": 0.80,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "EMG011",
+      "intent": "EMERGENCY",
+      "phrase": "مش قادر",
+      "normalized": "لا أستطيع",
+      "expectedConfidence": 0.75,
+      "region": "Cairo",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "EMG012",
+      "intent": "EMERGENCY",
+      "phrase": "طوارئ",
+      "normalized": "طوارئ",
+      "expectedConfidence": 0.92,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "EMG013",
+      "intent": "EMERGENCY",
+      "phrase": "نجدة أرجوك",
+      "normalized": "نجدة",
+      "expectedConfidence": 0.94,
+      "region": "Delta",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "EMG014",
+      "intent": "EMERGENCY",
+      "phrase": "استغاثة من فضلك",
+      "normalized": "استغاثة",
+      "expectedConfidence": 0.93,
+      "region": "Upper Egypt",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "EMG015",
+      "intent": "EMERGENCY",
+      "phrase": "help me",
+      "normalized": "help me",
+      "expectedConfidence": 0.85,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "CALL001",
+      "intent": "CALL_CONTACT",
+      "phrase": "كلم ماما",
+      "normalized": "اتصل بأمي",
+      "expectedConfidence": 0.92,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "CALL002",
+      "intent": "CALL_CONTACT",
+      "phrase": "اتصل ببابا",
+      "normalized": "اتصل بأبي",
+      "expectedConfidence": 0.95,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "CALL003",
+      "intent": "CALL_CONTACT",
+      "phrase": "رن على أحمد",
+      "normalized": "اتصل بأحمد",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "CALL004",
+      "intent": "CALL_CONTACT",
+      "phrase": "نادي بمحمد",
+      "normalized": "اتصل بمحمد",
+      "expectedConfidence": 0.88,
+      "region": "Alexandria",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "CALL005",
+      "intent": "CALL_CONTACT",
+      "phrase": "كلم الدكتور",
+      "normalized": "اتصل بالدكتور",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "CALL006",
+      "intent": "CALL_CONTACT",
+      "phrase": "خده على تليفون",
+      "normalized": "اتصل به",
+      "expectedConfidence": 0.85,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "CALL007",
+      "intent": "CALL_CONTACT",
+      "phrase": "حطني في مكالمة مع ماما",
+      "normalized": "اتصل بأمي",
+      "expectedConfidence": 0.82,
+      "region": "Delta",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "CALL008",
+      "intent": "CALL_CONTACT",
+      "phrase": "عايز أتتكلم مع أحمد",
+      "normalized": "أريد التحدث مع أحمد",
+      "expectedConfidence": 0.85,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "CALL009",
+      "intent": "CALL_CONTACT",
+      "phrase": "ممكن تكلم بابا",
+      "normalized": "هل يمكن الاتصال بأبي",
+      "expectedConfidence": 0.83,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "CALL010",
+      "intent": "CALL_CONTACT",
+      "phrase": "كلم خالي",
+      "normalized": "اتصل بخالي",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "CALL011",
+      "intent": "CALL_CONTACT",
+      "phrase": "رن على عمي",
+      "normalized": "اتصل بعمي",
+      "expectedConfidence": 0.90,
+      "region": "Alexandria",
+      "ageGroup": "All"
+    },
+    {
+      "id": "CALL012",
+      "intent": "CALL_CONTACT",
+      "phrase": "كلم تيتا",
+      "normalized": "اتصل بجدتي",
+      "expectedConfidence": 0.92,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "CALL013",
+      "intent": "CALL_CONTACT",
+      "phrase": "اتصل بزوجتي",
+      "normalized": "اتصل بزوجتي",
+      "expectedConfidence": 0.95,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "CALL014",
+      "intent": "CALL_CONTACT",
+      "phrase": "كلم حبيبتي",
+      "normalized": "اتصل بزوجتي",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "CALL015",
+      "intent": "CALL_CONTACT",
+      "phrase": "رن على الشغل",
+      "normalized": "اتصل بالعمل",
+      "expectedConfidence": 0.87,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "WA001",
+      "intent": "SEND_WHATSAPP",
+      "phrase": "ابعت واتساب لماما",
+      "normalized": "أرسل واتساب لأمي",
+      "expectedConfidence": 0.92,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "WA002",
+      "intent": "SEND_WHATSAPP",
+      "phrase": "ارسل رسالة واتساب لبابا",
+      "normalized": "أرسل رسالة واتساب لأبي",
+      "expectedConfidence": 0.93,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "WA003",
+      "intent": "SEND_WHATSAPP",
+      "phrase": "قول واتساب لأحمد",
+      "normalized": "قل واتساب لأحمد",
+      "expectedConfidence": 0.85,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "WA004",
+      "intent": "SEND_WHATSAPP",
+      "phrase": "ابعت رسالة على واتساب",
+      "normalized": "أرسل رسالة على واتساب",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "WA005",
+      "intent": "SEND_WHATSAPP",
+      "phrase": "راسل محمد على واتساب",
+      "normalized": "راسل محمد على واتساب",
+      "expectedConfidence": 0.88,
+      "region": "Alexandria",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "WA006",
+      "intent": "SEND_WHATSAPP",
+      "phrase": "اكتب لماما على واتساب",
+      "normalized": "اكتب لأمي على واتساب",
+      "expectedConfidence": 0.85,
+      "region": "Delta",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "WA007",
+      "intent": "SEND_WHATSAPP",
+      "phrase": "بعته واتساب",
+      "normalized": "أرسلت واتساب",
+      "expectedConfidence": 0.80,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "WA008",
+      "intent": "SEND_WHATSAPP",
+      "phrase": "ابعتله رسالة",
+      "normalized": "أرسل له رسالة",
+      "expectedConfidence": 0.82,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "WA009",
+      "intent": "SEND_WHATSAPP",
+      "phrase": "قول لبابا على واتساب",
+      "normalized": "قل لأبي على واتساب",
+      "expectedConfidence": 0.83,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "WA010",
+      "intent": "SEND_WHATSAPP",
+      "phrase": "send whatsapp to mama",
+      "normalized": "send whatsapp to mama",
+      "expectedConfidence": 0.75,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "ALM001",
+      "intent": "SET_ALARM",
+      "phrase": "نبهني الصبح",
+      "normalized": "نبهني الصباح",
+      "expectedConfidence": 0.92,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "ALM002",
+      "intent": "SET_ALARM",
+      "phrase": "ذكرني الظهر",
+      "normalized": "ذكرني الظهر",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "ALM003",
+      "intent": "SET_ALARM",
+      "phrase": "انبهني بعد ساعة",
+      "normalized": "أنبهني بعد ساعة",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "ALM004",
+      "intent": "SET_ALARM",
+      "phrase": "اضبط منبه للعشا",
+      "normalized": "اضبط منبه للعشاء",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "ALM005",
+      "intent": "SET_ALARM",
+      "phrase": "حطلي منبه بكرة الصبح",
+      "normalized": "ضع لي منبه غداً الصباح",
+      "expectedConfidence": 0.85,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "ALM006",
+      "intent": "SET_ALARM",
+      "phrase": "ذكرني بعد نص ساعة",
+      "normalized": "ذكرني بعد 30 دقيقة",
+      "expectedConfidence": 0.87,
+      "region": "Alexandria",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "ALM007",
+      "intent": "SET_ALARM",
+      "phrase": "نبهني الساعة 7",
+      "normalized": "نبهني الساعة 7",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "ALM008",
+      "intent": "SET_ALARM",
+      "phrase": "اضبط المنبه للعصر",
+      "normalized": "اضبط المنبه للعصر",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "ALM009",
+      "intent": "SET_ALARM",
+      "phrase": "حط تذكير للمغرب",
+      "normalized": "ضع تذكير للمغرب",
+      "expectedConfidence": 0.85,
+      "region": "Delta",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "ALM010",
+      "intent": "SET_ALARM",
+      "phrase": "نبهني بكرة بدري",
+      "normalized": "نبهني غداً مبكراً",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "ALM011",
+      "intent": "SET_ALARM",
+      "phrase": "ذكرني بعد ربع ساعة",
+      "normalized": "ذكرني بعد 15 دقيقة",
+      "expectedConfidence": 0.87,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "ALM012",
+      "intent": "SET_ALARM",
+      "phrase": "نبهني الليل",
+      "normalized": "نبهني الليل",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "ALM013",
+      "intent": "SET_ALARM",
+      "phrase": "اضبط منبه لـ 8 الصبح",
+      "normalized": "اضبط منبه لـ 8 الصباح",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "ALM014",
+      "intent": "SET_ALARM",
+      "phrase": "حطلي تذكير بعد ساعتين",
+      "normalized": "ضع لي تذكير بعد ساعتين",
+      "expectedConfidence": 0.85,
+      "region": "Upper Egypt",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "ALM015",
+      "intent": "SET_ALARM",
+      "phrase": "نبهني يوم الجمعة",
+      "normalized": "نبهني يوم الجمعة",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "TIME001",
+      "intent": "READ_TIME",
+      "phrase": "الساعة كام",
+      "normalized": "كم الساعة",
+      "expectedConfidence": 0.95,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "TIME002",
+      "intent": "READ_TIME",
+      "phrase": "كام الساعة",
+      "normalized": "كم الساعة",
+      "expectedConfidence": 0.95,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "TIME003",
+      "intent": "READ_TIME",
+      "phrase": "الوقت إيه",
+      "normalized": "الوقت ماذا",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "TIME004",
+      "intent": "READ_TIME",
+      "phrase": "إيه الوقت",
+      "normalized": "ماذا الوقت",
+      "expectedConfidence": 0.88,
+      "region": "Alexandria",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "TIME005",
+      "intent": "READ_TIME",
+      "phrase": "وقت إيه دلوقتي",
+      "normalized": "الوقت ماذا الآن",
+      "expectedConfidence": 0.87,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "TIME006",
+      "intent": "READ_TIME",
+      "phrase": "الساعة دلوقتي",
+      "normalized": "الساعة الآن",
+      "expectedConfidence": 0.85,
+      "region": "Delta",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "TIME007",
+      "intent": "READ_TIME",
+      "phrase": "what time is it",
+      "normalized": "what time is it",
+      "expectedConfidence": 0.80,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "TIME008",
+      "intent": "READ_TIME",
+      "phrase": "كم الوقت",
+      "normalized": "كم الوقت",
+      "expectedConfidence": 0.92,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "TIME009",
+      "intent": "READ_TIME",
+      "phrase": "إيه الساعة",
+      "normalized": "ماذا الساعة",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "TIME010",
+      "intent": "READ_TIME",
+      "phrase": "الساعة إيه",
+      "normalized": "الساعة ماذا",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "GRT001",
+      "intent": "GREETING",
+      "phrase": "السلام عليكم",
+      "normalized": "السلام عليكم",
+      "expectedConfidence": 0.95,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "GRT002",
+      "intent": "GREETING",
+      "phrase": "ازيك",
+      "normalized": "كيف حالك",
+      "expectedConfidence": 0.92,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "GRT003",
+      "intent": "GREETING",
+      "phrase": "عامل ايه",
+      "normalized": "كيف حالك",
+      "expectedConfidence": 0.92,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "GRT004",
+      "intent": "GREETING",
+      "phrase": "أهلاً",
+      "normalized": "أهلاً",
+      "expectedConfidence": 0.93,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "GRT005",
+      "intent": "GREETING",
+      "phrase": "مرحبا",
+      "normalized": "مرحبا",
+      "expectedConfidence": 0.93,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "GRT006",
+      "intent": "GREETING",
+      "phrase": "صباح الخير",
+      "normalized": "صباح الخير",
+      "expectedConfidence": 0.94,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "GRT007",
+      "intent": "GREETING",
+      "phrase": "مساء الخير",
+      "normalized": "مساء الخير",
+      "expectedConfidence": 0.94,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "GRT008",
+      "intent": "GREETING",
+      "phrase": "ألو",
+      "normalized": "ألو",
+      "expectedConfidence": 0.85,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "GRT009",
+      "intent": "GREETING",
+      "phrase": "إيه الأخبار",
+      "normalized": "ما الأخبار",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "GRT010",
+      "intent": "GREETING",
+      "phrase": "أخبار إيه",
+      "normalized": "ما الأخبار",
+      "expectedConfidence": 0.88,
+      "region": "Alexandria",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "GRT011",
+      "intent": "GREETING",
+      "phrase": "عامل إيه يا باشا",
+      "normalized": "كيف حالك يا باشا",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "GRT012",
+      "intent": "GREETING",
+      "phrase": "أزيك يا دكتور",
+      "normalized": "كيف حالك يا دكتور",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "GRT013",
+      "intent": "GREETING",
+      "phrase": "hello",
+      "normalized": "hello",
+      "expectedConfidence": 0.75,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "GRT014",
+      "intent": "GREETING",
+      "phrase": "hi there",
+      "normalized": "hi there",
+      "expectedConfidence": 0.70,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "GRT015",
+      "intent": "GREETING",
+      "phrase": "يا هلا",
+      "normalized": "أهلاً",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "THK001",
+      "intent": "THANK_YOU",
+      "phrase": "شكرا",
+      "normalized": "شكراً",
+      "expectedConfidence": 0.95,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "THK002",
+      "intent": "THANK_YOU",
+      "phrase": "متشكر",
+      "normalized": "متشكر",
+      "expectedConfidence": 0.92,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "THK003",
+      "intent": "THANK_YOU",
+      "phrase": "تسلم",
+      "normalized": "تسلم",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "THK004",
+      "intent": "THANK_YOU",
+      "phrase": "يسلمو",
+      "normalized": "يسلمو",
+      "expectedConfidence": 0.88,
+      "region": "Alexandria",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "THK005",
+      "intent": "THANK_YOU",
+      "phrase": "ألف شكر",
+      "normalized": "ألف شكر",
+      "expectedConfidence": 0.93,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "THK006",
+      "intent": "THANK_YOU",
+      "phrase": "شكراً جزيلاً",
+      "normalized": "شكراً جزيلاً",
+      "expectedConfidence": 0.94,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "THK007",
+      "intent": "THANK_YOU",
+      "phrase": "ميرسي",
+      "normalized": "شكراً",
+      "expectedConfidence": 0.85,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "THK008",
+      "intent": "THANK_YOU",
+      "phrase": "thank you",
+      "normalized": "thank you",
+      "expectedConfidence": 0.80,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "THK009",
+      "intent": "THANK_YOU",
+      "phrase": "تسلم إيدك",
+      "normalized": "تسلم يدك",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "THK010",
+      "intent": "THANK_YOU",
+      "phrase": "الله يسلمك",
+      "normalized": "الله يسلمك",
+      "expectedConfidence": 0.85,
+      "region": "Cairo",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "GBY001",
+      "intent": "GOODBYE",
+      "phrase": "مع السلامة",
+      "normalized": "مع السلامة",
+      "expectedConfidence": 0.95,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "GBY002",
+      "intent": "GOODBYE",
+      "phrase": "باي",
+      "normalized": "باي",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "GBY003",
+      "intent": "GOODBYE",
+      "phrase": "سلام",
+      "normalized": "سلام",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "GBY004",
+      "intent": "GOODBYE",
+      "phrase": "في أمان الله",
+      "normalized": "في أمان الله",
+      "expectedConfidence": 0.93,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "GBY005",
+      "intent": "GOODBYE",
+      "phrase": "أشوفك بعدين",
+      "normalized": "أراك لاحقاً",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "GBY006",
+      "intent": "GOODBYE",
+      "phrase": "سلامو",
+      "normalized": "سلام",
+      "expectedConfidence": 0.85,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "GBY007",
+      "intent": "GOODBYE",
+      "phrase": "bye",
+      "normalized": "bye",
+      "expectedConfidence": 0.80,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "GBY008",
+      "intent": "GOODBYE",
+      "phrase": "goodbye",
+      "normalized": "goodbye",
+      "expectedConfidence": 0.78,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "GBY009",
+      "intent": "GOODBYE",
+      "phrase": "إلى اللقاء",
+      "normalized": "إلى اللقاء",
+      "expectedConfidence": 0.92,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "GBY010",
+      "intent": "GOODBYE",
+      "phrase": "سلام عليكم",
+      "normalized": "سلام عليكم",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "WIFI001",
+      "intent": "TOGGLE_WIFI",
+      "phrase": "شغل الواي فاي",
+      "normalized": "شغّل الواي فاي",
+      "expectedConfidence": 0.92,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "WIFI002",
+      "intent": "TOGGLE_WIFI",
+      "phrase": "افتح الواي فاي",
+      "normalized": "افتح الواي فاي",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "WIFI003",
+      "intent": "TOGGLE_WIFI",
+      "phrase": "اقفل الواي فاي",
+      "normalized": "أغلق الواي فاي",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "WIFI004",
+      "intent": "TOGGLE_WIFI",
+      "phrase": "شغل wifi",
+      "normalized": "شغّل wifi",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "WIFI005",
+      "intent": "TOGGLE_WIFI",
+      "phrase": "اقفل wifi",
+      "normalized": "أغلق wifi",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "WIFI006",
+      "intent": "TOGGLE_WIFI",
+      "phrase": "شغل النت",
+      "normalized": "شغّل الإنترنت",
+      "expectedConfidence": 0.85,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "WIFI007",
+      "intent": "TOGGLE_WIFI",
+      "phrase": "اقفل النت",
+      "normalized": "أغلق الإنترنت",
+      "expectedConfidence": 0.85,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "WIFI008",
+      "intent": "TOGGLE_WIFI",
+      "phrase": "turn on wifi",
+      "normalized": "turn on wifi",
+      "expectedConfidence": 0.75,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "WIFI009",
+      "intent": "TOGGLE_WIFI",
+      "phrase": "turn off wifi",
+      "normalized": "turn off wifi",
+      "expectedConfidence": 0.75,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "WIFI010",
+      "intent": "TOGGLE_WIFI",
+      "phrase": "شغل الإنترنت",
+      "normalized": "شغّل الإنترنت",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "BT001",
+      "intent": "TOGGLE_BLUETOOTH",
+      "phrase": "شغل البلوتوث",
+      "normalized": "شغّل البلوتوث",
+      "expectedConfidence": 0.92,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "BT002",
+      "intent": "TOGGLE_BLUETOOTH",
+      "phrase": "افتح البلوتوث",
+      "normalized": "افتح البلوتوث",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "BT003",
+      "intent": "TOGGLE_BLUETOOTH",
+      "phrase": "اقفل البلوتوث",
+      "normalized": "أغلق البلوتوث",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "BT004",
+      "intent": "TOGGLE_BLUETOOTH",
+      "phrase": "شغل bluetooth",
+      "normalized": "شغّل bluetooth",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "BT005",
+      "intent": "TOGGLE_BLUETOOTH",
+      "phrase": "اقفل bluetooth",
+      "normalized": "أغلق bluetooth",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "BT006",
+      "intent": "TOGGLE_BLUETOOTH",
+      "phrase": "وصل السماعة بالبلوتوث",
+      "normalized": "وصل السماعة بالبلوتوث",
+      "expectedConfidence": 0.82,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "BT007",
+      "intent": "TOGGLE_BLUETOOTH",
+      "phrase": "turn on bluetooth",
+      "normalized": "turn on bluetooth",
+      "expectedConfidence": 0.75,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "BT008",
+      "intent": "TOGGLE_BLUETOOTH",
+      "phrase": "turn off bluetooth",
+      "normalized": "turn off bluetooth",
+      "expectedConfidence": 0.75,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "BT009",
+      "intent": "TOGGLE_BLUETOOTH",
+      "phrase": "فصل البلوتوث",
+      "normalized": "فصل البلوتوث",
+      "expectedConfidence": 0.85,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "BT010",
+      "intent": "TOGGLE_BLUETOOTH",
+      "phrase": "قفل البلوتوث",
+      "normalized": "أغلق البلوتوث",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "APP001",
+      "intent": "OPEN_APP",
+      "phrase": "افتح واتساب",
+      "normalized": "افتح واتساب",
+      "expectedConfidence": 0.92,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "APP002",
+      "intent": "OPEN_APP",
+      "phrase": "شغل فيسبوك",
+      "normalized": "شغّل فيسبوك",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "APP003",
+      "intent": "OPEN_APP",
+      "phrase": "افتح يوتيوب",
+      "normalized": "افتح يوتيوب",
+      "expectedConfidence": 0.92,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "APP004",
+      "intent": "OPEN_APP",
+      "phrase": "شغل whatsapp",
+      "normalized": "شغّل whatsapp",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "APP005",
+      "intent": "OPEN_APP",
+      "phrase": "افتح facebook",
+      "normalized": "افتح facebook",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "APP006",
+      "intent": "OPEN_APP",
+      "phrase": "شغل youtube",
+      "normalized": "شغّل youtube",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "APP007",
+      "intent": "OPEN_APP",
+      "phrase": "افتح جوجل",
+      "normalized": "افتح جوجل",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "APP008",
+      "intent": "OPEN_APP",
+      "phrase": "شغل الخرائط",
+      "normalized": "شغّل الخرائط",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "APP009",
+      "intent": "OPEN_APP",
+      "phrase": "افتح الكاميرا",
+      "normalized": "افتح الكاميرا",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "APP010",
+      "intent": "OPEN_APP",
+      "phrase": "شغل الإعدادات",
+      "normalized": "شغّل الإعدادات",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "UNK001",
+      "intent": "UNKNOWN",
+      "phrase": "كلام عشوائي غير مفهوم",
+      "normalized": "كلام عشوائي غير مفهوم",
+      "expectedConfidence": 0.30,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "UNK002",
+      "intent": "UNKNOWN",
+      "phrase": "أبجد هوز",
+      "normalized": "أبجد هوز",
+      "expectedConfidence": 0.25,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "UNK003",
+      "intent": "UNKNOWN",
+      "phrase": "لا أعرف ماذا أقول",
+      "normalized": "لا أعرف ماذا أقول",
+      "expectedConfidence": 0.35,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "UNK004",
+      "intent": "UNKNOWN",
+      "phrase": "random gibberish",
+      "normalized": "random gibberish",
+      "expectedConfidence": 0.20,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "UNK005",
+      "intent": "UNKNOWN",
+      "phrase": "xyz abc 123",
+      "normalized": "xyz abc 123",
+      "expectedConfidence": 0.15,
+      "region": "Cairo",
+      "ageGroup": "All"
+    },
+    {
+      "id": "MIX001",
+      "intent": "CALL_CONTACT",
+      "phrase": "كلم ماما على whatsapp",
+      "normalized": "اتصل بأمي على واتساب",
+      "expectedConfidence": 0.85,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "MIX002",
+      "intent": "SET_ALARM",
+      "phrase": "نبهني بكرة 8 AM",
+      "normalized": "نبهني غداً 8 صباحاً",
+      "expectedConfidence": 0.82,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "MIX003",
+      "intent": "SEND_WHATSAPP",
+      "phrase": "ابعت message لبابا",
+      "normalized": "أرسل رسالة لأبي",
+      "expectedConfidence": 0.78,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "MIX004",
+      "intent": "OPEN_APP",
+      "phrase": "افتح الـ settings",
+      "normalized": "افتح الإعدادات",
+      "expectedConfidence": 0.80,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "MIX005",
+      "intent": "TOGGLE_WIFI",
+      "phrase": "شغل الـ internet",
+      "normalized": "شغّل الإنترنت",
+      "expectedConfidence": 0.82,
+      "region": "Cairo",
+      "ageGroup": "Young"
+    },
+    {
+      "id": "SEN001",
+      "intent": "CALL_CONTACT",
+      "phrase": "كلم ولدي",
+      "normalized": "اتصل بابني",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "SEN002",
+      "intent": "CALL_CONTACT",
+      "phrase": "اتصل ببنتي",
+      "normalized": "اتصل بابنتي",
+      "expectedConfidence": 0.92,
+      "region": "Cairo",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "SEN003",
+      "intent": "READ_TIME",
+      "phrase": "إيه الوقت يا ابني",
+      "normalized": "ماذا الوقت يا ابني",
+      "expectedConfidence": 0.85,
+      "region": "Cairo",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "SEN004",
+      "intent": "SET_ALARM",
+      "phrase": "ذكرني صلاة الظهر",
+      "normalized": "ذكرني صلاة الظهر",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "SEN005",
+      "intent": "GREETING",
+      "phrase": "أهلاً يا ابني",
+      "normalized": "أهلاً يا ابني",
+      "expectedConfidence": 0.88,
+      "region": "Cairo",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "SEN006",
+      "intent": "EMERGENCY",
+      "phrase": "يا ابني أنا تعبان",
+      "normalized": "أنا متعب",
+      "expectedConfidence": 0.75,
+      "region": "Cairo",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "SEN007",
+      "intent": "SET_ALARM",
+      "phrase": "نبهني وقت المغرب",
+      "normalized": "نبهني وقت المغرب",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "SEN008",
+      "intent": "CALL_CONTACT",
+      "phrase": "كلم الدكتور أحمد",
+      "normalized": "اتصل بالدكتور أحمد",
+      "expectedConfidence": 0.92,
+      "region": "Cairo",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "SEN009",
+      "intent": "READ_TIME",
+      "phrase": "الساعة إيه يا ريس",
+      "normalized": "الساعة ماذا يا رئيس",
+      "expectedConfidence": 0.85,
+      "region": "Cairo",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "SEN010",
+      "intent": "THANK_YOU",
+      "phrase": "الله يخليك يا ابني",
+      "normalized": "الله يخليك يا ابني",
+      "expectedConfidence": 0.82,
+      "region": "Cairo",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "REG001",
+      "intent": "GREETING",
+      "phrase": "أهلاً وسهلاً",
+      "normalized": "أهلاً وسهلاً",
+      "expectedConfidence": 0.92,
+      "region": "Alexandria",
+      "ageGroup": "All"
+    },
+    {
+      "id": "REG002",
+      "intent": "CALL_CONTACT",
+      "phrase": "رن على البيت",
+      "normalized": "اتصل بالمنزل",
+      "expectedConfidence": 0.85,
+      "region": "Alexandria",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "REG003",
+      "intent": "SET_ALARM",
+      "phrase": "نبهني وقت الفجر",
+      "normalized": "نبهني وقت الفجر",
+      "expectedConfidence": 0.90,
+      "region": "Upper Egypt",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "REG004",
+      "intent": "GREETING",
+      "phrase": "يا هلا والله",
+      "normalized": "أهلاً",
+      "expectedConfidence": 0.88,
+      "region": "Upper Egypt",
+      "ageGroup": "All"
+    },
+    {
+      "id": "REG005",
+      "intent": "THANK_YOU",
+      "phrase": "عظيم يا باشا",
+      "normalized": "ممتاز يا باشا",
+      "expectedConfidence": 0.80,
+      "region": "Cairo",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "REG006",
+      "intent": "CALL_CONTACT",
+      "phrase": "كلم العمدة",
+      "normalized": "اتصل بالعمدة",
+      "expectedConfidence": 0.85,
+      "region": "Upper Egypt",
+      "ageGroup": "Adult"
+    },
+    {
+      "id": "REG007",
+      "intent": "GREETING",
+      "phrase": "نهارك سعيد",
+      "normalized": "نهارك سعيد",
+      "expectedConfidence": 0.90,
+      "region": "Alexandria",
+      "ageGroup": "All"
+    },
+    {
+      "id": "REG008",
+      "intent": "GOODBYE",
+      "phrase": "الله معاك",
+      "normalized": "الله معك",
+      "expectedConfidence": 0.88,
+      "region": "Delta",
+      "ageGroup": "Senior"
+    },
+    {
+      "id": "REG009",
+      "intent": "THANK_YOU",
+      "phrase": "ربنا يخليك",
+      "normalized": "ربنا يخليك",
+      "expectedConfidence": 0.85,
+      "region": "Delta",
+      "ageGroup": "All"
+    },
+    {
+      "id": "REG010",
+      "intent": "GREETING",
+      "phrase": "صباح النور",
+      "normalized": "صباح النور",
+      "expectedConfidence": 0.90,
+      "region": "Cairo",
+      "ageGroup": "All"
+    }
+  ],
+  "testScenarios": [
+    {
+      "name": "Emergency Response Flow",
+      "description": "Test complete emergency detection and response",
+      "phrases": ["EMG001", "EMG002", "EMG005", "EMG008"],
+      "expectedBehavior": "Trigger emergency protocol immediately"
+    },
+    {
+      "name": "Family Communication Flow",
+      "description": "Test calling and messaging family members",
+      "phrases": ["CALL001", "CALL002", "WA001", "WA002"],
+      "expectedBehavior": "Correctly identify family member and action"
+    },
+    {
+      "name": "Daily Routine Flow",
+      "description": "Test alarm and time queries",
+      "phrases": ["ALM001", "ALM002", "TIME001", "TIME002"],
+      "expectedBehavior": "Set alarms and report time correctly"
+    },
+    {
+      "name": "Conversation Flow",
+      "description": "Test greeting and farewell exchanges",
+      "phrases": ["GRT001", "GRT002", "THK001", "GBY001"],
+      "expectedBehavior": "Respond appropriately to social exchanges"
+    },
+    {
+      "name": "Device Control Flow",
+      "description": "Test WiFi and Bluetooth toggling",
+      "phrases": ["WIFI001", "WIFI003", "BT001", "BT003"],
+      "expectedBehavior": "Toggle device settings correctly"
+    },
+    {
+      "name": "Mixed Language Flow",
+      "description": "Test handling of Arabic-English code switching",
+      "phrases": ["MIX001", "MIX002", "MIX003", "MIX004"],
+      "expectedBehavior": "Understand mixed language commands"
+    },
+    {
+      "name": "Senior User Flow",
+      "description": "Test commands typical of senior users",
+      "phrases": ["SEN001", "SEN002", "SEN004", "SEN007"],
+      "expectedBehavior": "Handle senior speech patterns"
+    },
+    {
+      "name": "Regional Variation Flow",
+      "description": "Test regional dialect variations",
+      "phrases": ["REG001", "REG003", "REG004", "REG006"],
+      "expectedBehavior": "Understand regional variations"
+    }
+  ]
+}

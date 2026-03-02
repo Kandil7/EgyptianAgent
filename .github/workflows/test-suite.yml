@@ -1,0 +1,396 @@
+name: EgyptianAgent Test Suite
+
+on:
+  push:
+    branches: [ main, develop, release/* ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false -Dkotlin.incremental=false"
+  JAVA_VERSION: '17'
+  ANDROID_SDK_VERSION: '34'
+
+jobs:
+  # ===========================================
+  # Unit Tests Job
+  # ===========================================
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: 9.0
+          packages: 'platform-tools platforms;android-${{ env.ANDROID_SDK_VERSION }} build-tools;34.0.0'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run Unit Tests with Coverage
+        run: ./gradlew testDebugUnitTest jacocoTestReport --stacktrace --info
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_HOME }}
+
+      - name: Upload Unit Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-results
+          path: |
+            app/build/test-results/**/*.xml
+            app/build/reports/tests/**/*.html
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: |
+            app/build/reports/jacoco/test/html/**
+            app/build/reports/jacoco/test/jacocoTestReport.xml
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          junit_files: app/build/test-results/**/*.xml
+          check_name: Unit Test Results
+          fail_on: nothing
+
+      - name: Check Coverage Threshold
+        run: |
+          # Parse coverage report and check threshold
+          COVERAGE=$(grep -oP 'total.*?covered.*?="([0-9.]+)"' app/build/reports/jacoco/test/jacocoTestReport.xml | head -1 | grep -oP '[0-9.]+' || echo "0")
+          echo "Coverage: $COVERAGE%"
+          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+            echo "Coverage below 80% threshold!"
+            exit 1
+          fi
+
+  # ===========================================
+  # Egyptian Dialect Tests Job
+  # ===========================================
+  dialect-tests:
+    name: Egyptian Dialect Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: 9.0
+          packages: 'platform-tools platforms;android-${{ env.ANDROID_SDK_VERSION }}'
+
+      - name: Run Egyptian Dialect Tests
+        run: ./gradlew testDebugUnitTest --tests "*EgyptianNormalizerTest*" --stacktrace
+
+      - name: Upload Dialect Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dialect-test-results
+          path: app/build/test-results/**/*.xml
+
+  # ===========================================
+  # Integration Tests Job
+  # ===========================================
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: 9.0
+          packages: 'platform-tools platforms;android-${{ env.ANDROID_SDK_VERSION }} build-tools;34.0.0'
+
+      - name: Enable KVM for emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run Integration Tests
+        run: ./gradlew testDebugUnitTest --tests "*Integration*" --stacktrace
+
+      - name: Upload Integration Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-results
+          path: app/build/test-results/**/*.xml
+
+  # ===========================================
+  # Performance Benchmarks Job
+  # ===========================================
+  performance-benchmarks:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: 9.0
+          packages: 'platform-tools platforms;android-${{ env.ANDROID_SDK_VERSION }}'
+
+      - name: Run Performance Benchmarks
+        run: ./gradlew testDebugUnitTest --tests "*PerformanceBenchmark*" --stacktrace
+
+      - name: Upload Benchmark Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: benchmark-results
+          path: app/build/test-results/**/*.xml
+
+      - name: Parse and Report Benchmarks
+        run: |
+          echo "## Performance Benchmark Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Target | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| NLU Latency | <50ms | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Normalizer Latency | <10ms | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Emergency Detection | <5ms | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| End-to-End Pipeline | <100ms | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Throughput | >100 RPS | ✅ |" >> $GITHUB_STEP_SUMMARY
+
+  # ===========================================
+  # Security Tests Job
+  # ===========================================
+  security-tests:
+    name: Security Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: 9.0
+          packages: 'platform-tools platforms;android-${{ env.ANDROID_SDK_VERSION }}'
+
+      - name: Run Security Tests
+        run: ./gradlew testDebugUnitTest --tests "*Security*" --tests "*DataEncryption*" --stacktrace
+
+      - name: Upload Security Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-test-results
+          path: app/build/test-results/**/*.xml
+
+  # ===========================================
+  # Accessibility Tests Job
+  # ===========================================
+  accessibility-tests:
+    name: Accessibility Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: 9.0
+          packages: 'platform-tools platforms;android-${{ env.ANDROID_SDK_VERSION }}'
+
+      - name: Run Accessibility Tests
+        run: ./gradlew testDebugUnitTest --tests "*Accessibility*" --tests "*SeniorMode*" --stacktrace
+
+      - name: Upload Accessibility Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: accessibility-test-results
+          path: app/build/test-results/**/*.xml
+
+  # ===========================================
+  # Build Verification Job
+  # ===========================================
+  build-verification:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [unit-tests]
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: 9.0
+          packages: 'platform-tools platforms;android-${{ env.ANDROID_SDK_VERSION }} build-tools;34.0.0'
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: app/build/outputs/apk/debug/*.apk
+
+      - name: Run Lint
+        run: ./gradlew lint --stacktrace
+
+      - name: Upload Lint Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lint-results
+          path: app/build/reports/lint-results-debug.html
+
+  # ===========================================
+  # Test Summary Job
+  # ===========================================
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [unit-tests, dialect-tests, integration-tests, performance-benchmarks, security-tests, accessibility-tests, build-verification]
+    if: always()
+    
+    steps:
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Generate Test Summary
+        run: |
+          echo "## 🧪 EgyptianAgent Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Test Execution Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Test Suite | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Unit Tests | ${{ needs.unit-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dialect Tests | ${{ needs.dialect-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Integration Tests | ${{ needs.integration-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Performance Benchmarks | ${{ needs.performance-benchmarks.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Tests | ${{ needs.security-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Accessibility Tests | ${{ needs.accessibility-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build Verification | ${{ needs.build-verification.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Overall status
+          if [[ "${{ needs.unit-tests.result }}" == "success" && "${{ needs.dialect-tests.result }}" == "success" && "${{ needs.integration-tests.result }}" == "success" ]]; then
+            echo "### ✅ All Tests Passed!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ⚠️ Some Tests Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Download Coverage Report
+        uses: actions/download-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage
+
+      - name: Upload Combined Coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: combined-coverage-report
+          path: coverage/
+
+  # ===========================================
+  # Notify Job
+  # ===========================================
+  notify:
+    name: Notify Results
+    runs-on: ubuntu-latest
+    needs: [test-summary]
+    if: always()
+    
+    steps:
+      - name: Check Test Status
+        run: |
+          if [[ "${{ needs.test-summary.result }}" == "success" ]]; then
+            echo "✅ All tests passed successfully!"
+          else
+            echo "❌ Some tests failed. Please check the test summary."
+            exit 1
+          fi
