@@ -1,0 +1,316 @@
+# Llama 3.2 3B Configuration for Honor X6c
+# Target Device: Honor X6c (MediaTek Helio G81 Ultra, 6GB RAM)
+# Model: llama-3.2-3b-Q4_K_M.gguf (~1.64GB)
+
+# =============================================================================
+# HARDWARE SPECIFICATIONS (Honor X6c)
+# =============================================================================
+# SoC: MediaTek Helio G81 Ultra
+# CPU: Octa-core (2x Cortex-A75 @ 2.0 GHz + 6x Cortex-A55 @ 1.8 GHz)
+# GPU: Mali-G52 MC2
+# RAM: 6GB LPDDR4X
+# Storage: 128GB eMMC 5.1
+# Android: 14 (MagicOS 8.0)
+
+# =============================================================================
+# MODEL SPECIFICATIONS
+# =============================================================================
+# Model: Llama 3.2 3B Instruct
+# Quantization: Q4_K_M (4-bit K-quants Medium)
+# Model Size: ~1.64GB (GGUF format)
+# Parameters: 3.2 billion
+# Context Window: 128K (we use 2048 for mobile)
+# Vocabulary: 128K tokens (supports Arabic)
+
+# =============================================================================
+# MEMORY BUDGET
+# =============================================================================
+# Model File: 1.64GB (memory-mapped, not fully loaded)
+# KV Cache: ~100MB (2048 context, 32 layers)
+# Runtime Overhead: ~200MB
+# Total Peak RAM: ~2.0-2.5GB
+# Available on 6GB device: ~3-4GB (after Android)
+# Safety Margin: ~500MB
+
+# =============================================================================
+# PERFORMANCE TARGETS
+# =============================================================================
+# Model Load Time (cold): <30 seconds
+# Model Load Time (warm): <5 seconds
+# Token Generation Speed: 8-12 tokens/second
+# Time to First Token: <500ms
+# 128 Token Response: <1.5 seconds (target)
+# Memory Usage: <350MB during inference
+
+# =============================================================================
+# NATIVE CONFIGURATION (llama.cpp)
+# =============================================================================
+
+# Context Parameters
+n_ctx = 2048              # Context window (balance quality vs memory)
+n_batch = 512             # Batch size for prompt processing
+n_ubatch = 512            # Micro-batch size
+n_threads = 4             # CPU threads (optimal for Helio G81)
+n_threads_batch = 4       # Threads for batch processing
+
+# Memory Optimization
+use_mmap = true           # Memory map model (reduces RAM usage)
+use_mlock = false         # Don't lock memory (allow swapping)
+numa = false              # Disable NUMA (mobile doesn't have it)
+
+# GPU Offloading (disabled for compatibility)
+n_gpu_layers = 0          # CPU only (Mali-G52 not well supported)
+
+# =============================================================================
+# SAMPLING PARAMETERS (Egyptian Arabic Optimized)
+# =============================================================================
+
+# Temperature and Sampling
+temperature = 0.7         # Balance creativity and consistency
+top_k = 40                # Sample from top 40 tokens
+top_p = 0.9               # Nucleus sampling (90% probability mass)
+min_p = 0.0               # Minimum probability threshold
+
+# Penalties
+repeat_penalty = 1.1      # Reduce repetition (important for Arabic)
+repeat_last_n = 64        # Look back 64 tokens for repetition
+frequency_penalty = 0.0   # Frequency penalty (disabled)
+presence_penalty = 0.0    # Presence penalty (disabled)
+
+# Special Tokens
+n_keep = 48               # Keep special tokens (bos, eos, etc.)
+special = true            # Parse special tokens
+
+# =============================================================================
+# EGYPTIAN ARABIC PROMPT TEMPLATES
+# =============================================================================
+
+# System Prompt (Egyptian Arabic)
+system_prompt = """
+أنت مساعد صوتي مصري بتتكلم مصري عامي طبيعي.
+رد بإيجاز وبطريقة ودية وطبيعية زي المصريين.
+استخدم اللهجة المصرية في ردك.
+كون مفيد ومباشر في ردك.
+"""
+
+# Conversation Format
+conversation_template = """
+{system}
+
+تاريخ المحادثة:
+{history}
+
+المستخدم: {user_query}
+المساعد:
+"""
+
+# Classification Prompt (for NLU)
+classification_prompt = """
+أنت مصنف نوايا لمساعد صوتي مصري.
+صنف الأمر ده لواحد من الأنواع دي:
+CALL_CONTACT, SEND_WHATSAPP, SET_ALARM, READ_TIME, EMERGENCY, GREETING, UNKNOWN
+
+اكتب الرد في شكل JSON:
+{
+  "intent": "نوع الأمر",
+  "entities": {
+    "contact": "اسم جهة الاتصال",
+    "time": "الوقت"
+  },
+  "confidence": 0.95
+}
+
+الأمر: "{user_input}"
+الرد:
+"""
+
+# =============================================================================
+# INTENT TYPES (EgyptianAgent)
+# =============================================================================
+# CALL_CONTACT      - اتصل بـ / كلم / رن على
+# SEND_WHATSAPP     - ابعت واتساب / قول لـ
+# SEND_VOICE_MESSAGE - ابعت رسالة صوتية
+# SET_ALARM         - نبهني / ذكرني / اضبط المنبه
+# READ_TIME         - الساعة كام / قوللي الوقت
+# READ_MISSED_CALLS - اقرأ المكالمات الفائتة
+# TOGGLE_WIFI       - شغل / اطفي الواي فاي
+# TOGGLE_BLUETOOTH  - شغل / اطفي البلوتوث
+# OPEN_APP          - افتح [تطبيق]
+# EMERGENCY         - نجدة / استغاثة
+# SENIOR_ASSIST     - مساعدة كبار السن
+# GREETING          - أهلاً / ازيك / عامل ايه
+# THANK_YOU         - شكراً / يسلمو
+# GOODBYE           - مع السلامة / باي
+# UNKNOWN           - غير معروف
+
+# =============================================================================
+# EGYPTIAN DIALECT PATTERNS
+# =============================================================================
+
+# Call Patterns
+call_patterns = [
+    "اتصل بـ {contact}",
+    "كلم {contact}",
+    "رن على {contact}",
+    "خده على تليفون {contact}",
+    "نادي على {contact}",
+    "اتصل بـ {contact} دلوقتي",
+    "كلم {contact} حالا",
+]
+
+# WhatsApp Patterns
+whatsapp_patterns = [
+    "ابعت واتساب لـ {contact}",
+    "ابعت رسالة لـ {contact}",
+    "قول لـ {contact} إن {message}",
+    "راسل {contact} على واتساب",
+    "ابعتلها رسالة",
+    "ابعتله واتساب",
+]
+
+# Alarm Patterns
+alarm_patterns = [
+    "نبهني {time}",
+    "ذكرني {time}",
+    "اضبط المنبه على {time}",
+    "انبهني {time}",
+    "نبهني بكرة {time_of_day}",
+    "ذكرني بعد {duration}",
+]
+
+# Time Expressions (Egyptian)
+time_expressions = {
+    "الصبح": "morning",
+    "بدري": "early morning",
+    "الضهر": "noon",
+    "العصر": "afternoon",
+    "المغرب": "sunset",
+    "العشا": "evening",
+    "الليل": "night",
+    "دلوقتي": "now",
+    "حالا": "immediately",
+    "بكرة": "tomorrow",
+    "بعد بكرة": "day after tomorrow",
+    "بعد شوية": "in a while",
+    "بعد ساعة": "in an hour",
+    "بعد نص ساعة": "in half an hour",
+}
+
+# =============================================================================
+# ERROR HANDLING & FALLBACKS
+# =============================================================================
+
+# Memory Pressure Handling
+memory_threshold_warning = 500    # MB - trigger warnings
+memory_threshold_critical = 300   # MB - unload model
+memory_threshold_load = 2000      # MB - minimum for model load
+
+# Fallback Chain
+fallback_chain = [
+    "Llama 3.2 3B (primary)",
+    "OpenPhone-3B TFLite (secondary)",
+    "Rule-based + Regex (tertiary)",
+    "Simple pattern matching (ultimate)",
+]
+
+# Error Responses (Egyptian Arabic)
+error_responses = {
+    "model_not_loaded": "أنا لسه بحمل، استنى شوية",
+    "low_memory": "الذاكرة قليلة، أنا آسف",
+    "inference_error": "حدث خطأ، ممكن تعيد؟",
+    "unknown_intent": "ممكن توضحلي أكتر؟",
+    "timeout": "الأمر أخد وقت طويل، حاول تاني",
+}
+
+# =============================================================================
+# BUILD CONFIGURATION (Gradle)
+# =============================================================================
+
+# app/build.gradle
+android {
+    defaultConfig {
+        externalNativeBuild {
+            cmake {
+                arguments "-DUSE_LLAMA_CPP=ON",
+                          "-DCMAKE_BUILD_TYPE=Release",
+                          "-DANDROID_ARM_NEON=ON",
+                          "-DANDROID_TOOLCHAIN=clang"
+            }
+        }
+    }
+    
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+            version "3.22.1"
+        }
+    }
+}
+
+# gradle.properties
+org.gradle.jvmargs=-Xmx4096m -Dfile.encoding=UTF-8
+android.useAndroidX=true
+android.enableR8.fullMode=true
+
+# =============================================================================
+# TESTING CONFIGURATION
+# =============================================================================
+
+# Test Commands (Egyptian Arabic)
+test_commands = [
+    # Basic
+    "اتصل بأمي",
+    "كلم بابا",
+    "رن على ماما",
+    
+    # Egyptian Dialect
+    "كلم ماما دلوقتي",
+    "انبهني بكرة بدري",
+    "قول لأحمد إني هتأخر",
+    
+    # Mixed Language
+    "اتصل بـ Ahmed",
+    "ابعت WhatsApp لـ Sara",
+    
+    # Edge Cases
+    "اتصل",           # Incomplete
+    "كلمني",          # Ambiguous
+    "اتصل بأمى",      # Typo
+]
+
+# Expected Accuracy Targets
+accuracy_targets = {
+    "basic_commands": 0.98,
+    "egyptian_dialect": 0.95,
+    "entity_extraction": 0.95,
+    "mixed_language": 0.90,
+    "edge_cases": 0.80,
+    "overall": 0.95,
+}
+
+# =============================================================================
+# PERFORMANCE MONITORING
+# =============================================================================
+
+# Metrics to Track
+metrics = [
+    "model_load_time_ms",
+    "inference_time_ms",
+    "tokens_per_second",
+    "memory_usage_mb",
+    "intent_confidence",
+    "accuracy_percentage",
+]
+
+# Alert Thresholds
+alerts = {
+    "inference_time_warning": 2000,    # ms
+    "inference_time_critical": 3000,   # ms
+    "memory_usage_warning": 400,       # MB
+    "memory_usage_critical": 500,      # MB
+    "confidence_low": 0.7,             # threshold
+}
+
+# =============================================================================
+# END OF CONFIGURATION
+# =============================================================================
