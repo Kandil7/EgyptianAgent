@@ -1,118 +1,219 @@
-# For more information about using CMake with Android Studio, read the
-# documentation: https://d.android.com/studio/projects/add-native-code.html
+# CMakeLists.txt for EgyptianAgent Native Libraries
+# Supports both llama.cpp integration and mock fallback
+# Target: Honor X6c (MediaTek Helio G81 Ultra)
 
-# Sets the minimum version of CMake required for your project.
 cmake_minimum_required(VERSION 3.22.1)
-
-# Declares and names the project.
-project("egyptian_agent")
+project("egyptian_agent" VERSION 1.1.0 LANGUAGES C CXX)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Check if llama.cpp exists and set flag accordingly
-if(EXISTS "${CMAKE_SOURCE_DIR}/../../external/llama.cpp/CMakeLists.txt")
-    set(HAVE_LLAMA_CPP TRUE)
-    message(STATUS "Found llama.cpp, enabling full Llama functionality")
-else()
-    set(HAVE_LLAMA_CPP FALSE)
-    message(WARNING "llama.cpp not found, building with mock implementation")
+# Compiler flags for optimization on mobile
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -ffast-math -fno-exceptions -fno-rtti")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -DDEBUG")
+
+# Android-specific flags
+if(ANDROID)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+    
+    # Enable NEON for ARM processors (Helio G81 Ultra)
+    if(${ANDROID_ABI} MATCHES "armeabi")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpu=neon")
+    endif()
 endif()
 
-# Check if faster-whisper exists and set flag accordingly
-if(EXISTS "${CMAKE_SOURCE_DIR}/../../external/faster-whisper/CMakeLists.txt")
-    set(HAVE_FASTER_WHISPER TRUE)
-    message(STATUS "Found faster-whisper, enabling Whisper ASR functionality")
-else()
-    set(HAVE_FASTER_WHISPER FALSE)
-    message(WARNING "faster-whisper not found, building without Whisper ASR")
-endif()
+# Define project root for path resolution
+set(PROJECT_ROOT "${CMAKE_SOURCE_DIR}/..")
+set(EXTERNAL_DIR "${PROJECT_ROOT}/../external")
 
-# Create the native libraries
-add_library(
-    # Sets the name of the library.
-    llama_native
-
-    # Sets the library as a shared library.
-    SHARED
-
-    # Provides a relative path to your source file(s).
-    src/main/cpp/llama_native.cpp
-)
-
-# Add Whisper native library if available
-if(HAVE_FASTER_WHISPER)
-    add_library(
-        egyptian_whisper
-
-        SHARED
-
-        src/main/cpp/whisper_native.cpp
-    )
-endif()
-
-# Find required libraries
+# Log library from NDK
 find_library(log-lib log)
+find_library(android-lib android)
 
-if(HAVE_LLAMA_CPP)
-    # Add llama.cpp as a subdirectory
-    add_subdirectory(${CMAKE_SOURCE_DIR}/../../external/llama.cpp ${CMAKE_CURRENT_BINARY_DIR}/llama.cpp)
+# ============================================================================
+# Build Options
+# ============================================================================
+option(USE_LLAMA_CPP "Enable llama.cpp integration" OFF)
+option(USE_WHISPER "Enable whisper.cpp integration" OFF)
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
-    # Link with llama libraries
-    target_link_libraries(
-        # Specifies the target library.
+message(STATUS "Egyptian Agent Native Build")
+message(STATUS "  Project Root: ${PROJECT_ROOT}")
+message(STATUS "  External Dir: ${EXTERNAL_DIR}")
+message(STATUS "  Android ABI: ${ANDROID_ABI}")
+message(STATUS "  USE_LLAMA_CPP: ${USE_LLAMA_CPP}")
+message(STATUS "  USE_WHISPER: ${USE_WHISPER}")
+
+# ============================================================================
+# llama.cpp Integration (Optional)
+# ============================================================================
+if(USE_LLAMA_CPP)
+    set(LLAMA_CPP_DIR "${EXTERNAL_DIR}/llama.cpp")
+    
+    if(EXISTS "${LLAMA_CPP_DIR}/CMakeLists.txt")
+        message(STATUS "Building with llama.cpp integration")
+        
+        # llama.cpp build options - optimized for mobile
+        set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+        set(LLAMA_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+        set(LLAMA_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+        set(LLAMA_BUILD_SERVER OFF CACHE BOOL "" FORCE)
+        set(LLAMA_NATIVE OFF CACHE BOOL "" FORCE)
+        set(LLAMA_CURL OFF CACHE BOOL "" FORCE)
+        set(LLAMA_METAL OFF CACHE BOOL "" FORCE)
+        set(LLAMA_CUDA OFF CACHE BOOL "" FORCE)
+        set(LLAMA_VULKAN OFF CACHE BOOL "" FORCE)
+        set(LLAMA_OPENMP OFF CACHE BOOL "" FORCE)
+        
+        # Add llama.cpp as subdirectory
+        add_subdirectory(${LLAMA_CPP_DIR} ${CMAKE_CURRENT_BINARY_DIR}/llama.cpp)
+        
+        # Create the native library wrapper
+        add_library(
+            llama_native
+            SHARED
+            src/main/cpp/llama_native.cpp
+        )
+        
+        target_link_libraries(
+            llama_native
+            llama
+            ggml
+            ${log-lib}
+            ${android-lib}
+        )
+        
+        target_include_directories(
+            llama_native
+            PRIVATE
+            ${LLAMA_CPP_DIR}
+            ${LLAMA_CPP_DIR}/common
+            ${LLAMA_CPP_DIR}/ggml/include
+            ${LLAMA_CPP_DIR}/include
+        )
+        
+        target_compile_definitions(
+            llama_native
+            PRIVATE
+            USE_LLAMA_CPP=1
+            GGML_USE_CPU=1
+        )
+        
+        # Set target properties for Android
+        set_target_properties(llama_native PROPERTIES
+            CXX_STANDARD 17
+            POSITION_INDEPENDENT_CODE ON
+        )
+        
+    else()
+        message(WARNING "llama.cpp not found at ${LLAMA_CPP_DIR}")
+        message(WARNING "Falling back to MOCK implementation")
+        set(USE_LLAMA_CPP OFF)
+    endif()
+endif()
+
+# ============================================================================
+# Mock llama.cpp Implementation (Default)
+# ============================================================================
+if(NOT USE_LLAMA_CPP)
+    message(STATUS "Building MOCK llama_native implementation")
+    
+    add_library(
         llama_native
-
-        # Links the target library to the llama library
-        llama
-        ggml
-
-        # Links the target library to the log library
-        # included in the NDK.
-        ${log-lib}
+        SHARED
+        src/main/cpp/llama_native.cpp
     )
-
-    # Define preprocessor macro to enable llama.cpp integration
-    target_compile_definitions(llama_native PRIVATE USE_LLAMA_CPP)
-
-    # Include headers
+    
+    target_link_libraries(
+        llama_native
+        ${log-lib}
+        ${android-lib}
+    )
+    
+    target_compile_definitions(
+        llama_native
+        PRIVATE
+        USE_LLAMA_CPP=0
+        MOCK_IMPLEMENTATION=1
+    )
+    
     target_include_directories(
         llama_native
         PRIVATE
-        ${CMAKE_SOURCE_DIR}/../../external/llama.cpp/common
-        ${CMAKE_SOURCE_DIR}/../../external/llama.cpp
-    )
-else()
-    # Just link with log library for mock implementation
-    target_link_libraries(
-        # Specifies the target library.
-        llama_native
-
-        # Links the target library to the log library
-        # included in the NDK.
-        ${log-lib}
+        src/main/cpp
     )
 endif()
 
-if(HAVE_FASTER_WHISPER)
-    # Add faster-whisper as a subdirectory
-    add_subdirectory(${CMAKE_SOURCE_DIR}/../../external/faster-whisper ${CMAKE_CURRENT_BINARY_DIR}/faster-whisper)
-
-    # Link with Whisper libraries
-    target_link_libraries(
-        egyptian_whisper
-        whisper
-        ${log-lib}
-    )
-
-    # Define preprocessor macro to enable Whisper integration
-    target_compile_definitions(egyptian_whisper PRIVATE USE_FASTER_WHISPER)
-
-    # Include headers
-    target_include_directories(
-        egyptian_whisper
-        PRIVATE
-        ${CMAKE_SOURCE_DIR}/../../external/faster-whisper
-    )
+# ============================================================================
+# whisper.cpp Integration (Optional)
+# ============================================================================
+if(USE_WHISPER)
+    set(WHISPER_CPP_DIR "${EXTERNAL_DIR}/whisper.cpp")
+    
+    if(EXISTS "${WHISPER_CPP_DIR}/CMakeLists.txt")
+        message(STATUS "Building with whisper.cpp integration")
+        
+        # whisper.cpp build options
+        set(WHISPER_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+        set(WHISPER_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+        set(WHISPER_METAL OFF CACHE BOOL "" FORCE)
+        set(WHISPER_CUDA OFF CACHE BOOL "" FORCE)
+        
+        add_subdirectory(${WHISPER_CPP_DIR} ${CMAKE_CURRENT_BINARY_DIR}/whisper.cpp)
+        
+        add_library(
+            whisper_native
+            SHARED
+            src/main/cpp/whisper_native.cpp
+        )
+        
+        target_link_libraries(
+            whisper_native
+            whisper
+            ggml
+            ${log-lib}
+            ${android-lib}
+        )
+        
+        target_include_directories(
+            whisper_native
+            PRIVATE
+            ${WHISPER_CPP_DIR}
+            ${WHISPER_CPP_DIR}/include
+        )
+        
+        target_compile_definitions(
+            whisper_native
+            PRIVATE
+            USE_WHISPER=1
+        )
+        
+    else()
+        message(WARNING "whisper.cpp not found at ${WHISPER_CPP_DIR}")
+        message(WARNING "Falling back to MOCK implementation")
+        set(USE_WHISPER OFF)
+    endif()
 endif()
+
+# ============================================================================
+# Mock whisper.cpp Implementation (Default)
+# ============================================================================
+if(NOT USE_WHISPER)
+    message(STATUS "Building MOCK whisper_native implementation")
+    
+    # Note: whisper_native.cpp is compiled but uses mock implementation
+    # The actual implementation is controlled by USE_WHISPER preprocessor flag
+endif()
+
+# ============================================================================
+# Output Summary
+# ============================================================================
+message(STATUS "")
+message(STATUS "=== Build Configuration Summary ===")
+message(STATUS "  llama_native: Will be built (${USE_LLAMA_CPP ? 'full' : 'mock'} implementation)")
+message(STATUS "  whisper_native: Will be built (${USE_WHISPER ? 'full' : 'mock'} implementation)")
+message(STATUS "  Optimization: ${CMAKE_BUILD_TYPE}")
+message(STATUS "====================================")

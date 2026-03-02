@@ -1,0 +1,250 @@
+# EgyptianAgent Release Pipeline
+# Creates production releases with signing and publishing
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v1.1.0)'
+        required: true
+        type: string
+
+env:
+  GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m"
+  JAVA_VERSION: 17
+
+jobs:
+  # ============================================================================
+  # Pre-release Validation
+  # ============================================================================
+  validate:
+    name: Pre-release Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate version tag
+        run: |
+          if [[ ! "${{ github.ref_name }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid version format. Expected: v1.2.3"
+            exit 1
+          fi
+          echo "Version: ${{ github.ref_name }}"
+
+      - name: Check CHANGELOG
+        run: |
+          if [ ! -f "CHANGELOG.md" ]; then
+            echo "Warning: CHANGELOG.md not found"
+          else
+            echo "CHANGELOG.md found"
+          fi
+
+  # ============================================================================
+  # Build Production APKs
+  # ============================================================================
+  build:
+    name: Build Production APKs
+    runs-on: ubuntu-latest
+    needs: validate
+    timeout-minutes: 60
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      version_code: ${{ steps.version.outputs.version_code }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: 9.0
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0 ndk;25.2.9519653'
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          VERSION_CODE=$(echo $VERSION | awk -F. '{print $1 * 10000 + $2 * 100 + $3}')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+
+      - name: Create release keystore
+        env:
+          KEYSTORE_B64: ${{ secrets.RELEASE_KEYSTORE_B64 }}
+        run: |
+          mkdir -p keystore
+          echo "$KEYSTORE_B64" | base64 -d > keystore/release.keystore
+
+      - name: Build Release APKs
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          ./gradlew clean assembleRelease \
+            -PversionName=${{ steps.version.outputs.version }} \
+            -PversionCode=${{ steps.version.outputs.version_code }} \
+            --no-daemon --console=plain --stacktrace
+
+      - name: Verify APK signatures
+        run: |
+          for apk in app/build/outputs/apk/release/*.apk; do
+            echo "Verifying: $apk"
+            apksigner verify --verbose "$apk" || exit 1
+          done
+
+      - name: Calculate APK checksums
+        run: |
+          cd app/build/outputs/apk/release
+          sha256sum *.apk > checksums.sha256
+          cat checksums.sha256
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apks-${{ steps.version.outputs.version }}
+          path: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/apk/release/checksums.sha256
+          retention-days: 90
+
+      - name: Generate build metadata
+        run: |
+          cat > build_metadata.json << EOF
+          {
+            "version": "${{ steps.version.outputs.version }}",
+            "version_code": "${{ steps.version.outputs.version_code }}",
+            "build_time": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "git_commit": "$(git rev-parse HEAD)",
+            "git_tag": "${{ github.ref_name }}",
+            "builder": "GitHub Actions",
+            "runner": "${{ runner.os }}",
+            "java_version": "${{ env.JAVA_VERSION }}",
+            "gradle_version": "${{ env.GRADLE_VERSION }}"
+          }
+          EOF
+
+      - name: Upload build metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-metadata
+          path: build_metadata.json
+          retention-days: 90
+
+  # ============================================================================
+  # Create GitHub Release
+  # ============================================================================
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download APKs
+        uses: actions/download-artifact@v4
+        with:
+          name: release-apks-${{ needs.build.outputs.version }}
+          path: ./release-artifacts
+
+      - name: Download build metadata
+        uses: actions/download-artifact@v4
+        with:
+          name: build-metadata
+          path: ./release-artifacts
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          # Get commits since last tag
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$LAST_TAG" ]; then
+            COMMITS=$(git log --pretty=format:"- %s (%h)" $LAST_TAG..HEAD)
+          else
+            COMMITS=$(git log --pretty=format:"- %s (%h)" --max-count=20)
+          fi
+          
+          cat > release_notes.md << EOF
+          ## EgyptianAgent ${{ needs.build.outputs.version }}
+          
+          ### Changes
+          $COMMITS
+          
+          ### Installation
+          1. Download the appropriate APK for your device
+          2. Install on rooted Honor X6c device
+          3. Move to /system/priv-app/ for system-level access
+          
+          ### Files
+          - \`EgyptianAgent-universal.apk\` - Universal APK (larger size)
+          - \`EgyptianAgent-arm64-v8a.apk\` - ARM64 optimized (recommended for Honor X6c)
+          - \`EgyptianAgent-armeabi-v7a.apk\` - ARMv7 compatible
+          
+          ### Checksums
+          \`\`\`
+          $(cat ./release-artifacts/checksums.sha256)
+          \`\`\`
+          EOF
+          
+          echo "path=release_notes.md" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ./release-artifacts/*.apk
+            ./release-artifacts/checksums.sha256
+            ./release-artifacts/build_metadata.json
+          body_path: ${{ steps.release_notes.outputs.path }}
+          draft: false
+          prerelease: false
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================================================
+  # Notify (Optional)
+  # ============================================================================
+  notify:
+    name: Send Notifications
+    runs-on: ubuntu-latest
+    needs: [build, release]
+    if: always()
+    
+    steps:
+      - name: Notify success
+        if: needs.build.result == 'success'
+        run: |
+          echo "✅ Release ${{ needs.build.outputs.version }} completed successfully!"
+          echo "GitHub Release: https://github.com/${{ github.repository }}/releases/tag/v${{ needs.build.outputs.version }}"
+
+      - name: Notify failure
+        if: needs.build.result == 'failure'
+        run: |
+          echo "❌ Release ${{ needs.build.outputs.version }} failed!"
+          echo "Check the workflow run for details: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"

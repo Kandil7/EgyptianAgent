@@ -4,8 +4,9 @@ import android.content.Context;
 import android.util.Log;
 
 import com.egyptian.agent.core.Quantum;
-import com.egyptian.agent.nlp.IntentResult;
-import com.egyptian.agent.stt.EgyptianNormalizer;
+import com.egyptian.agent.nlu.IntentResult;
+import com.egyptian.agent.nlu.IntentType;
+import com.egyptian.agent.nlu.EgyptianNormalizer;
 import com.egyptian.agent.utils.CrashLogger;
 
 import java.util.concurrent.ExecutorService;
@@ -78,15 +79,15 @@ public class HybridOrchestrator {
             @Override
             public void onFallbackRequired(String reason) {
                 Log.d(TAG, "OpenPhone requires fallback: " + reason);
-                
+
                 // Try EgyptianNormalizer as fallback
                 IntentResult fallbackResult = EgyptianNormalizer.classifyBasicIntent(command);
-                
-                if (fallbackResult.getIntentType().equals(com.egyptian.agent.nlp.IntentType.UNKNOWN)) {
+
+                if (fallbackResult.getIntentType().equals(IntentType.UNKNOWN)) {
                     // If still unknown, use Quantum class
                     Quantum quantum = new Quantum(context);
                     quantum.processCommand(command);
-                    
+
                     // Return unknown since Quantum doesn't return structured results
                     callback.onResult(fallbackResult);
                 } else {

@@ -1,0 +1,299 @@
+# EgyptianAgent CI Pipeline
+# Runs on every push and pull request
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop, release/*]
+    tags: ['v*']
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
+  GRADLE_VERSION: 8.13
+  JAVA_VERSION: 17
+
+jobs:
+  # ============================================================================
+  # Build Validation
+  # ============================================================================
+  validate:
+    name: Validate Build Configuration
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v2
+
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+
+      - name: Validate Gradle configuration
+        run: ./gradlew tasks --all --dry-run
+
+      - name: Check dependency licenses
+        run: ./gradlew dependencies --configuration releaseRuntimeClasspath
+
+  # ============================================================================
+  # Lint and Code Quality
+  # ============================================================================
+  lint:
+    name: Lint & Code Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: validate
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+
+      - name: Run Android Lint
+        run: ./gradlew lint --no-daemon --console=plain
+        continue-on-error: true
+
+      - name: Upload Lint Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lint-report
+          path: app/build/reports/lint-results-*.html
+          retention-days: 30
+
+  # ============================================================================
+  # Unit Tests
+  # ============================================================================
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: validate
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+
+      - name: Run unit tests
+        run: ./gradlew test --no-daemon --console=plain --stacktrace
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: |
+            app/build/test-results/
+            app/build/reports/tests/
+          retention-days: 30
+
+  # ============================================================================
+  # Debug Build
+  # ============================================================================
+  build-debug:
+    name: Build Debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: [lint, test]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: 9.0
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0 ndk;25.2.9519653'
+
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --no-daemon --console=plain --stacktrace
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 14
+
+      - name: Generate build info
+        run: |
+          echo "Build completed at: $(date)"
+          echo "Git commit: $(git rev-parse --short HEAD)"
+          echo "Git branch: $(git rev-parse --abbrev-ref HEAD)"
+
+  # ============================================================================
+  # Release Build (on tags only)
+  # ============================================================================
+  build-release:
+    name: Build Release APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: [lint, test]
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: 9.0
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0 ndk;25.2.9519653'
+
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+
+      - name: Create release keystore (from secrets)
+        if: env.KEYSTORE_B64 != ''
+        env:
+          KEYSTORE_B64: ${{ secrets.RELEASE_KEYSTORE_B64 }}
+        run: |
+          mkdir -p keystore
+          echo "$KEYSTORE_B64" | base64 -d > keystore/release.keystore
+        continue-on-error: true
+
+      - name: Build Release APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew assembleRelease --no-daemon --console=plain --stacktrace
+
+      - name: Build ABI-specific APKs
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew assembleRelease --no-daemon --console=plain
+
+      - name: Upload Release APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apks
+          path: app/build/outputs/apk/release/*.apk
+          retention-days: 30
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: app/build/outputs/apk/release/*.apk
+          generate_release_notes: true
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================================================
+  # Native Build Test (with llama.cpp)
+  # ============================================================================
+  build-native:
+    name: Build with Native Libraries
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    needs: validate
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[native]')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Initialize llama.cpp submodule
+        run: |
+          git submodule update --init --recursive
+          cd external/llama.cpp && git submodule update --init --recursive
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: 9.0
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0 ndk;25.2.9519653 cmake;3.22.1'
+
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+
+      - name: Build with native libraries
+        env:
+          USE_LLAMA_CPP: ON
+          USE_WHISPER: ON
+        run: ./gradlew assembleDebug -PuseLlamaCpp=true -PuseWhisper=true --no-daemon --console=plain
+
+      - name: Upload Native APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-apk
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 7

@@ -1,6 +1,7 @@
 #!/bin/bash
 # Egyptian Agent Build Script
 # Builds the Egyptian Agent app for Honor X6c devices
+# Cross-platform: Linux, macOS, Windows (Git Bash/WSL)
 
 set -e  # Exit on any error
 
@@ -11,33 +12,43 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}=== Egyptian Agent Build Script ===${NC}"
-echo -e "${BLUE}Building for Honor X6c (MediaTek Helio G81 Ultra)${NC}"
+echo -e "${BLUE}========================================${NC}"
+echo -e "${BLUE}  Egyptian Agent Build Script${NC}"
+echo -e "${BLUE}========================================${NC}"
+echo -e "${BLUE}Target: Honor X6c (MediaTek Helio G81 Ultra)${NC}"
+echo ""
 
-# Check if Gradle is available
-if ! command -v ./gradlew &> /dev/null; then
-    echo -e "${RED}Gradle wrapper not found!${NC}"
-    exit 1
+# Detect OS
+OS="$(uname -s 2>/dev/null || echo "Windows")"
+log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
+log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
+log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+log_step() { echo -e "${BLUE}[STEP]${NC} $1"; }
+
+# Check if Gradle wrapper is available
+GRADLEW="./gradlew"
+if [ ! -f "$GRADLEW" ]; then
+    if [ -f "gradlew.bat" ]; then
+        GRADLEW="./gradlew.bat"
+        log_info "Using gradlew.bat (Windows)"
+    else
+        log_error "Gradle wrapper not found!"
+        log_error "Please ensure you're in the project root directory."
+        exit 1
+    fi
 fi
 
-# Function to print status
-print_status() {
-    echo -e "${GREEN}[INFO]${NC} $1"
-}
-
-print_warning() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
-}
-
-print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
+# Make gradlew executable (Unix only)
+if [[ "$OS" != "Windows"* ]] && [[ "$OS" != "MINGW"* ]]; then
+    chmod +x "$GRADLEW"
+fi
 
 # Parse command line arguments
-BUILD_TYPE="release"
+BUILD_TYPE="debug"
 TARGET_DEVICE="honor-x6c"
 CLEAN_BUILD=false
 INSTALL_ON_DEVICE=false
+NATIVE_BUILD=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -61,84 +72,140 @@ while [[ $# -gt 0 ]]; do
             INSTALL_ON_DEVICE=true
             shift
             ;;
+        --native)
+            NATIVE_BUILD=true
+            shift
+            ;;
+        -h|--help)
+            echo "Usage: $0 [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  --debug       Build debug APK (default)"
+            echo "  --release     Build release APK"
+            echo "  --target      Target device (default: honor-x6c)"
+            echo "  --clean       Clean before building"
+            echo "  --install     Install on connected device"
+            echo "  --native      Build with native libraries (llama.cpp)"
+            echo "  -h, --help    Show this help"
+            exit 0
+            ;;
         *)
-            echo "Unknown option: $1"
-            echo "Usage: $0 [--debug|--release] [--target <device>] [--clean] [--install]"
+            log_error "Unknown option: $1"
+            echo "Use --help for usage information"
             exit 1
             ;;
     esac
 done
 
-print_status "Build configuration:"
+log_step "Build Configuration:"
 echo "  Build Type: $BUILD_TYPE"
 echo "  Target Device: $TARGET_DEVICE"
 echo "  Clean Build: $CLEAN_BUILD"
 echo "  Install on Device: $INSTALL_ON_DEVICE"
+echo "  Native Build: $NATIVE_BUILD"
+echo ""
 
 # Clean build if requested
 if [ "$CLEAN_BUILD" = true ]; then
-    print_status "Cleaning previous build..."
-    ./gradlew clean
+    log_step "Cleaning previous build..."
+    "$GRADLEW" clean
+fi
+
+# Initialize submodules if native build requested
+if [ "$NATIVE_BUILD" = true ]; then
+    log_step "Initializing native libraries..."
+    if [ -f "initialize_submodules.sh" ]; then
+        chmod +x initialize_submodules.sh
+        ./initialize_submodules.sh
+    fi
 fi
 
 # Build the application
-print_status "Building Egyptian Agent ($BUILD_TYPE) for $TARGET_DEVICE..."
+log_step "Building Egyptian Agent ($BUILD_TYPE)..."
 
 if [ "$BUILD_TYPE" = "release" ]; then
-    ./gradlew assembleRelease
-    APK_PATH="app/build/outputs/apk/release/app-release.apk"
+    if [ "$NATIVE_BUILD" = true ]; then
+        "$GRADLEW" assembleRelease -PuseLlamaCpp=true -PuseWhisper=true
+    else
+        "$GRADLEW" assembleRelease
+    fi
+    APK_PATH="app/build/outputs/apk/release"
 else
-    ./gradlew assembleDebug
-    APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
+    if [ "$NATIVE_BUILD" = true ]; then
+        "$GRADLEW" assembleDebug -PuseLlamaCpp=true -PuseWhisper=true
+    else
+        "$GRADLEW" assembleDebug
+    fi
+    APK_PATH="app/build/outputs/apk/debug"
 fi
 
-print_status "Build completed successfully!"
-print_status "APK location: $APK_PATH"
-
-# Check if APK was created
-if [ ! -f "$APK_PATH" ]; then
-    print_error "APK file not found at $APK_PATH"
+# Find the generated APK
+if [ -d "$APK_PATH" ]; then
+    APK_FILE=$(find "$APK_PATH" -name "*.apk" -type f | head -1)
+    if [ -n "$APK_FILE" ]; then
+        log_info "Build completed successfully!"
+        log_info "APK location: $APK_FILE"
+        log_info "APK size: $(du -h "$APK_FILE" 2>/dev/null | cut -f1 || echo "unknown")"
+    else
+        log_error "No APK file found in $APK_PATH"
+        exit 1
+    fi
+else
+    log_error "APK output directory not found: $APK_PATH"
     exit 1
 fi
 
 # Install on device if requested
 if [ "$INSTALL_ON_DEVICE" = true ]; then
-    print_status "Installing on connected device..."
-    
+    log_step "Installing on connected device..."
+
     # Check if ADB is available
     if ! command -v adb &> /dev/null; then
-        print_error "ADB not found! Please install Android SDK platform-tools."
+        log_error "ADB not found! Please install Android SDK platform-tools."
         exit 1
     fi
-    
+
     # Check if device is connected
-    DEVICE_COUNT=$(adb devices | grep -c "device$")
+    DEVICE_COUNT=$(adb devices 2>/dev/null | grep -c "device$" || echo "0")
     if [ "$DEVICE_COUNT" -eq 0 ]; then
-        print_error "No connected devices found!"
+        log_error "No connected devices found!"
         exit 1
     fi
+
+    log_info "Found $DEVICE_COUNT device(s)"
     
     # Install the APK
-    adb install -r "$APK_PATH"
-    
+    adb install -r "$APK_FILE"
+
     if [ $? -eq 0 ]; then
-        print_status "APK installed successfully!"
+        log_info "APK installed successfully!"
     else
-        print_error "Failed to install APK!"
+        log_error "Failed to install APK!"
         exit 1
     fi
 fi
 
-# For system app installation (requires root)
-if [ "$BUILD_TYPE" = "release" ] && [ "$INSTALL_ON_DEVICE" = true ]; then
+# Summary
+echo ""
+log_info "=========================================="
+log_info "Build Summary"
+log_info "=========================================="
+log_info "Build Type: $BUILD_TYPE"
+log_info "Output: $APK_FILE"
+log_info "=========================================="
+
+if [ "$BUILD_TYPE" = "release" ]; then
     echo ""
-    print_warning "For system-level installation (required for full functionality):"
+    log_warn "For system-level installation (required for full functionality):"
     echo "  1. Ensure device is rooted with Magisk"
-    echo "  2. Run: adb push $APK_PATH /sdcard/"
-    echo "  3. Run: adb shell su -c 'mkdir -p /system/priv-app/EgyptianAgent'"
-    echo "  4. Run: adb shell su -c 'cp /sdcard/$(basename $APK_PATH) /system/priv-app/EgyptianAgent/'"
-    echo "  5. Run: adb shell su -c 'chmod 644 /system/priv-app/EgyptianAgent/$(basename $APK_PATH)'"
-    echo "  6. Reboot device"
+    echo "  2. Run: ./deploy_production.sh"
+    echo "  Or manually:"
+    echo "    adb push $APK_FILE /sdcard/"
+    echo "    adb shell su -c 'mkdir -p /system/priv-app/EgyptianAgent'"
+    echo "    adb shell su -c 'cp /sdcard/$(basename $APK_FILE) /system/priv-app/EgyptianAgent/'"
+    echo "    adb shell su -c 'chmod 644 /system/priv-app/EgyptianAgent/$(basename $APK_FILE)'"
+    echo "    adb reboot"
 fi
 
-print_status "Build process completed!"
+echo ""
+log_info "Build process completed!"

@@ -1,0 +1,8 @@
+[submodule "external/llama.cpp"]
+	path = external/llama.cpp
+	url = https://github.com/ggerganov/llama.cpp.git
+	shallow = true
+[submodule "external/whisper.cpp"]
+	path = external/whisper.cpp
+	url = https://github.com/ggerganov/whisper.cpp.git
+	shallow = true

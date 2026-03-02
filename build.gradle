@@ -2,7 +2,8 @@
 plugins {
     id 'com.android.application' version '8.13.2' apply false
     id 'com.android.library' version '8.13.2' apply false
-    id 'org.jetbrains.kotlin.android' version '1.8.10' apply false
+    id 'org.jetbrains.kotlin.android' version '2.0.21' apply false
+    id 'org.jetbrains.kotlin.plugin.serialization' version '2.0.21' apply false
 }
 
 // Define project-wide properties
@@ -11,29 +12,35 @@ ext {
     versionMajor = 1
     versionMinor = 1
     versionPatch = 0
+    versionCode = versionMajor * 10000 + versionMinor * 100 + versionPatch
 
-    // Build configuration
+    // Build configuration - Honor X6c (Android 12)
     minSdkVersion = 28
     targetSdkVersion = 34
     compileSdkVersion = 34
+    ndkVersion = '25.2.9519653'
 
-    // Dependencies versions
-    kotlinVersion = '1.8.10'
-    coreKtxVersion = '1.12.0'
-    appcompatVersion = '1.6.1'
-    materialVersion = '1.11.0'
-    lifecycleVersion = '2.7.0'
+    // Dependencies versions - Updated for compatibility
+    kotlinVersion = '2.0.21'
+    coreKtxVersion = '1.15.0'
+    appcompatVersion = '1.7.0'
+    materialVersion = '1.12.0'
+    lifecycleVersion = '2.8.7'
     voskVersion = '0.3.44'
-    pytorchVersion = '1.13.0'
+    pytorchVersion = '2.0.0'
     okhttpVersion = '4.12.0'
-    retrofitVersion = '2.9.0'
-    shizukuVersion = '12.1.0'
+    retrofitVersion = '2.11.0'
+    shizukuVersion = '13.1.5'
     securityCryptoVersion = '1.1.0-alpha06'
-    workRuntimeVersion = '2.8.1'
-    profileInstallerVersion = '1.3.1'
+    workRuntimeVersion = '2.9.1'
+    profileInstallerVersion = '1.4.1'
     mlKitLanguageIdVersion = '17.0.6'
     mlKitSmartReplyVersion = '16.0.0'
-    fragmentKtxVersion = '1.6.2'
-    activityKtxVersion = '1.8.2'
-    coroutinesVersion = '1.7.3'
+    fragmentKtxVersion = '1.8.5'
+    activityKtxVersion = '1.9.3'
+    coroutinesVersion = '1.9.0'
+    
+    // Native library versions
+    llamaCppVersion = '0.0.0'  // From submodule
+    whisperCppVersion = '0.0.0'  // From submodule
 }
