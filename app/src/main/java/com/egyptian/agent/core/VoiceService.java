@@ -411,8 +411,16 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
         super.onDestroy();
         Log.d(TAG, "Service destroyed");
 
+        // Critical memory leak fix: Clean up Handler callbacks
+        if (mainHandler != null) {
+            mainHandler.removeCallbacksAndMessages(null);
+            mainHandler = null;
+        }
+
+        // Critical memory leak fix: Release wake lock properly
         if (wakeLock != null && wakeLock.isHeld()) {
             wakeLock.release();
+            wakeLock = null;
         }
 
         if (sttEngine != null) {
@@ -434,9 +442,15 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
         if (audioManager != null) {
             audioManager.abandonAudioFocus(this);
         }
-        
+
         if (floatingView != null) {
             floatingView.hide();
+        }
+
+        // Clean up foreground service delegate
+        if (foregroundDelegate != null) {
+            // Delegate cleanup handled by garbage collection
+            foregroundDelegate = null;
         }
 
         // Critical for memory management on 6GB RAM devices

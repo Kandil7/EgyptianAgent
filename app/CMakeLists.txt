@@ -150,62 +150,65 @@ endif()
 # ============================================================================
 # whisper.cpp Integration (Optional)
 # ============================================================================
-if(USE_WHISPER)
-    set(WHISPER_CPP_DIR "${EXTERNAL_DIR}/whisper.cpp")
-    
-    if(EXISTS "${WHISPER_CPP_DIR}/CMakeLists.txt")
-        message(STATUS "Building with whisper.cpp integration")
-        
-        # whisper.cpp build options
-        set(WHISPER_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-        set(WHISPER_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-        set(WHISPER_METAL OFF CACHE BOOL "" FORCE)
-        set(WHISPER_CUDA OFF CACHE BOOL "" FORCE)
-        
-        add_subdirectory(${WHISPER_CPP_DIR} ${CMAKE_CURRENT_BINARY_DIR}/whisper.cpp)
-        
-        add_library(
-            whisper_native
-            SHARED
-            src/main/cpp/whisper_native.cpp
-        )
-        
-        target_link_libraries(
-            whisper_native
-            whisper
-            ggml
-            ${log-lib}
-            ${android-lib}
-        )
-        
-        target_include_directories(
-            whisper_native
-            PRIVATE
-            ${WHISPER_CPP_DIR}
-            ${WHISPER_CPP_DIR}/include
-        )
-        
-        target_compile_definitions(
-            whisper_native
-            PRIVATE
-            USE_WHISPER=1
-        )
-        
-    else()
-        message(WARNING "whisper.cpp not found at ${WHISPER_CPP_DIR}")
-        message(WARNING "Falling back to MOCK implementation")
-        set(USE_WHISPER OFF)
-    endif()
-endif()
+# Check if whisper.cpp exists
+set(WHISPER_CPP_DIR "${EXTERNAL_DIR}/whisper.cpp")
 
-# ============================================================================
-# Mock whisper.cpp Implementation (Default)
-# ============================================================================
-if(NOT USE_WHISPER)
-    message(STATUS "Building MOCK whisper_native implementation")
+if(EXISTS "${WHISPER_CPP_DIR}/CMakeLists.txt")
+    message(STATUS "Found whisper.cpp, enabling Whisper ASR")
+    set(USE_WHISPER ON)
     
-    # Note: whisper_native.cpp is compiled but uses mock implementation
-    # The actual implementation is controlled by USE_WHISPER preprocessor flag
+    # Disable tests and examples for production build
+    set(WHISPER_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(WHISPER_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(WHISPER_METAL OFF CACHE BOOL "" FORCE)
+    set(WHISPER_CUDA OFF CACHE BOOL "" FORCE)
+    set(WHISPER_SYCL OFF CACHE BOOL "" FORCE)
+    set(WHISPER_OPENVINO OFF CACHE BOOL "" FORCE)
+    set(WHISPER_COREML OFF CACHE BOOL "" FORCE)
+    
+    # Add whisper.cpp as subdirectory
+    add_subdirectory(${WHISPER_CPP_DIR} ${CMAKE_CURRENT_BINARY_DIR}/whisper.cpp)
+    
+    # Create whisper_native library
+    add_library(whisper_native SHARED src/main/cpp/whisper_native.cpp)
+    
+    target_link_libraries(whisper_native 
+        whisper
+        ggml
+        ${log-lib}
+        ${android-lib}
+    )
+    
+    target_include_directories(whisper_native PRIVATE
+        ${WHISPER_CPP_DIR}
+        ${WHISPER_CPP_DIR}/include
+        ${WHISPER_CPP_DIR}/ggml/include
+    )
+    
+    target_compile_definitions(whisper_native PRIVATE
+        USE_WHISPER_CPP=1
+        WHISPER_BUILD=1
+    )
+    
+    # Set target properties for Android
+    set_target_properties(whisper_native PROPERTIES
+        CXX_STANDARD 17
+        POSITION_INDEPENDENT_CODE ON
+    )
+    
+    message(STATUS "  whisper_native: FULL implementation with whisper.cpp")
+else()
+    message(WARNING "whisper.cpp not found at ${WHISPER_CPP_DIR}")
+    message(WARNING "Falling back to MOCK implementation")
+    set(USE_WHISPER OFF)
+    
+    # Build mock whisper_native
+    add_library(whisper_native SHARED src/main/cpp/whisper_native.cpp)
+    target_link_libraries(whisper_native ${log-lib} ${android-lib})
+    target_compile_definitions(whisper_native PRIVATE
+        USE_WHISPER_CPP=0
+        MOCK_IMPLEMENTATION=1
+    )
 endif()
 
 # ============================================================================
