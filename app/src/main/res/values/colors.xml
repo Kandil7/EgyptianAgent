@@ -1,7 +1,64 @@
 <resources>
+    <!-- Primary Colors -->
     <color name="colorPrimary">#2196F3</color>
     <color name="colorPrimaryDark">#1976D2</color>
     <color name="colorAccent">#FF4081</color>
+    
+    <!-- Basic Colors -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
+    
+    <!-- Senior Mode Colors - High Contrast Theme -->
+    
+    <!-- Primary Colors for Seniors -->
+    <color name="senior_primary">#1565C0</color>
+    <color name="senior_primary_dark">#0D47A1</color>
+    <color name="senior_accent">#FF6F00</color>
+    
+    <!-- Background Colors - High Contrast -->
+    <color name="senior_background">#FFFFFF</color>
+    <color name="senior_background_secondary">#F5F5F5</color>
+    <color name="senior_card_background">#FFFFFF</color>
+    
+    <!-- Text Colors - High Contrast for Readability -->
+    <color name="senior_text_primary">#212121</color>
+    <color name="senior_text_secondary">#424242</color>
+    <color name="senior_text_hint">#757575</color>
+    
+    <!-- Button Colors -->
+    <color name="senior_button_primary">#1565C0</color>
+    <color name="senior_button_pressed">#0D47A1</color>
+    <color name="senior_button_text">#FFFFFF</color>
+    
+    <!-- Emergency Colors - High Visibility -->
+    <color name="senior_emergency">#D32F2F</color>
+    <color name="senior_emergency_text">#FFFFFF</color>
+    
+    <!-- Success Colors -->
+    <color name="senior_success">#388E3C</color>
+    <color name="senior_success_text">#FFFFFF</color>
+    
+    <!-- Warning Colors -->
+    <color name="senior_warning">#F57C00</color>
+    <color name="senior_warning_text">#FFFFFF</color>
+    
+    <!-- Disabled State Colors -->
+    <color name="senior_disabled">#BDBDBD</color>
+    <color name="senior_disabled_text">#9E9E9E</color>
+    
+    <!-- Status Bar for Senior Mode -->
+    <color name="senior_status_bar">#0D47A1</color>
+    
+    <!-- Navigation Bar for Senior Mode -->
+    <color name="senior_navigation_bar">#FFFFFF</color>
+    
+    <!-- Divider Colors -->
+    <color name="senior_divider">#E0E0E0</color>
+    
+    <!-- Ripple Colors -->
+    <color name="senior_ripple">#40000000</color>
+    
+    <!-- Icon Colors -->
+    <color name="senior_icon_primary">#1565C0</color>
+    <color name="senior_icon_secondary">#757575</color>
 </resources>

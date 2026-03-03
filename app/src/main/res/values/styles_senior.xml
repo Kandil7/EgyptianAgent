@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 
+        Senior Mode Theme and Styles
+        Optimized for elderly users (65+) with:
+        - Larger text sizes
+        - Higher contrast colors
+        - Larger touch targets
+        - Simplified layouts
+    -->
+
+    <!-- Senior Mode Base Theme -->
+    <style name="SeniorTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Large text for readability -->
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColorPrimary">@color/senior_text_primary</item>
+        <item name="android:textColorSecondary">@color/senior_text_secondary</item>
+        
+        <!-- High contrast background -->
+        <item name="android:colorBackground">@color/senior_background</item>
+        <item name="android:windowBackground">@color/senior_background</item>
+        
+        <!-- Large button style -->
+        <item name="android:buttonStyle">@style/SeniorButton</item>
+        
+        <!-- Accessibility settings -->
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <!-- Senior Button Style -->
+    <style name="SeniorButton" parent="Widget.AppCompat.Button">
+        <item name="android:minHeight">80dp</item>
+        <item name="android:minWidth">200dp</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:background">@drawable/senior_button_background</item>
+    </style>
+
+    <!-- Senior Button Outlined Style -->
+    <style name="SeniorButtonOutlined" parent="Widget.AppCompat.Button.OutlinedButton">
+        <item name="android:minHeight">80dp</item>
+        <item name="android:minWidth">200dp</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Senior Text Button Style -->
+    <style name="SeniorButtonText" parent="Widget.AppCompat.Button.TextButton">
+        <item name="android:minHeight">60dp</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:padding">12dp</item>
+    </style>
+
+    <!-- Senior Large Button (for primary actions) -->
+    <style name="SeniorButtonLarge" parent="SeniorButton">
+        <item name="android:minHeight">100dp</item>
+        <item name="android:minWidth">280dp</item>
+        <item name="android:textSize">26sp</item>
+    </style>
+
+    <!-- Senior Text Styles -->
+    <style name="SeniorTextTitle">
+        <item name="android:textSize">32sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/senior_text_primary</item>
+    </style>
+
+    <style name="SeniorTextHeading">
+        <item name="android:textSize">28sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/senior_text_primary</item>
+    </style>
+
+    <style name="SeniorTextBody">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/senior_text_primary</item>
+        <item name="android:lineSpacingMultiplier">1.4</item>
+    </style>
+
+    <style name="SeniorTextCaption">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/senior_text_secondary</item>
+    </style>
+
+    <!-- Senior Card Style -->
+    <style name="SeniorCard" parent="Widget.AppCompat.CardView">
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">4dp</item>
+        <item name="cardBackgroundColor">@color/senior_card_background</item>
+        <item name="contentPadding">20dp</item>
+    </style>
+
+    <!-- Senior EditText Style -->
+    <style name="SeniorEditText" parent="Widget.AppCompat.EditText">
+        <item name="android:textSize">24sp</item>
+        <item name="android:minHeight">72dp</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+    <!-- Senior Toolbar Style -->
+    <style name="SeniorToolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="android:minHeight">72dp</item>
+        <item name="android:background">@color/senior_primary</item>
+        <item name="titleTextSize">24sp</item>
+        <item name="subtitleTextSize">18sp</item>
+    </style>
+
+    <!-- Senior Icon Button Style -->
+    <style name="SeniorIconButton" parent="Widget.AppCompat.ImageButton">
+        <item name="android:minHeight">72dp</item>
+        <item name="android:minWidth">72dp</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+    <!-- Senior List Item Style -->
+    <style name="SeniorListItem">
+        <item name="android:minHeight">88dp</item>
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingEnd">20dp</item>
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingBottom">16dp</item>
+    </style>
+
+    <!-- Senior Dialog Style -->
+    <style name="SeniorDialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:textSize">24sp</item>
+        <item name="android:windowBackground">@color/senior_background</item>
+    </style>
+
+    <!-- Senior Switch Style -->
+    <style name="SeniorSwitch" parent="Widget.AppCompat.CompoundButton.Switch">
+        <item name="android:minHeight">64dp</item>
+        <item name="android:textSize">22sp</item>
+    </style>
+
+    <!-- Senior Checkbox Style -->
+    <style name="SeniorCheckbox" parent="Widget.AppCompat.CompoundButton.CheckBox">
+        <item name="android:minHeight">64dp</item>
+        <item name="android:textSize">22sp</item>
+    </style>
+
+    <!-- Senior RadioButton Style -->
+    <style name="SeniorRadioButton" parent="Widget.AppCompat.CompoundButton.RadioButton">
+        <item name="android:minHeight">64dp</item>
+        <item name="android:textSize">22sp</item>
+    </style>
+
+    <!-- Senior FAB Style -->
+    <style name="SeniorFAB" parent="Widget.AppCompat.FloatingActionButton">
+        <item name="fabSize">normal</item>
+        <item name="fabCustomSize">80dp</item>
+    </style>
+
+    <!-- Senior Bottom Navigation Style -->
+    <style name="SeniorBottomNavigation" parent="Widget.Design.BottomNavigationView">
+        <item name="itemTextSize">18sp</item>
+        <item name="itemIconSize">36dp</item>
+        <item name="android:minHeight">80dp</item>
+    </style>
+
+    <!-- Senior Progress Bar Style -->
+    <style name="SeniorProgressBar" parent="Widget.AppCompat.ProgressBar">
+        <item name="android:minHeight">16dp</item>
+    </style>
+
+    <!-- Senior SeekBar Style -->
+    <style name="SeniorSeekBar" parent="Widget.AppCompat.SeekBar">
+        <item name="android:minHeight">48dp</item>
+    </style>
+</resources>

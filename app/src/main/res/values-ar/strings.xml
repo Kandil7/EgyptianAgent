@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Name -->
+    <string name="app_name">الوكيل المصري</string>
+    
+    <!-- Main Screen -->
+    <string name="activate_assistant">تفعيل المساعد</string>
+    <string name="start_service">تشغيل خدمة الصوت</string>
+    <string name="stop_service">إيقاف خدمة الصوت</string>
+    <string name="toggle_senior_mode">وضع كبار السن</string>
+    <string name="service_status">حالة الخدمة: %s</string>
+    <string name="wake_word">قول \"يا صاحبي\" أو \"يا كبير\" للتفعيل</string>
+    
+    <!-- Commands -->
+    <string name="emergency_call">اتصال طوارئ</string>
+    <string name="call_contact">الاتصال بجهة</string>
+    <string name="send_message">إرسال رسالة</string>
+    <string name="set_alarm">ضبط منبه</string>
+    <string name="read_time">معرفة الوقت</string>
+    <string name="read_missed_calls">قراءة المكالمات الفائتة</string>
+    
+    <!-- Voice Feedback -->
+    <string name="listening">اسمعك…</string>
+    <string name="processing">جارٍ المعالجة…</string>
+    <string name="executing">جارٍ التنفيذ…</string>
+    <string name="success">تم بنجاح</string>
+    <string name="failed">فشل في التنفيذ</string>
+    <string name="try_again">حاول مرة أخرى</string>
+    <string name="please_repeat">ممكن تعيد تاني؟</string>
+    <string name="didnt_hear">مسمعتكش كويس</string>
+    
+    <!-- Contact Names -->
+    <string name="mama">ماما</string>
+    <string name="baba">بابا</string>
+    <string name="brother">أخويا</string>
+    <string name="sister">اختي</string>
+    
+    <!-- Emergency -->
+    <string name="emergency_detected">تم اكتشاف طوارئ!</string>
+    <string name="calling_emergency">جارٍ الاتصال بالطوارئ…</string>
+    <string name="sending_location">جارٍ إرسال الموقع…</string>
+    <string name="emergency_contacts">جهة اتصال طوارئ</string>
+    <string name="add_emergency_contact">إضافة جهة اتصال طوارئ</string>
+    
+    <!-- Fall Detection -->
+    <string name="fall_detected">تم اكتشاف سقوط!</string>
+    <string name="are_you_ok">يا كبير، لقيت إنك وقعت؟</string>
+    <string name="im_ok">أنا تمام</string>
+    <string name="need_help">محتاج مساعدة</string>
+    
+    <!-- Settings -->
+    <string name="settings">الإعدادات</string>
+    <string name="language">اللغة</string>
+    <string name="voice_settings">إعدادات الصوت</string>
+    <string name="wake_word_settings">إعدادات كلمة التنبيه</string>
+    <string name="sensitivity">الحساسية</string>
+    <string name="volume">مستوى الصوت</string>
+    
+    <!-- Permissions -->
+    <string name="permission_required">مطلوب إذن</string>
+    <string name="microphone_permission">مطلوب إذن الميكروفون</string>
+    <string name="contacts_permission">مطلوب إذن جهات الاتصال</string>
+    <string name="phone_permission">مطلوب إذن الاتصال</string>
+    <string name="location_permission">مطلوب إذن الموقع</string>
+    <string name="grant_permission">منح الإذن</string>
+    
+    <!-- Senior Mode -->
+    <string name="senior_mode">وضع كبار السن</string>
+    <string name="senior_mode_enabled">تم تفعيل وضع كبار السن</string>
+    <string name="senior_mode_disabled">تم إيقاف وضع كبار السن</string>
+    <string name="senior_mode_description">يتميز وضع كبار السن بحجم خط أكبر وأوامر صوتية مبسطة</string>
+    
+    <!-- Accessibility -->
+    <string name="accessibility">إمكانية الوصول</string>
+    <string name="large_text">نص كبير</string>
+    <string name="high_contrast">تباين عالي</string>
+    
+    <!-- Status Messages -->
+    <string name="service_running">الخدمة تعمل</string>
+    <string name="service_stopped">الخدمة متوقفة</string>
+    <string name="connecting">جارٍ الاتصال…</string>
+    <string name="connected">متصل</string>
+    <string name="disconnected">غير متصل</string>
+    
+    <!-- Errors -->
+    <string name="error_occurred">حدث خطأ</string>
+    <string name="network_error">خطأ في الشبكة</string>
+    <string name="no_internet">لا يوجد اتصال بالإنترنت</string>
+    <string name="contact_not_found">الجهة المطلوبة غير موجودة</string>
+    
+    <!-- Confirmation -->
+    <string name="confirm">تأكيد</string>
+    <string name="cancel">إلغاء</string>
+    <string name="yes">أيوه</string>
+    <string name="no">لا</string>
+    <string name="ok">تمام</string>
+    
+    <!-- Time -->
+    <string name="morning">الصباح</string>
+    <string name="afternoon">الظهر</string>
+    <string name="evening">المساء</string>
+    <string name="night">الليل</string>
+    <string name="tomorrow">بكرة</string>
+    <string name="today">النهاردة</string>
+    <string name="yesterday">امبارح</string>
+    
+    <!-- Days -->
+    <string name="sunday">الأحد</string>
+    <string name="monday">الاثنين</string>
+    <string name="tuesday">الثلاثاء</string>
+    <string name="wednesday">الأربعاء</string>
+    <string name="thursday">الخميس</string>
+    <string name="friday">الجمعة</string>
+    <string name="saturday">السبت</string>
+    
+    <!-- Common Phrases -->
+    <string name="hello">أهلا</string>
+    <string name="welcome">أهلا وسهلا</string>
+    <string name="good_morning">صباح الخير</string>
+    <string name="good_evening">مساء الخير</string>
+    <string name="good_night">تصبح على خير</string>
+    <string name="how_are_you">عامل إيه</string>
+    <string name="thank_you">شكرا</string>
+    <string name="goodbye">مع السلامة</string>
+    <string name="see_you">بكره</string>
+</resources>

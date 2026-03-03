@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Senior Button Background Drawable -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/senior_ripple">
+    
+    <item>
+        <shape android:shape="rectangle">
+            <!-- Rounded corners for modern look -->
+            <corners android:radius="16dp" />
+            
+            <!-- Primary button color -->
+            <solid android:color="@color/senior_button_primary" />
+            
+            <!-- Padding for text -->
+            <padding
+                android:left="24dp"
+                android:top="16dp"
+                android:right="24dp"
+                android:bottom="16dp" />
+        </shape>
+    </item>
+    
+</ripple>
