@@ -1,0 +1,133 @@
+# FunctionGemma Egyptian Dialect Fine-tuning Configuration
+# This configuration file contains all hyperparameters for training
+# the FunctionGemma-270M-IT model on Egyptian Arabic voice commands.
+
+# Model Configuration
+model:
+  # Base model from Hugging Face
+  name: "google/functiongemma-270m-it"
+  # Whether to trust remote code (required for FunctionGemma)
+  trust_remote_code: true
+  # Model revision (optional, use specific commit for reproducibility)
+  # revision: "main"
+
+# LoRA (Low-Rank Adaptation) Configuration
+# LoRA enables efficient fine-tuning by training only small adapter matrices
+lora:
+  # Rank of the LoRA matrices (higher = more parameters, better fit)
+  r: 16
+  # LoRA alpha (scaling factor for LoRA weights)
+  alpha: 32
+  # Dropout probability for LoRA layers
+  dropout: 0.05
+  # Target modules to apply LoRA (attention layers work best)
+  target_modules:
+    - "q_proj"
+    - "v_proj"
+    - "k_proj"
+    - "o_proj"
+  # Whether to train bias terms
+  bias: "none"
+  # Task type (CAUSAL_LM for language generation)
+  task_type: "CAUSAL_LM"
+
+# Training Configuration
+training:
+  # Batch size per device (reduce if OOM)
+  batch_size: 4
+  # Learning rate (2e-4 is good for LoRA fine-tuning)
+  learning_rate: 2.0e-4
+  # Number of training epochs
+  epochs: 5
+  # Maximum sequence length (truncate longer inputs)
+  max_seq_length: 512
+  # Gradient accumulation steps (effective batch = batch_size * accumulation_steps)
+  gradient_accumulation_steps: 4
+  # Warmup ratio (fraction of training for learning rate warmup)
+  warmup_ratio: 0.1
+  # Learning rate scheduler type
+  lr_scheduler_type: "cosine"
+  # Steps between saving checkpoints
+  save_steps: 100
+  # Steps between logging training metrics
+  logging_steps: 10
+  # Evaluation strategy ("epoch" or "steps")
+  evaluation_strategy: "epoch"
+  # Number of checkpoints to keep (oldest deleted)
+  save_total_limit: 2
+  # Whether to use mixed precision training (requires GPU)
+  fp16: true
+  # Random seed for reproducibility
+  seed: 42
+  # Early stopping patience
+  early_stopping_patience: 3
+  # Load best model at end of training
+  load_best_model_at_end: true
+  # Metric to optimize for early stopping
+  metric_for_best_model: "eval_loss"
+
+# Data Configuration
+data:
+  # Path to training dataset (JSONL format)
+  train_path: "datasets/egyptian_voice_commands/train.jsonl"
+  # Path to evaluation dataset (optional, will split from train if not provided)
+  eval_path: "datasets/egyptian_voice_commands/eval.jsonl"
+  # Path to test dataset (for final evaluation)
+  test_path: "datasets/egyptian_voice_commands/test.jsonl"
+  # Validation split ratio (if eval_path not provided)
+  validation_split: 0.1
+  # Random seed for data splitting
+  data_seed: 42
+
+# Output Configuration
+output:
+  # Directory to save fine-tuned model
+  dir: "models/functiongemma-270m-egyptian"
+  # Path for GGUF converted model (after conversion script)
+  gguf_path: "models/functiongemma-270m-egyptian-Q4_K_M.gguf"
+  # Directory for evaluation results
+  eval_dir: "evaluation_results"
+  # Directory for training logs
+  log_dir: "logs"
+
+# Hardware Configuration
+hardware:
+  # Device to use ("cuda", "cpu", or "auto")
+  device: "auto"
+  # Number of GPUs to use (for multi-GPU training)
+  num_gpus: 1
+  # GPU memory fraction to allocate (for TensorFlow)
+  gpu_memory_fraction: 0.9
+  # Enable TF32 for faster training on Ampere GPUs
+  tf32: true
+
+# Quantization Configuration (for 4-bit training on low-memory GPUs)
+quantization:
+  # Enable 4-bit quantization (reduces memory usage)
+  enabled: false
+  # Quantization type ("nf4" or "fp4")
+  type: "nf4"
+  # Double quantization (quantize quantization constants)
+  double_quant: true
+  # Compute dtype for quantized model
+  compute_dtype: "float16"
+
+# WandB Configuration (optional experiment tracking)
+wandb:
+  # Enable Weights & Biases logging
+  enabled: false
+  # Project name
+  project: "functiongemma-egyptian"
+  # Run name
+  run_name: null
+  # Entity (team or username)
+  entity: null
+
+# Performance Optimization
+optimization:
+  # Enable gradient checkpointing (saves memory, slower)
+  gradient_checkpointing: false
+  # Enable Flash Attention 2 (faster attention, requires specific GPU)
+  flash_attention_2: false
+  # Enable torch compile (PyTorch 2.0+)
+  torch_compile: false

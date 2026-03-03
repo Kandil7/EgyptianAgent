@@ -1,0 +1,77 @@
+# FunctionGemma Egyptian Dialect Fine-tuning Requirements
+# Install with: pip install -r requirements_functiongemma.txt
+
+# Core Transformers Library
+transformers>=4.37.0
+
+# TRL (Transformer Reinforcement Learning) for SFT Training
+trl>=0.7.0
+
+# Hugging Face Datasets
+datasets>=2.14.0
+
+# PEFT (Parameter-Efficient Fine-Tuning) for LoRA
+peft>=0.7.0
+
+# Accelerate for distributed training
+accelerate>=0.25.0
+
+# BitsAndBytes for 4-bit quantization (optional, GPU required)
+# Uncomment if you want to use 4-bit quantization
+# bitsandbytes>=0.41.0
+
+# SentencePiece for tokenization
+sentencepiece>=0.1.99
+
+# Protocol Buffers for model serialization
+protobuf>=4.21.0
+
+# Scientific Computing
+scipy>=1.11.0
+numpy>=1.24.0
+
+# Machine Learning Utilities
+scikit-learn>=1.3.0
+
+# Visualization
+matplotlib>=3.8.0
+seaborn>=0.13.0
+
+# Configuration
+pyyaml>=6.0
+
+# Progress Bars
+tqdm>=4.66.0
+
+# Optional: Experiment Tracking
+# wandb>=0.16.0
+
+# Optional: Jupyter support
+# jupyter>=1.0.0
+# ipywidgets>=8.0.0
+
+# Optional: Development tools
+# black>=23.0.0
+# flake8>=6.0.0
+# pytest>=7.0.0
+
+# Platform-specific dependencies
+# For Windows users, you may need:
+# torch>=2.0.0+cu118 --extra-index-url https://download.pytorch.org/whl/cu118
+
+# For Linux users with CUDA:
+# torch>=2.0.0 --extra-index-url https://download.pytorch.org/whl/cu118
+
+# For CPU-only or Mac:
+torch>=2.0.0
+
+# Additional utilities
+packaging>=23.0
+filelock>=3.12.0
+huggingface-hub>=0.19.0
+safetensors>=0.4.0
+tokenizers>=0.15.0
+
+# For GGUF conversion (llama.cpp Python bindings)
+# Note: These are installed separately via the conversion script
+# gguf>=0.6.0
