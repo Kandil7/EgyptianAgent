@@ -10,6 +10,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // JitPack repository for llama.cpp and other GitHub libraries
+        maven { url 'https://jitpack.io' }
     }
 }
 rootProject.name = "EgyptianAgent"

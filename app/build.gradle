@@ -29,6 +29,10 @@ android {
             }
         }
 
+        // BuildConfig fields for FunctionGemma
+        buildConfigField "boolean", "USE_FUNCTIONGEMMA", "true"
+        buildConfigField "String", "MODEL_PATH", "\"/data/data/com.egyptian.agent/models/functiongemma-270m-it.gguf\""
+
         // Enable vector drawables
         vectorDrawables {
             useSupportLibrary true
@@ -110,6 +114,11 @@ android {
         test {
             java.srcDirs += ['src/test/cpp']
         }
+        // AI-specific source sets for FunctionGemma
+        ai {
+            java.srcDirs = ['src/ai/java', 'src/ai/kotlin']
+            resources.srcDirs = ['src/ai/assets']
+        }
     }
 
     // CMake configuration for native libraries
@@ -159,6 +168,10 @@ android {
         jniLibs {
             useLegacyPackaging = false
         }
+        // Exclude duplicate native libraries for llama.cpp
+        nativeLibs {
+            excludes += ['**/libllama.so']
+        }
     }
 
     // Lint configuration
@@ -200,6 +213,12 @@ android {
         androidTest {
             useAndroidXTest = true
         }
+    }
+
+    // Build features for AI modules
+    buildFeatures {
+        aidl = false
+        renderScript = false
     }
 }
 
@@ -421,6 +440,20 @@ dependencies {
     // Additional dependencies for NLP and text processing
     implementation "com.google.mlkit:language-id:$rootProject.ext.mlKitLanguageIdVersion"
     implementation "com.google.mlkit:smart-reply:$rootProject.ext.mlKitSmartReplyVersion"
+
+    // ===========================================
+    // FunctionGemma-270M-IT Dependencies
+    // ===========================================
+
+    // llama.cpp for efficient LLM inference on Android
+    implementation "com.github.ggerganov:llama.cpp:$rootProject.ext.llamaCppVersion"
+
+    // ML Kit for on-device machine learning
+    implementation "com.google.mlkit:text-recognition:$rootProject.ext.mlKitTextRecognitionVersion"
+    implementation "com.google.mlkit:translate:$rootProject.ext.mlKitTranslateVersion"
+
+    // ONNX Runtime for model compatibility (optional fallback)
+    implementation "com.microsoft.onnxruntime:onnxruntime-android:$rootProject.ext.onnxRuntimeVersion"
 
     // Shizuku API for system privileges
     implementation "dev.rikka.shizuku:api:$rootProject.ext.shizukuVersion"

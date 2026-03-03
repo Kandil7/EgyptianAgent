@@ -43,4 +43,11 @@ ext {
     // Native library versions
     llamaCppVersion = '0.0.0'  // From submodule
     whisperCppVersion = '0.0.0'  // From submodule
+
+    // ML Kit versions for FunctionGemma
+    mlKitTextRecognitionVersion = '16.0.1'
+    mlKitTranslateVersion = '17.0.2'
+
+    // ONNX Runtime version
+    onnxRuntimeVersion = '1.17.0'
 }
