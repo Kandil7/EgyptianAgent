@@ -1,0 +1,196 @@
+# EgyptianAgent Project - Git Attributes
+# Controls line endings, diff drivers, and export settings
+# Last updated: 2026-03-03
+
+#===============================================================================
+# Line Ending Handling (Cross-Platform)
+#===============================================================================
+# Use LF line endings on checkout for all text files (Unix-style)
+# This ensures consistency across Windows, macOS, and Linux
+
+* text=auto eol=lf
+
+# Explicitly set line endings for specific file types
+*.java text eol=lf
+*.kt text eol=lf
+*.gradle text eol=lf
+*.properties text eol=lf
+*.xml text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.sh text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Shell scripts should always use LF
+*.sh text eol=lf working-tree- LF
+
+# Windows batch files should use CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+#===============================================================================
+# Binary Files
+#===============================================================================
+# Mark binary files explicitly to prevent text conversion
+
+# Images
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.bmp binary
+*.ico binary
+*.svg text
+
+# Audio files
+*.wav binary
+*.mp3 binary
+*.ogg binary
+*.m4a binary
+
+# Model files (large binary files)
+*.bin binary
+*.gguf binary
+*.ggml binary
+*.pt binary
+*.pth binary
+*.onnx binary
+*.tflite binary
+*.h5 binary
+*.pb binary
+*.tflite binary
+*.model binary
+
+# Archives
+*.zip binary
+*.tar binary
+*.gz binary
+*.rar binary
+*.7z binary
+
+# Compiled files
+*.class binary
+*.so binary
+*.dll binary
+*.dylib binary
+*.o binary
+*.a binary
+*.lib binary
+
+# Android resources
+*.arsc binary
+*.dex binary
+
+#===============================================================================
+# Diff Drivers
+#===============================================================================
+# Use appropriate diff drivers for specific file types
+
+# Java source files
+*.java diff=java
+
+# Kotlin source files
+*.kt diff=kotlin
+
+# Gradle files
+*.gradle diff=java
+
+# JSON files
+*.json diff=json
+
+# YAML files
+*.yaml diff=yaml
+*.yml diff=yaml
+
+# XML files
+*.xml diff=html
+
+# Markdown files
+*.md diff=markdown
+
+# Shell scripts
+*.sh diff=bash
+
+# C/C++ files
+*.c diff=c
+*.cpp diff=c
+*.h diff=c
+*.hpp diff=c
+
+#===============================================================================
+# Merge Strategies
+#===============================================================================
+# Configure merge strategies for specific file types
+
+# Use union merge for Gradle dependencies
+*.gradle merge=union
+
+# Use union merge for JSON (careful with this)
+# *.json merge=union
+
+#===============================================================================
+# Export Ignore
+#===============================================================================
+# Files to exclude when using git archive
+
+.gitignore export-ignore
+.gitattributes export-ignore
+.gitmodules export-ignore
+*.md export-ignore
+docs/ export-ignore
+scripts/ export-ignore
+datasets/ export-ignore
+external/ export-ignore
+
+#===============================================================================
+# Submodule Handling
+#===============================================================================
+# Submodule paths
+external/llama.cpp/ .gitmodules
+external/whisper.cpp/ .gitmodules
+external/faster-whisper/ .gitmodules
+
+#===============================================================================
+# Language-specific Settings
+#===============================================================================
+# Java
+*.java linguist-language=Java
+
+# Kotlin
+*.kt linguist-language=Kotlin
+
+# Gradle
+*.gradle linguist-language=Gradle
+
+# C/C++
+*.c linguist-language=C
+*.cpp linguist-language=C++
+*.h linguist-language=C
+*.hpp linguist-language=C++
+
+# Python
+*.py linguist-language=Python
+
+# Shell
+*.sh linguist-language=Shell
+
+# YAML
+*.yaml linguist-language=YAML
+*.yml linguist-language=YAML
+
+#===============================================================================
+# Vendored Code
+#===============================================================================
+# Mark external submodules as vendored
+external/**/ linguist-vendored
+
+#===============================================================================
+# Generated Files
+#===============================================================================
+# Mark auto-generated files
+**/BuildConfig.java linguist-generated
+**/R.java linguist-generated
