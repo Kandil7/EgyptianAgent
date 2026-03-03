@@ -146,6 +146,24 @@ cd egyptian-agent
 
 ## 📚 Documentation
 
+All documentation is now organized in the [`docs/`](docs/) directory:
+
+- [Architecture](docs/architecture/) - System design and architecture
+- [Deployment](docs/deployment/) - Deployment guides and instructions
+- [API Reference](docs/api/) - API documentation
+- [User Guides](docs/guides/) - User manuals and troubleshooting
+- [Testing](docs/testing/) - Test documentation
+- [Performance](docs/performance/) - Performance benchmarks
+- [Integration](docs/integration/) - Integration guides
+- [Archive](docs/archive/) - Historical documents
+
+### Quick Links
+
+- [FunctionGemma Quick Start](docs/FUNCTIONGEMMA_QUICKSTART.md)
+- [Deployment Guide](docs/deployment/DEPLOYMENT_GUIDE.md)
+- [User Manual (Arabic)](docs/guides/user_manual_ar.md)
+- [Troubleshooting](docs/guides/TROUBLESHOOTING.md)
+
 - [Technical Documentation](documentation/technical_documentation.md) - Deep dive into architecture
 - [User Manual (Arabic)](documentation/user_manual_ar.md) - Complete guide for end users
 - [Installation Guide](documentation/installation_guide.md) - Step-by-step setup instructions
