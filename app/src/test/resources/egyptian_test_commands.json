@@ -1,0 +1,692 @@
+{
+  "test_dataset": {
+    "name": "Egyptian Voice Commands Test Dataset",
+    "version": "1.0",
+    "description": "Comprehensive test dataset for FunctionGemma Egyptian dialect understanding",
+    "total_examples": 200,
+    "language": "Egyptian Arabic (arz)",
+    "created_date": "2026-03-03"
+  },
+  "test_cases": [
+    {
+      "id": "call_001",
+      "category": "CALL_CONTACT",
+      "input": "اتصل بماما",
+      "expected_intent": "CALL_CONTACT",
+      "expected_entities": {"contact_name": "ماما"},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "call_002",
+      "category": "CALL_CONTACT",
+      "input": "كلم بابا",
+      "expected_intent": "CALL_CONTACT",
+      "expected_entities": {"contact_name": "بابا"},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "call_003",
+      "category": "CALL_CONTACT",
+      "input": "رن على أحمد",
+      "expected_intent": "CALL_CONTACT",
+      "expected_entities": {"contact_name": "أحمد"},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "call_004",
+      "category": "CALL_CONTACT",
+      "input": "عايز اكلم ماما",
+      "expected_intent": "CALL_CONTACT",
+      "expected_entities": {"contact_name": "ماما"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "call_005",
+      "category": "CALL_CONTACT",
+      "input": "ممكن تكلمني بابا",
+      "expected_intent": "CALL_CONTACT",
+      "expected_entities": {"contact_name": "بابا"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "call_006",
+      "category": "CALL_CONTACT",
+      "input": "اتصل بـ محمد",
+      "expected_intent": "CALL_CONTACT",
+      "expected_entities": {"contact_name": "محمد"},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "call_007",
+      "category": "CALL_CONTACT",
+      "input": "كلم اختي",
+      "expected_intent": "CALL_CONTACT",
+      "expected_entities": {"contact_name": "اختي"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "call_008",
+      "category": "CALL_CONTACT",
+      "input": "رن على اخويا",
+      "expected_intent": "CALL_CONTACT",
+      "expected_entities": {"contact_name": "اخويا"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "call_009",
+      "category": "CALL_CONTACT",
+      "input": "اتصل بالدكتور أحمد",
+      "expected_intent": "CALL_CONTACT",
+      "expected_entities": {"contact_name": "الدكتور أحمد"},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "call_010",
+      "category": "CALL_CONTACT",
+      "input": "كلم الاستاذ محمود",
+      "expected_intent": "CALL_CONTACT",
+      "expected_entities": {"contact_name": "الاستاذ محمود"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "whatsapp_001",
+      "category": "SEND_WHATSAPP",
+      "input": "ابعت واتساب لمريم",
+      "expected_intent": "SEND_WHATSAPP",
+      "expected_entities": {"contact_name": "مريم"},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "whatsapp_002",
+      "category": "SEND_WHATSAPP",
+      "input": "ابعت واتساب لأحمد وقوله إنى هتأخر",
+      "expected_intent": "SEND_WHATSAPP",
+      "expected_entities": {"contact_name": "أحمد", "message": "إنى هتأخر"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "whatsapp_003",
+      "category": "SEND_WHATSAPP",
+      "input": "ابعث رسالة لـ سارة",
+      "expected_intent": "SEND_WHATSAPP",
+      "expected_entities": {"contact_name": "سارة"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "whatsapp_004",
+      "category": "SEND_WHATSAPP",
+      "input": "قول لـ محمد إنى جاي",
+      "expected_intent": "SEND_WHATSAPP",
+      "expected_entities": {"contact_name": "محمد", "message": "إنى جاي"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "whatsapp_005",
+      "category": "SEND_WHATSAPP",
+      "input": "ارسل واتساب لأبي",
+      "expected_intent": "SEND_WHATSAPP",
+      "expected_entities": {"contact_name": "أبي"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "whatsapp_006",
+      "category": "SEND_WHATSAPP",
+      "input": "ممكن تبعت رسالة لماما",
+      "expected_intent": "SEND_WHATSAPP",
+      "expected_entities": {"contact_name": "ماما"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "whatsapp_007",
+      "category": "SEND_WHATSAPP",
+      "input": "ابعت واتساب وقوله سلامات",
+      "expected_intent": "SEND_WHATSAPP",
+      "expected_entities": {"message": "سلامات"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "whatsapp_008",
+      "category": "SEND_WHATSAPP",
+      "input": "قول لفاطمة اطمن عليك",
+      "expected_intent": "SEND_WHATSAPP",
+      "expected_entities": {"contact_name": "فاطمة", "message": "اطمن عليك"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "whatsapp_009",
+      "category": "SEND_WHATSAPP",
+      "input": "ابعت رسالة لعلى وقوله meeting بكرة",
+      "expected_intent": "SEND_WHATSAPP",
+      "expected_entities": {"contact_name": "على", "message": "meeting بكرة"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "whatsapp_010",
+      "category": "SEND_WHATSAPP",
+      "input": "ممكن تبعت واتساب للدكتور تقول له شكرا",
+      "expected_intent": "SEND_WHATSAPP",
+      "expected_entities": {"contact_name": "الدكتور", "message": "شكرا"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "alarm_001",
+      "category": "SET_ALARM",
+      "input": "نبهني بكرة الصبح",
+      "expected_intent": "SET_ALARM",
+      "expected_entities": {"time": "بكرة الصبح"},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "alarm_002",
+      "category": "SET_ALARM",
+      "input": "انبهني بعد ساعة",
+      "expected_intent": "SET_ALARM",
+      "expected_entities": {"time": "بعد ساعة"},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "alarm_003",
+      "category": "SET_ALARM",
+      "input": "ذكرني الساعة 5",
+      "expected_intent": "SET_ALARM",
+      "expected_entities": {"time": "الساعة 5"},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "alarm_004",
+      "category": "SET_ALARM",
+      "input": "عايز منبه بكرة",
+      "expected_intent": "SET_ALARM",
+      "expected_entities": {"time": "بكرة"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "alarm_005",
+      "category": "SET_ALARM",
+      "input": "اضبط منبه على العصر",
+      "expected_intent": "SET_ALARM",
+      "expected_entities": {"time": "العصر"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "alarm_006",
+      "category": "SET_ALARM",
+      "input": "نبهني نص الليل",
+      "expected_intent": "SET_ALARM",
+      "expected_entities": {"time": "نص الليل"},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "alarm_007",
+      "category": "SET_ALARM",
+      "input": "ممكن تنبهني بعد نص ساعة",
+      "expected_intent": "SET_ALARM",
+      "expected_entities": {"time": "بعد نص ساعة"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "alarm_008",
+      "category": "SET_ALARM",
+      "input": "ذكرني اصلي الفجر",
+      "expected_intent": "SET_ALARM",
+      "expected_entities": {"time": "الفجر", "label": "اصلي"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "alarm_009",
+      "category": "SET_ALARM",
+      "input": "نبهني آخذ الدواء",
+      "expected_intent": "SET_ALARM",
+      "expected_entities": {"time": "", "label": "آخذ الدواء"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "alarm_010",
+      "category": "SET_ALARM",
+      "input": "ممكن منبه الساعة 10 بكرة",
+      "expected_intent": "SET_ALARM",
+      "expected_entities": {"time": "الساعة 10 بكرة"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "emergency_001",
+      "category": "EMERGENCY",
+      "input": "يا نجدة",
+      "expected_intent": "EMERGENCY",
+      "expected_entities": {},
+      "min_confidence": 0.95
+    },
+    {
+      "id": "emergency_002",
+      "category": "EMERGENCY",
+      "input": "استغاثة",
+      "expected_intent": "EMERGENCY",
+      "expected_entities": {},
+      "min_confidence": 0.95
+    },
+    {
+      "id": "emergency_003",
+      "category": "EMERGENCY",
+      "input": "مش قادر",
+      "expected_intent": "EMERGENCY",
+      "expected_entities": {},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "emergency_004",
+      "category": "EMERGENCY",
+      "input": "محتاج مساعدة بسرعة",
+      "expected_intent": "EMERGENCY",
+      "expected_entities": {},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "emergency_005",
+      "category": "EMERGENCY",
+      "input": "حالة طوارئ",
+      "expected_intent": "EMERGENCY",
+      "expected_entities": {},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "emergency_006",
+      "category": "EMERGENCY",
+      "input": "يا كبير نجدة",
+      "expected_intent": "EMERGENCY",
+      "expected_entities": {},
+      "min_confidence": 0.95
+    },
+    {
+      "id": "emergency_007",
+      "category": "EMERGENCY",
+      "input": "حصل حاجة",
+      "expected_intent": "EMERGENCY",
+      "expected_entities": {},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "emergency_008",
+      "category": "EMERGENCY",
+      "input": "تعبان جدا",
+      "expected_intent": "EMERGENCY",
+      "expected_entities": {},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "emergency_009",
+      "category": "EMERGENCY",
+      "input": "اتصل بالاسعاف",
+      "expected_intent": "EMERGENCY",
+      "expected_entities": {"emergency_service": "اسعاف"},
+      "min_confidence": 0.95
+    },
+    {
+      "id": "emergency_010",
+      "category": "EMERGENCY",
+      "input": "نجدة نجدة",
+      "expected_intent": "EMERGENCY",
+      "expected_entities": {},
+      "min_confidence": 0.95
+    },
+    {
+      "id": "time_001",
+      "category": "READ_TIME",
+      "input": "الساعة كام؟",
+      "expected_intent": "READ_TIME",
+      "expected_entities": {},
+      "min_confidence": 0.95
+    },
+    {
+      "id": "time_002",
+      "category": "READ_TIME",
+      "input": "وقت إيه دلوقتي؟",
+      "expected_intent": "READ_TIME",
+      "expected_entities": {},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "time_003",
+      "category": "READ_TIME",
+      "input": "كام الساعة؟",
+      "expected_intent": "READ_TIME",
+      "expected_entities": {},
+      "min_confidence": 0.95
+    },
+    {
+      "id": "time_004",
+      "category": "READ_TIME",
+      "input": "ممكن تقوللي الوقت؟",
+      "expected_intent": "READ_TIME",
+      "expected_entities": {},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "time_005",
+      "category": "READ_TIME",
+      "input": "العصر ولا الفجر؟",
+      "expected_intent": "READ_TIME",
+      "expected_entities": {},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "time_006",
+      "category": "READ_TIME",
+      "input": "إيه الوقت دلوقتي",
+      "expected_intent": "READ_TIME",
+      "expected_entities": {},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "time_007",
+      "category": "READ_TIME",
+      "input": "الساعة عدت كام",
+      "expected_intent": "READ_TIME",
+      "expected_entities": {},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "time_008",
+      "category": "READ_TIME",
+      "input": "معاك وقت تقوللي الساعة كام",
+      "expected_intent": "READ_TIME",
+      "expected_entities": {},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "time_009",
+      "category": "READ_TIME",
+      "input": "أيه ده الساعة",
+      "expected_intent": "READ_TIME",
+      "expected_entities": {},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "time_010",
+      "category": "READ_TIME",
+      "input": "الوقت إيه",
+      "expected_intent": "READ_TIME",
+      "expected_entities": {},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "openapp_001",
+      "category": "OPEN_APP",
+      "input": "افتح واتساب",
+      "expected_intent": "OPEN_APP",
+      "expected_entities": {"app_name": "واتساب"},
+      "min_confidence": 0.95
+    },
+    {
+      "id": "openapp_002",
+      "category": "OPEN_APP",
+      "input": "شغل فيسبوك",
+      "expected_intent": "OPEN_APP",
+      "expected_entities": {"app_name": "فيسبوك"},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "openapp_003",
+      "category": "OPEN_APP",
+      "input": "شغل يوتيوب",
+      "expected_intent": "OPEN_APP",
+      "expected_entities": {"app_name": "يوتيوب"},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "openapp_004",
+      "category": "OPEN_APP",
+      "input": "ممكن تفتح جوجل؟",
+      "expected_intent": "OPEN_APP",
+      "expected_entities": {"app_name": "جوجل"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "openapp_005",
+      "category": "OPEN_APP",
+      "input": "افتح الخريطة",
+      "expected_intent": "OPEN_APP",
+      "expected_entities": {"app_name": "الخريطة"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "openapp_006",
+      "category": "OPEN_APP",
+      "input": "شغل التطبيق بتاع الصور",
+      "expected_intent": "OPEN_APP",
+      "expected_entities": {"app_name": "الصور"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "openapp_007",
+      "category": "OPEN_APP",
+      "input": "افتح الالة الحاسبة",
+      "expected_intent": "OPEN_APP",
+      "expected_entities": {"app_name": "الالة الحاسبة"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "openapp_008",
+      "category": "OPEN_APP",
+      "input": "ممكن تفتح الارسالات؟",
+      "expected_intent": "OPEN_APP",
+      "expected_entities": {"app_name": "الارسالات"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "openapp_009",
+      "category": "OPEN_APP",
+      "input": "شغل سبوتيفاي",
+      "expected_intent": "OPEN_APP",
+      "expected_entities": {"app_name": "سبوتيفاي"},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "openapp_010",
+      "category": "OPEN_APP",
+      "input": "افتح الرسائل",
+      "expected_intent": "OPEN_APP",
+      "expected_entities": {"app_name": "الرسائل"},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "device_001",
+      "category": "WIFI_TOGGLE",
+      "input": "افتح الواي فاي",
+      "expected_intent": "WIFI_TOGGLE",
+      "expected_entities": {"state": "on"},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "device_002",
+      "category": "WIFI_TOGGLE",
+      "input": "قفل الواي فاي",
+      "expected_intent": "WIFI_TOGGLE",
+      "expected_entities": {"state": "off"},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "device_003",
+      "category": "BLUETOOTH_TOGGLE",
+      "input": "افتح البلوتوث",
+      "expected_intent": "BLUETOOTH_TOGGLE",
+      "expected_entities": {"state": "on"},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "device_004",
+      "category": "BLUETOOTH_TOGGLE",
+      "input": "قفل البلوتوث",
+      "expected_intent": "BLUETOOTH_TOGGLE",
+      "expected_entities": {"state": "off"},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "device_005",
+      "category": "VOLUME_UP",
+      "input": "زود الصوت",
+      "expected_intent": "VOLUME_UP",
+      "expected_entities": {},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "device_006",
+      "category": "VOLUME_DOWN",
+      "input": "اطفي الصوت",
+      "expected_intent": "VOLUME_DOWN",
+      "expected_entities": {},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "device_007",
+      "category": "BRIGHTNESS_UP",
+      "input": "زود النور",
+      "expected_intent": "BRIGHTNESS_UP",
+      "expected_entities": {},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "device_008",
+      "category": "BRIGHTNESS_DOWN",
+      "input": "اطفي النور",
+      "expected_intent": "BRIGHTNESS_DOWN",
+      "expected_entities": {},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "device_009",
+      "category": "AIRPLANE_MODE",
+      "input": "افتح وضع الطيران",
+      "expected_intent": "AIRPLANE_MODE",
+      "expected_entities": {"state": "on"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "device_010",
+      "category": "LOCATION_TOGGLE",
+      "input": "شغل الـ GPS",
+      "expected_intent": "LOCATION_TOGGLE",
+      "expected_entities": {"state": "on"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "voice_001",
+      "category": "SEND_VOICE_MESSAGE",
+      "input": "ابعت رسالة صوتية لـ محمد",
+      "expected_intent": "SEND_VOICE_MESSAGE",
+      "expected_entities": {"contact_name": "محمد"},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "voice_002",
+      "category": "SEND_VOICE_MESSAGE",
+      "input": "سجل صوتي لماما",
+      "expected_intent": "SEND_VOICE_MESSAGE",
+      "expected_entities": {"contact_name": "ماما"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "voice_003",
+      "category": "SEND_VOICE_MESSAGE",
+      "input": "ممكن تبعت صوتي لأحمد",
+      "expected_intent": "SEND_VOICE_MESSAGE",
+      "expected_entities": {"contact_name": "أحمد"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "voice_004",
+      "category": "SEND_VOICE_MESSAGE",
+      "input": "ابعت رسالة بصوتي",
+      "expected_intent": "SEND_VOICE_MESSAGE",
+      "expected_entities": {},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "voice_005",
+      "category": "SEND_VOICE_MESSAGE",
+      "input": "سجل رسالة لبابا",
+      "expected_intent": "SEND_VOICE_MESSAGE",
+      "expected_entities": {"contact_name": "بابا"},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "missed_001",
+      "category": "READ_MISSED_CALLS",
+      "input": "في مكالمات فاتة؟",
+      "expected_intent": "READ_MISSED_CALLS",
+      "expected_entities": {},
+      "min_confidence": 0.9
+    },
+    {
+      "id": "missed_002",
+      "category": "READ_MISSED_CALLS",
+      "input": "مين اللي اتصل؟",
+      "expected_intent": "READ_MISSED_CALLS",
+      "expected_entities": {},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "missed_003",
+      "category": "READ_MISSED_CALLS",
+      "input": "عندي مكالمات مقروءة؟",
+      "expected_intent": "READ_MISSED_CALLS",
+      "expected_entities": {},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "missed_004",
+      "category": "READ_MISSED_CALLS",
+      "input": "قولي مين اتصل عليا",
+      "expected_intent": "READ_MISSED_CALLS",
+      "expected_entities": {},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "missed_005",
+      "category": "READ_MISSED_CALLS",
+      "input": "في حد اتصل بيا؟",
+      "expected_intent": "READ_MISSED_CALLS",
+      "expected_entities": {},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "contacts_001",
+      "category": "READ_CONTACTS",
+      "input": "وريني اسماء الناس",
+      "expected_intent": "READ_CONTACTS",
+      "expected_entities": {},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "contacts_002",
+      "category": "READ_CONTACTS",
+      "input": "عندي تليفون إيه؟",
+      "expected_intent": "READ_CONTACTS",
+      "expected_entities": {},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "contacts_003",
+      "category": "READ_CONTACTS",
+      "input": "قولي اسماء اصحابي",
+      "expected_intent": "READ_CONTACTS",
+      "expected_entities": {},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "contacts_004",
+      "category": "READ_CONTACTS",
+      "input": "معاك تليفونات كام",
+      "expected_intent": "READ_CONTACTS",
+      "expected_entities": {},
+      "min_confidence": 0.85
+    },
+    {
+      "id": "contacts_005",
+      "category": "READ_CONTACTS",
+      "input": "افتح جهات الاتصال",
+      "expected_intent": "READ_CONTACTS",
+      "expected_entities": {},
+      "min_confidence": 0.85
+    }
+  ]
+}
