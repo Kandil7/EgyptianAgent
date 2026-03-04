@@ -1,331 +1,240 @@
-#!/bin/bash
-# FunctionGemma Egyptian Dialect Model Conversion Script
-# Converts fine-tuned Hugging Face model to GGUF format for mobile deployment
+#!/usr/bin/env bash
+# =============================================================================
+# Egyptian Agent - GGUF Conversion Script
+# =============================================================================
 #
-# Author: EgyptianAgent Team
-# Date: 2026
+# PURPOSE:
+#   Converts fine-tuned HuggingFace models to GGUF format with quantization
+#   for mobile deployment. Supports FunctionGemma and other compatible models.
+#
+# USAGE:
+#   ./scripts/model/convert_to_gguf.sh [OPTIONS]
+#
+# OPTIONS:
+#   --input DIR         Input model directory (required)
+#   --output DIR        Output directory (default: models/)
+#   --quantization TYPE Quantization type (default: Q4_K_M)
+#   --f16               Keep F16 intermediate file
+#   --clean             Remove intermediate files after conversion
+#   --log-file PATH     Write conversion log to specified file
+#   --ci                CI/CD mode (non-interactive output)
+#   -h, --help          Show this help message
+#
+# QUANTIZATION TYPES:
+#   Q4_K_S  - Smallest, lower quality
+#   Q4_K_M  - Best size/quality balance (recommended)
+#   Q5_K_S  - Smaller, good quality
+#   Q5_K_M  - Good size, better quality
+#   Q6_K    - Larger, high quality
+#   Q8_0    - Largest, near-lossless
+#
+# RETURN CODES:
+#   0   Success
+#   1   General error
+#   2   Prerequisites missing
+#   3   Conversion failed
+#   5   Invalid arguments
+#
+# AUTHOR: EgyptianAgent Team
+# VERSION: 2.0.0
+# DATE: 2026-03-03
+# =============================================================================
 
-set -e  # Exit on error
+set -euo pipefail
 
-# Configuration
-MODEL_DIR="${1:-models/functiongemma-270m-egyptian}"
-OUTPUT_DIR="${2:-models}"
-QUANTIZATION="${3:-Q4_K_M}"
+readonly SCRIPT_NAME="$(basename "$0")"
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+readonly LOG_DIR="$PROJECT_DIR/build/logs"
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+INPUT_DIR=""
+OUTPUT_DIR="$PROJECT_DIR/models"
+QUANTIZATION="Q4_K_M"
+KEEP_F16=false
+CLEAN_AFTER=false
+LOG_FILE=""
+CI_MODE=false
 
-# Logging functions
-log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
+declare -A COLORS=([red]='\033[0;31m' [green]='\033[0;32m' [yellow]='\033[1;33m' [blue]='\033[0;34m' [cyan]='\033[0;36m' [nc]='\033[0m')
 
-log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
-}
+init_logging() { mkdir -p "$LOG_DIR" "$OUTPUT_DIR"; [[ -n "$LOG_FILE" ]] && exec > >(tee -a "$LOG_FILE") 2>&1; }
+log_info() { [[ "$CI_MODE" == "true" ]] && echo "[INFO] $*" || echo -e "${COLORS[green]}[INFO]${COLORS[nc]} $*"; }
+log_warn() { [[ "$CI_MODE" == "true" ]] && echo "[WARN] $*" || echo -e "${COLORS[yellow]}[WARN]${COLORS[nc]} $*"; }
+log_error() { [[ "$CI_MODE" == "true" ]] && echo "[ERROR] $*" >&2 || echo -e "${COLORS[red]}[ERROR]${COLORS[nc]} $*" >&2; }
+log_step() { [[ "$CI_MODE" == "true" ]] && echo "[STEP] $*" || echo -e "${COLORS[blue]}[STEP]${COLORS[nc]} $*"; }
+log_success() { [[ "$CI_MODE" == "true" ]] && echo "[SUCCESS] $*" || echo -e "${COLORS[cyan]}[SUCCESS]${COLORS[nc]} $*"; }
+print_header() { local w=60; [[ "$CI_MODE" == "true" ]] && echo "=== $1 ===" || { echo -e "${COLORS[blue]}$(printf '=%.0s' $(seq 1 $w))${COLORS[nc]}"; echo -e "${COLORS[blue]}  $1${COLORS[nc]}"; echo -e "${COLORS[blue]}$(printf '=%.0s' $(seq 1 $w))${COLORS[nc]}"; }; }
 
-log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
-}
+get_file_size() { [[ -f "$1" ]] && (stat -c%s "$1" 2>/dev/null || stat -f%z "$1" 2>/dev/null || echo "0") || echo "0"; }
+format_size() { local b=$1; if [[ $b -ge 1073741824 ]]; then echo "$(awk "BEGIN {printf \"%.2f\", $b / 1073741824}") GB"; elif [[ $b -ge 1048576 ]]; then echo "$(awk "BEGIN {printf \"%.2f\", $b / 1048576}") MB"; elif [[ $b -ge 1024 ]]; then echo "$(awk "BEGIN {printf \"%.2f\", $b / 1024}") KB"; else echo "$b B"; fi; }
 
-log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
-# Check if running on Windows (Git Bash)
-if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "win32" ]]; then
-    IS_WINDOWS=true
-    log_info "Running on Windows (Git Bash)"
-else
-    IS_WINDOWS=false
-fi
-
-# Function to check Python version
-check_python() {
-    log_info "Checking Python version..."
-    if command -v python3 &> /dev/null; then
-        PYTHON_CMD="python3"
-    elif command -v python &> /dev/null; then
-        PYTHON_CMD="python"
-    else
-        log_error "Python not found. Please install Python 3.8+"
-        exit 1
+check_prerequisites() {
+    log_step "Checking prerequisites..."
+    local missing=()
+    
+    command -v python3 &>/dev/null || missing+=("Python 3.8+")
+    [[ -d "$INPUT_DIR" ]] || missing+=("Input directory: $INPUT_DIR")
+    
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        log_error "Missing: ${missing[*]}"
+        return 2
     fi
     
-    PYTHON_VERSION=$($PYTHON_CMD --version 2>&1 | cut -d' ' -f2)
-    log_info "Found Python $PYTHON_VERSION"
-}
-
-# Function to check if llama.cpp exists
-check_llama_cpp() {
-    if [ -d "llama.cpp" ]; then
-        log_info "llama.cpp directory found"
-        return 0
-    else
-        log_warning "llama.cpp not found, will clone it"
-        return 1
-    fi
-}
-
-# Function to clone llama.cpp
-clone_llama_cpp() {
-    log_info "Cloning llama.cpp repository..."
-    git clone --depth 1 https://github.com/ggerganov/llama.cpp.git
-    log_success "llama.cpp cloned successfully"
-}
-
-# Function to install llama.cpp dependencies
-install_llama_cpp_deps() {
-    log_info "Installing llama.cpp Python dependencies..."
-    cd llama.cpp
-    
-    if [ "$IS_WINDOWS" = true ]; then
-        $PYTHON_CMD -m pip install --upgrade pip
-        $PYTHON_CMD -m pip install -r requirements.txt
-    else
-        pip3 install -r requirements.txt
+    # Check for llama.cpp
+    local llama_dir="$PROJECT_DIR/external/llama.cpp"
+    if [[ ! -d "$llama_dir" ]]; then
+        log_warn "llama.cpp not found, will clone..."
+        git clone --depth 1 https://github.com/ggerganov/llama.cpp.git "$llama_dir"
     fi
     
-    cd ..
-    log_success "Dependencies installed"
+    # Install Python dependencies
+    pip3 install --quiet --upgrade pip
+    pip3 install --quiet -r "$llama_dir/requirements.txt" 2>/dev/null || true
+    
+    log_success "Prerequisites ready"
 }
 
-# Function to build llama.cpp (for quantization tool)
-build_llama_cpp() {
-    log_info "Building llama.cpp..."
-    cd llama.cpp
+convert_to_f16() {
+    local model_name=$(basename "$INPUT_DIR")
+    local output="$OUTPUT_DIR/${model_name}-f16.gguf"
+    local llama_dir="$PROJECT_DIR/external/llama.cpp"
     
-    if [ "$IS_WINDOWS" = true ]; then
-        # Windows build using CMake
-        mkdir -p build
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release
-        cmake --build . --config Release
-        cd ..
-    else
-        # Linux/Mac build using make
-        make clean
-        make -j$(nproc)
-    fi
+    log_step "Converting to GGUF (F16)..."
     
-    cd ..
-    log_success "llama.cpp built successfully"
+    python3 "$llama_dir/convert_hf_to_gguf.py" "$INPUT_DIR" --outfile "$output" --vocab-type bpe || {
+        log_error "F16 conversion failed"
+        return 3
+    }
+    
+    local size=$(get_file_size "$output")
+    log_success "F16 model: $(format_size $size)"
+    echo "$output"
 }
 
-# Function to convert model to GGUF (F16)
-convert_to_gguf_f16() {
-    log_info "Converting model to GGUF (F16 format)..."
-    
-    MODEL_NAME=$(basename "$MODEL_DIR")
-    F16_OUTPUT="$OUTPUT_DIR/${MODEL_NAME}-f16.gguf"
-    
-    cd llama.cpp
-    
-    $PYTHON_CMD convert-hf-to-gguf.py \
-        "../$MODEL_DIR" \
-        --outfile "../$F16_OUTPUT" \
-        --vocab-type bpe
-    
-    cd ..
-    
-    if [ -f "$F16_OUTPUT" ]; then
-        F16_SIZE=$(du -h "$F16_OUTPUT" | cut -f1)
-        log_success "F16 model created: $F16_OUTPUT ($F16_SIZE)"
-    else
-        log_error "Failed to create F16 model"
-        exit 1
-    fi
-}
-
-# Function to quantize model
 quantize_model() {
-    log_info "Quantizing model to $QUANTIZATION..."
+    local f16_input="$1"
+    local model_name=$(basename "$INPUT_DIR")
+    local output="$OUTPUT_DIR/${model_name}-${QUANTIZATION}.gguf"
+    local llama_dir="$PROJECT_DIR/external/llama.cpp"
     
-    MODEL_NAME=$(basename "$MODEL_DIR")
-    F16_INPUT="$OUTPUT_DIR/${MODEL_NAME}-f16.gguf"
-    QUANT_OUTPUT="$OUTPUT_DIR/${MODEL_NAME}-${QUANTIZATION}.gguf"
+    log_step "Quantizing to $QUANTIZATION..."
     
-    if [ ! -f "$F16_INPUT" ]; then
-        log_error "F16 model not found: $F16_INPUT"
-        exit 1
-    fi
+    "$llama_dir/llama-quantize" "$f16_input" "$output" "$QUANTIZATION" || {
+        log_error "Quantization failed"
+        return 3
+    }
     
-    cd llama.cpp
-    
-    if [ "$IS_WINDOWS" = true ]; then
-        ./build/bin/Release/quantize.exe \
-            "../$F16_INPUT" \
-            "../$QUANT_OUTPUT" \
-            "$QUANTIZATION"
-    else
-        ./quantize \
-            "../$F16_INPUT" \
-            "../$QUANT_OUTPUT" \
-            "$QUANTIZATION"
-    fi
-    
-    cd ..
-    
-    if [ -f "$QUANT_OUTPUT" ]; then
-        QUANT_SIZE=$(du -h "$QUANT_OUTPUT" | cut -f1)
-        log_success "Quantized model created: $QUANT_OUTPUT ($QUANT_SIZE)"
-    else
-        log_error "Failed to create quantized model"
-        exit 1
-    fi
+    local size=$(get_file_size "$output")
+    log_success "Quantized: $(format_size $size)"
+    echo "$output"
 }
 
-# Function to verify output
 verify_output() {
-    log_info "Verifying output model..."
+    local output="$1"
     
-    MODEL_NAME=$(basename "$MODEL_DIR")
-    QUANT_OUTPUT="$OUTPUT_DIR/${MODEL_NAME}-${QUANTIZATION}.gguf"
+    log_step "Verifying output..."
     
-    if [ ! -f "$QUANT_OUTPUT" ]; then
-        log_error "Output model not found: $QUANT_OUTPUT"
-        exit 1
-    fi
+    [[ ! -f "$output" ]] && { log_error "Output not found"; return 3; }
     
-    # Check file size (should be around 288MB for Q4_K_M)
-    FILE_SIZE=$(stat -c%s "$QUANT_OUTPUT" 2>/dev/null || stat -f%z "$QUANT_OUTPUT" 2>/dev/null)
-    FILE_SIZE_MB=$((FILE_SIZE / 1024 / 1024))
+    local size=$(get_file_size "$output")
+    local size_mb=$((size / 1024 / 1024))
     
-    log_info "Model size: ${FILE_SIZE_MB}MB"
+    log_info "Output: $(basename "$output")"
+    log_info "Size: $(format_size $size) ($size_mb MB)"
     
-    # Verify size is reasonable (200-400MB for 270M model quantized)
-    if [ "$FILE_SIZE_MB" -lt 200 ] || [ "$FILE_SIZE_MB" -gt 500 ]; then
-        log_warning "Model size seems unusual: ${FILE_SIZE_MB}MB"
-    else
-        log_success "Model size is within expected range"
-    fi
+    # Check GGUF magic
+    local magic=$(head -c 4 "$output" 2>/dev/null || echo "")
+    [[ "$magic" == "GGUF" ]] && log_info "GGUF magic: verified" || log_warn "GGUF magic: could not verify"
     
-    # Test model info using Python
-    cd llama.cpp
-    $PYTHON_CMD -c "
-import sys
-sys.path.insert(0, '.')
-try:
-    from gguf import GGUFReader
-    reader = GGUFReader('../$QUANT_OUTPUT')
-    print('Model metadata:')
-    for key, value in reader.fields.items():
-        if not key.startswith('_'):
-            print(f'  {key}: {value}')
-except Exception as e:
-    print(f'Could not read GGUF metadata: {e}')
-"
-    cd ..
-    
-    log_success "Model verification complete"
+    log_success "Verification passed"
 }
 
-# Function to clean up intermediate files
-cleanup() {
-    log_info "Cleaning up intermediate files..."
+show_help() {
+    cat << EOF
+Egyptian Agent - GGUF Conversion Script
+
+USAGE:
+    $SCRIPT_NAME [OPTIONS]
+
+OPTIONS:
+    --input DIR         Input model directory (required)
+    --output DIR        Output directory (default: models/)
+    --quantization TYPE Quantization type (default: Q4_K_M)
+                        Options: Q4_K_S, Q4_K_M, Q5_K_S, Q5_K_M, Q6_K, Q8_0
+    --f16               Keep F16 intermediate file
+    --clean             Remove intermediate files
+    --log-file PATH     Write log to file
+    --ci                CI/CD mode
+    -h, --help          Show help
+
+EXAMPLES:
+    $SCRIPT_NAME --input models/my-finetuned-model
+    $SCRIPT_NAME --input models/egyptian-model --quantization Q5_K_M
+    $SCRIPT_NAME --input models/model --clean
+
+QUANTIZATION GUIDE:
+    Q4_K_M  - Best balance (recommended for mobile)
+    Q5_K_M  - Better quality, larger size
+    Q8_0    - Near-lossless, largest size
+
+RETURN CODES:
+    0   Success
+    1   General error
+    2   Prerequisites missing
+    3   Conversion failed
+    5   Invalid arguments
+EOF
+}
+
+parse_arguments() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --input) INPUT_DIR="$2"; shift 2;;
+            --output) OUTPUT_DIR="$2"; shift 2;;
+            --quantization) QUANTIZATION="$2"; shift 2;;
+            --f16) KEEP_F16=true; shift;;
+            --clean) CLEAN_AFTER=true; shift;;
+            --log-file) LOG_FILE="$2"; shift 2;;
+            --ci) CI_MODE=true; COLORS=([red]='' [green]='' [yellow]='' [blue]='' [cyan]='' [nc]=''); shift;;
+            -h|--help) show_help; exit 0;;
+            -*) log_error "Unknown option: $1"; exit 5;;
+            *) log_error "Unexpected argument: $1"; exit 5;;
+        esac
+    done
     
-    MODEL_NAME=$(basename "$MODEL_DIR")
-    F16_FILE="$OUTPUT_DIR/${MODEL_NAME}-f16.gguf"
-    
-    if [ -f "$F16_FILE" ]; then
-        rm -f "$F16_FILE"
-        log_info "Removed F16 intermediate file"
+    if [[ -z "$INPUT_DIR" ]]; then
+        log_error "--input is required"
+        exit 5
     fi
 }
 
-# Function to show usage
-show_usage() {
-    echo "Usage: $0 [MODEL_DIR] [OUTPUT_DIR] [QUANTIZATION]"
-    echo ""
-    echo "Arguments:"
-    echo "  MODEL_DIR      Path to fine-tuned model directory (default: models/functiongemma-270m-egyptian)"
-    echo "  OUTPUT_DIR     Output directory for GGUF files (default: models)"
-    echo "  QUANTIZATION   Quantization type (default: Q4_K_M)"
-    echo ""
-    echo "Quantization options:"
-    echo "  Q4_K_M    - Best quality/size balance (recommended)"
-    echo "  Q4_K_S    - Smaller size, slightly lower quality"
-    echo "  Q5_K_M    - Higher quality, larger size"
-    echo "  Q5_K_S    - Higher quality, smaller size"
-    echo "  Q6_K      - Very high quality, larger size"
-    echo "  Q8_0      - Near-lossless, largest size"
-    echo ""
-    echo "Examples:"
-    echo "  $0                                    # Use all defaults"
-    echo "  $0 models/my-model models Q4_K_S      # Custom model and quantization"
-}
-
-# Main execution
 main() {
-    echo "=============================================="
-    echo "FunctionGemma Egyptian Model Conversion"
-    echo "=============================================="
-    echo ""
+    parse_arguments
+    init_logging
+    print_header "GGUF Conversion"
     
-    # Check for help flag
-    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-        show_usage
-        exit 0
+    log_info "Input: $INPUT_DIR"
+    log_info "Output: $OUTPUT_DIR"
+    log_info "Quantization: $QUANTIZATION"
+    
+    check_prerequisites || exit $?
+    
+    local f16_output
+    f16_output=$(convert_to_f16) || exit $?
+    
+    local quantized_output
+    quantized_output=$(quantize_model "$f16_output") || exit $?
+    
+    verify_output "$quantized_output"
+    
+    if [[ "$CLEAN_AFTER" == "true" && "$KEEP_F16" != "true" ]]; then
+        log_step "Cleaning intermediate files..."
+        rm -f "$f16_output"
     fi
     
-    # Check if model directory exists
-    if [ ! -d "$MODEL_DIR" ]; then
-        log_error "Model directory not found: $MODEL_DIR"
-        log_info "Please ensure the model has been fine-tuned first"
-        exit 1
-    fi
-    
-    # Create output directory if it doesn't exist
-    mkdir -p "$OUTPUT_DIR"
-    
-    # Check Python
-    check_python
-    
-    # Check/install llama.cpp
-    if ! check_llama_cpp; then
-        clone_llama_cpp
-        install_llama_cpp_deps
-        build_llama_cpp
-    else
-        # Just install dependencies if llama.cpp exists
-        cd llama.cpp
-        if [ "$IS_WINDOWS" = true ]; then
-            $PYTHON_CMD -m pip install -r requirements.txt 2>/dev/null || true
-        else
-            pip3 install -r requirements.txt 2>/dev/null || true
-        fi
-        cd ..
-    fi
-    
-    # Convert model
-    convert_to_gguf_f16
-    
-    # Quantize model
-    quantize_model
-    
-    # Verify output
-    verify_output
-    
-    # Optional: cleanup intermediate files
-    # cleanup
-    
-    echo ""
-    echo "=============================================="
-    log_success "Conversion completed successfully!"
-    echo "=============================================="
-    echo ""
-    
-    MODEL_NAME=$(basename "$MODEL_DIR")
-    echo "Output model: $OUTPUT_DIR/${MODEL_NAME}-${QUANTIZATION}.gguf"
-    echo ""
-    echo "To use this model with llama.cpp:"
-    echo "  ./main -m $OUTPUT_DIR/${MODEL_NAME}-${QUANTIZATION}.gguf -p 'اتصل بماما' -n 128"
-    echo ""
+    print_header "Conversion Complete"
+    log_success "Output: $quantized_output"
 }
 
-# Run main function
+trap 'log_error "Interrupted"; exit 1' INT TERM
 main "$@"

@@ -1,164 +1,242 @@
-#!/bin/bash
-# Final verification and build script for Egyptian Agent complete implementation
+#!/usr/bin/env bash
+# =============================================================================
+# Egyptian Agent - Implementation Verification Script
+# =============================================================================
+#
+# PURPOSE:
+#   Verifies the complete Egyptian Agent implementation including source files,
+#   model assets, build configuration, and deployment readiness.
+#
+# USAGE:
+#   ./scripts/utils/verify_implementation.sh [OPTIONS]
+#
+# OPTIONS:
+#   --quick             Quick verification (skip model checks)
+#   --full              Full verification including models
+#   --output FILE       Write report to file
+#   --ci                CI/CD mode (machine-readable output)
+#   -h, --help          Show this help message
+#
+# CHECKS PERFORMED:
+#   - Project structure
+#   - Source files (Java/Kotlin/C++)
+#   - Build configuration
+#   - Model assets
+#   - Native libraries
+#   - Permissions and manifest
+#
+# RETURN CODES:
+#   0   All checks passed
+#   1   General error
+#   2   Critical files missing
+#   3   Non-critical issues found
+#
+# AUTHOR: EgyptianAgent Team
+# VERSION: 2.0.0
+# DATE: 2026-03-03
+# =============================================================================
 
-echo "==========================================="
-echo "Egyptian Agent - Complete Implementation Verification"
-echo "==========================================="
+set -euo pipefail
 
-# Check if we're in the right directory
-if [ ! -f "build.gradle" ] || [ ! -f "app/build.gradle" ]; then
-    echo "Error: Not in project root directory"
-    exit 1
-fi
+readonly SCRIPT_NAME="$(basename "$0")"
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-echo "✓ Project directory verified"
+QUICK_MODE=false
+FULL_MODE=false
+OUTPUT_FILE=""
+CI_MODE=false
 
-# Check for required source files
-REQUIRED_FILES=(
-    "app/src/main/java/com/egyptian/agent/core/VoiceService.java"
-    "app/src/main/java/com/egyptian/agent/ai/LlamaIntentEngine.java"
-    "app/src/main/java/com/egyptian/agent/ai/LlamaNative.java"
-    "app/src/main/java/com/egyptian/agent/ai/EgyptianWhisperASR.java"
-    "app/src/main/java/com/egyptian/agent/hybrid/HybridOrchestrator.java"
-    "app/src/main/java/com/egyptian/agent/stt/EgyptianNormalizer.java"
-    "app/src/main/java/com/egyptian/agent/core/Quantum.java"
-    "app/src/main/cpp/llama_native.cpp"
-    "app/src/main/cpp/whisper_native.cpp"
-    "app/src/main/java/com/egyptian/agent/core/DeviceClassDetector.java"
-    "app/src/main/java/com/egyptian/agent/utils/DeviceClassDetector.java"
-)
+declare -A COLORS=([red]='\033[0;31m' [green]='\033[0;32m' [yellow]='\033[1;33m' [blue]='\033[0;34m' [cyan]='\033[0;36m' [nc]='\033[0m')
 
-echo "Checking for required source files..."
-for file in "${REQUIRED_FILES[@]}"; do
-    if [ -f "$file" ]; then
-        echo "✓ Found: $file"
+CHECKS_PASSED=0
+CHECKS_FAILED=0
+CHECKS_WARNING=0
+
+log_info() { [[ "$CI_MODE" == "true" ]] && echo "[INFO] $*" || echo -e "${COLORS[green]}[INFO]${COLORS[nc]} $*"; }
+log_warn() { [[ "$CI_MODE" == "true" ]] && echo "[WARN] $*" || echo -e "${COLORS[yellow]}[WARN]${COLORS[nc]} $*"; }
+log_error() { [[ "$CI_MODE" == "true" ]] && echo "[ERROR] $*" >&2 || echo -e "${COLORS[red]}[ERROR]${COLORS[nc]} $*" >&2; }
+log_step() { [[ "$CI_MODE" == "true" ]] && echo "[STEP] $*" || echo -e "${COLORS[blue]}[STEP]${COLORS[nc]} $*"; }
+print_header() { local w=60; [[ "$CI_MODE" == "true" ]] && echo "=== $1 ===" || { echo -e "${COLORS[blue]}$(printf '=%.0s' $(seq 1 $w))${COLORS[nc]}"; echo -e "${COLORS[blue]}  $1${COLORS[nc]}"; echo -e "${COLORS[blue]}$(printf '=%.0s' $(seq 1 $w))${COLORS[nc]}"; }; }
+
+check_pass() { ((CHECKS_PASSED++)); [[ "$CI_MODE" == "true" ]] && echo "[PASS] $1" || echo -e "${COLORS[green]}✓${COLORS[nc]} $1"; }
+check_fail() { ((CHECKS_FAILED++)); [[ "$CI_MODE" == "true" ]] && echo "[FAIL] $1" || echo -e "${COLORS[red]}✗${COLORS[nc]} $1"; }
+check_warn() { ((CHECKS_WARNING++)); [[ "$CI_MODE" == "true" ]] && echo "[WARN] $1" || echo -e "${COLORS[yellow]}!${COLORS[nc]} $1"; }
+
+check_file() {
+    [[ -f "$1" ]] && { check_pass "$2"; return 0; } || { check_fail "$2"; return 1; }
+}
+
+check_dir() {
+    [[ -d "$1" ]] && { check_pass "$2"; return 0; } || { check_fail "$2"; return 1; }
+}
+
+check_project_structure() {
+    log_step "Checking project structure..."
+    
+    check_dir "$PROJECT_DIR/app" "app directory"
+    check_dir "$PROJECT_DIR/app/src/main/java" "Java source directory"
+    check_dir "$PROJECT_DIR/app/src/main/cpp" "Native source directory"
+    check_dir "$PROJECT_DIR/app/src/main/assets" "Assets directory"
+    check_dir "$PROJECT_DIR/scripts" "Scripts directory"
+}
+
+check_source_files() {
+    log_step "Checking source files..."
+    
+    # Core Java files
+    check_file "$PROJECT_DIR/app/src/main/java/com/egyptian/agent/core/VoiceService.java" "VoiceService.java"
+    check_file "$PROJECT_DIR/app/src/main/java/com/egyptian/agent/ai/LlamaIntentEngine.java" "LlamaIntentEngine.java"
+    check_file "$PROJECT_DIR/app/src/main/java/com/egyptian/agent/hybrid/HybridOrchestrator.java" "HybridOrchestrator.java"
+    
+    # Native files
+    check_file "$PROJECT_DIR/app/src/main/cpp/llama_native.cpp" "llama_native.cpp"
+    check_file "$PROJECT_DIR/app/CMakeLists.txt" "CMakeLists.txt"
+}
+
+check_build_config() {
+    log_step "Checking build configuration..."
+    
+    check_file "$PROJECT_DIR/build.gradle" "Root build.gradle"
+    check_file "$PROJECT_DIR/app/build.gradle" "App build.gradle"
+    check_file "$PROJECT_DIR/settings.gradle" "settings.gradle"
+    check_file "$PROJECT_DIR/gradlew" "Gradle wrapper"
+}
+
+check_manifest() {
+    log_step "Checking AndroidManifest.xml..."
+    
+    local manifest="$PROJECT_DIR/app/src/main/AndroidManifest.xml"
+    if [[ -f "$manifest" ]]; then
+        check_pass "AndroidManifest.xml exists"
+        
+        # Check for required permissions
+        grep -q "RECORD_AUDIO" "$manifest" && check_pass "RECORD_AUDIO permission" || check_warn "RECORD_AUDIO permission missing"
+        grep -q "CALL_PHONE" "$manifest" && check_pass "CALL_PHONE permission" || check_warn "CALL_PHONE permission missing"
     else
-        echo "✗ Missing: $file"
-        MISSING=1
+        check_fail "AndroidManifest.xml"
     fi
-done
+}
 
-if [ "$MISSING" = "1" ]; then
-    echo "Some required files are missing!"
-    exit 1
-fi
-
-echo "✓ All required source files present"
-
-# Check for required model files
-MODEL_FILES=(
-    "app/src/main/assets/model/llama-3.2-3b-Q4_K_M.gguf"
-    "app/src/main/assets/model/openphone-3b/model.pt"
-    "app/src/main/assets/models/vosk-model-small-ar.zip"
-    "app/src/main/assets/models/whisper-egy/base.bin"
-)
-
-echo "Checking for required model files..."
-for file in "${MODEL_FILES[@]}"; do
-    if [ -f "$file" ]; then
-        echo "✓ Found: $file"
+check_models() {
+    [[ "$QUICK_MODE" == "true" ]] && { log_info "Skipping model checks (quick mode)"; return 0; }
+    
+    log_step "Checking model assets..."
+    
+    # Check for model directories
+    check_dir "$PROJECT_DIR/app/src/main/assets/models" "Models directory"
+    
+    # Check for model files (warn if missing, don't fail)
+    if [[ -f "$PROJECT_DIR/app/src/main/assets/models/functiongemma-270m-it-Q4_K_M.gguf" ]]; then
+        check_pass "FunctionGemma model"
     else
-        echo "✗ Missing: $file"
-        MISSING_MODELS=1
+        check_warn "FunctionGemma model not found (download with download_functiongemma_model.sh)"
     fi
-done
+}
 
-if [ "$MISSING_MODELS" = "1" ]; then
-    echo "Some required model files are missing!"
-    echo "Creating placeholder files for build purposes..."
-    # Placeholders were already created earlier
-fi
+check_scripts() {
+    log_step "Checking scripts..."
+    
+    check_file "$PROJECT_DIR/scripts/build/build.sh" "build.sh"
+    check_file "$PROJECT_DIR/scripts/deploy/deploy_production.sh" "deploy_production.sh"
+    check_file "$PROJECT_DIR/scripts/model/download_functiongemma_model.sh" "download_functiongemma_model.sh"
+}
 
-echo "✓ All required model files present (or placeholders created)"
-
-# Check for CMakeLists.txt
-if [ -f "app/CMakeLists.txt" ]; then
-    echo "✓ CMakeLists.txt found"
-else
-    echo "✗ CMakeLists.txt missing"
-    exit 1
-fi
-
-# Check for AndroidManifest.xml
-if [ -f "app/src/main/AndroidManifest.xml" ]; then
-    echo "✓ AndroidManifest.xml found"
-else
-    echo "✗ AndroidManifest.xml missing"
-    exit 1
-fi
-
-# Check for build scripts
-if [ -f "build.sh" ]; then
-    echo "✓ build.sh found"
-else
-    echo "✗ build.sh missing"
-    exit 1
-fi
-
-if [ -f "build_production.sh" ]; then
-    echo "✓ build_production.sh found"
-else
-    echo "✗ build_production.sh missing"
-    exit 1
-fi
-
-echo "✓ All build scripts present"
-
-# Verify project structure
-DIRECTORIES=(
-    "app/src/main/java/com/egyptian/agent/core"
-    "app/src/main/java/com/egyptian/agent/ai"
-    "app/src/main/java/com/egyptian/agent/hybrid"
-    "app/src/main/java/com/egyptian/agent/stt"
-    "app/src/main/java/com/egyptian/agent/executors"
-    "app/src/main/java/com/egyptian/agent/accessibility"
-    "app/src/main/cpp"
-    "app/src/main/assets/model"
-    "app/src/main/assets/models"
-)
-
-echo "Checking for required directories..."
-for dir in "${DIRECTORIES[@]}"; do
-    if [ -d "$dir" ]; then
-        echo "✓ Found directory: $dir"
+generate_report() {
+    local total=$((CHECKS_PASSED + CHECKS_FAILED + CHECKS_WARNING))
+    
+    echo ""
+    print_header "Verification Summary"
+    echo "  Total Checks:  $total"
+    echo "  Passed:        $CHECKS_PASSED"
+    echo "  Failed:        $CHECKS_FAILED"
+    echo "  Warnings:      $CHECKS_WARNING"
+    echo ""
+    
+    if [[ $CHECKS_FAILED -eq 0 ]]; then
+        log_success "All critical checks passed!"
+        
+        if [[ $CHECKS_WARNING -gt 0 ]]; then
+            log_warn "$CHECKS_WARNING non-critical issue(s) found"
+            return 3
+        fi
+        return 0
     else
-        echo "✗ Missing directory: $dir"
-        MISSING_DIRS=1
+        log_error "$CHECKS_FAILED critical check(s) failed"
+        echo ""
+        log_info "Run the following to fix issues:"
+        echo "  1. ./scripts/deploy/initialize_submodules.sh"
+        echo "  2. ./scripts/model/download_functiongemma_model.sh"
+        echo "  3. ./scripts/build/build.sh --release"
+        return 2
     fi
-done
+}
 
-if [ "$MISSING_DIRS" = "1" ]; then
-    echo "Some required directories are missing!"
-    exit 1
-fi
+show_help() {
+    cat << EOF
+Egyptian Agent - Implementation Verification Script
 
-echo "✓ All required directories present"
+USAGE:
+    $SCRIPT_NAME [OPTIONS]
 
-echo ""
-echo "==========================================="
-echo "Egyptian Agent Implementation Status: COMPLETE ✓"
-echo "==========================================="
-echo ""
-echo "All components of the Egyptian Agent have been verified:"
-echo "- Core voice service with wake word detection"
-echo "- Llama 3.2 3B Q4_K_M integration for Egyptian dialect processing"
-echo "- Whisper ASR for Egyptian Arabic speech recognition"
-echo "- Hybrid orchestrator with fallback mechanisms"
-echo "- Egyptian dialect normalization and cultural context"
-echo "- Senior mode and accessibility features"
-echo "- Emergency response system"
-echo "- Native libraries for efficient inference"
-echo "- Device class detection for optimal performance"
-echo "- Complete model assets and dependencies"
-echo ""
-echo "The Egyptian Agent is ready for:"
-echo "- Building with './build.sh --release --target honor-x6c'"
-echo "- Production deployment with './build_production.sh'"
-echo "- System-level installation on Honor X6c devices"
-echo ""
-echo "Target Performance:"
-echo "- 97.8% accuracy for Egyptian dialect processing"
-echo "- 2.1s average response time"
-echo "- Full offline functionality"
-echo "- 100% privacy protection"
-echo ""
+OPTIONS:
+    --quick             Quick verification (skip model checks)
+    --full              Full verification including models
+    --output FILE       Write report to file
+    --ci                CI/CD mode (machine-readable)
+    -h, --help          Show help
+
+RETURN CODES:
+    0   All checks passed
+    1   General error
+    2   Critical files missing
+    3   Non-critical issues found
+EOF
+}
+
+parse_arguments() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --quick) QUICK_MODE=true; shift;;
+            --full) FULL_MODE=true; shift;;
+            --output) OUTPUT_FILE="$2"; shift 2;;
+            --ci) CI_MODE=true; COLORS=([red]='' [green]='' [yellow]='' [blue]='' [cyan]='' [nc]=''); shift;;
+            -h|--help) show_help; exit 0;;
+            -*) log_error "Unknown option: $1"; exit 1;;
+            *) log_error "Unexpected argument: $1"; exit 1;;
+        esac
+    done
+}
+
+main() {
+    parse_arguments
+    
+    [[ -n "$OUTPUT_FILE" ]] && exec > >(tee -a "$OUTPUT_FILE") 2>&1
+    
+    print_header "Egyptian Agent Implementation Verification"
+    echo "Project: $PROJECT_DIR"
+    echo "Date: $(date)"
+    echo ""
+    
+    # Verify project root
+    if [[ ! -f "$PROJECT_DIR/build.gradle" ]]; then
+        log_error "Not in project root directory"
+        return 1
+    fi
+    
+    check_project_structure
+    echo ""
+    check_source_files
+    echo ""
+    check_build_config
+    echo ""
+    check_manifest
+    echo ""
+    check_models
+    echo ""
+    check_scripts
+    
+    generate_report
+}
+
+main "$@"

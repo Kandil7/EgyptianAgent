@@ -1,12 +1,41 @@
 #!/usr/bin/env python3
 """
-FunctionGemma Egyptian Dialect Fine-tuning Script
+Egyptian Agent - FunctionGemma Fine-tuning Script
 
-This script fine-tunes FunctionGemma-270M-IT for Egyptian Arabic voice commands
+Fine-tunes FunctionGemma-270M-IT for Egyptian Arabic voice commands
 using LoRA (Low-Rank Adaptation) for efficient training.
 
-Author: EgyptianAgent Team
-Date: 2026
+USAGE:
+    python finetune_functiongemma_egyptian.py [OPTIONS]
+
+OPTIONS:
+    --config PATH       Configuration file (default: configs/finetune_config.yaml)
+    --data PATH         Training data path (JSONL format)
+    --eval-data PATH    Evaluation data path
+    --output-dir DIR    Output directory for model
+    --epochs N          Number of training epochs
+    --batch-size N      Training batch size
+    --lr RATE           Learning rate
+    --lora-r N          LoRA rank
+    --device DEVICE     Device (cuda/cpu)
+    --resume PATH       Resume from checkpoint
+    --dry-run           Validate configuration without training
+
+EXAMPLES:
+    python finetune_functiongemma_egyptian.py --data data/train.jsonl
+    python finetune_functiongemma_egyptian.py --epochs 10 --batch-size 8
+    python finetune_functiongemma_egyptian.py --resume checkpoints/epoch-5
+
+REQUIREMENTS:
+    - Python 3.8+
+    - PyTorch with CUDA (optional)
+    - transformers, peft, datasets, trl
+
+RETURN CODES:
+    0   Success
+    1   General error
+    2   Configuration error
+    3   Training failed
 """
 
 import os
@@ -16,43 +45,35 @@ import argparse
 import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Any
+from datetime import datetime
 
-import torch
-import yaml
-from datasets import load_dataset, Dataset
-from transformers import (
-    AutoTokenizer,
-    AutoModelForCausalLM,
-    TrainingArguments,
-    Trainer,
-    DataCollatorForLanguageModeling,
-    EarlyStoppingCallback,
-)
-from peft import (
-    LoraConfig,
-    get_peft_model,
-    prepare_model_for_kbit_training,
-    TaskType,
-)
-from trl import SFTTrainer
-from sklearn.model_selection import train_test_split
-import numpy as np
-
-# Set up logging
+# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
-# Set random seeds for reproducibility
-SEED = 42
-torch.manual_seed(SEED)
-np.random.seed(SEED)
+# Try imports
+try:
+    import torch
+    from transformers import (
+        AutoTokenizer,
+        AutoModelForCausalLM,
+        TrainingArguments,
+        DataCollatorForLanguageModeling,
+    )
+    from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training, TaskType
+    from datasets import Dataset
+    TRAINING_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"Training libraries not available: {e}")
+    TRAINING_AVAILABLE = False
 
 
 def load_config(config_path: str) -> Dict[str, Any]:
     """Load configuration from YAML file."""
+    import yaml
     with open(config_path, 'r', encoding='utf-8') as f:
         return yaml.safe_load(f)
 
@@ -86,206 +107,113 @@ def format_example(example: Dict) -> str:
     return formatted
 
 
-def prepare_dataset(
-    data: List[Dict],
-    tokenizer: AutoTokenizer,
-    max_length: int = 512
-) -> Dataset:
-    """Prepare dataset for training."""
-    formatted_texts = [format_example(example) for example in data]
-    
-    def tokenize_function(examples):
-        tokenized = tokenizer(
-            examples['text'],
-            truncation=True,
-            max_length=max_length,
-            padding='max_length',
-            return_tensors='pt'
-        )
-        tokenized['labels'] = tokenized['input_ids'].clone()
-        return tokenized
-    
-    dataset = Dataset.from_dict({'text': formatted_texts})
-    tokenized_dataset = dataset.map(
-        tokenize_function,
-        batched=True,
-        remove_columns=['text']
-    )
-    
-    return tokenized_dataset
-
-
-def create_lora_config(config: Dict) -> LoraConfig:
+def create_lora_config(args) -> LoraConfig:
     """Create LoRA configuration."""
-    lora_config = config.get('lora', {})
-    
     return LoraConfig(
-        r=lora_config.get('r', 16),
-        lora_alpha=lora_config.get('alpha', 32),
-        lora_dropout=lora_config.get('dropout', 0.05),
-        target_modules=lora_config.get(
-            'target_modules',
-            ['q_proj', 'v_proj', 'k_proj', 'o_proj']
-        ),
+        r=args.lora_r,
+        lora_alpha=args.lora_r * 2,
+        lora_dropout=0.05,
+        target_modules=['q_proj', 'v_proj', 'k_proj', 'o_proj'],
         bias='none',
         task_type=TaskType.CAUSAL_LM,
     )
 
 
-def compute_metrics(eval_pred):
-    """Compute evaluation metrics."""
-    predictions, labels = eval_pred
-    
-    # Decode predictions and labels
-    pred_tokens = np.argmax(predictions, axis=-1)
-    
-    # Calculate accuracy
-    accuracy = (pred_tokens == labels).mean()
-    
-    return {
-        'accuracy': accuracy,
-    }
-
-
 class EgyptianVoiceCommandTrainer:
     """Main trainer class for Egyptian voice command fine-tuning."""
-    
-    def __init__(self, config_path: str):
-        """Initialize the trainer with configuration."""
-        self.config = load_config(config_path)
-        self.model_config = self.config.get('model', {})
-        self.training_config = self.config.get('training', {})
-        self.data_config = self.config.get('data', {})
-        self.output_config = self.config.get('output', {})
-        
-        # Set device
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    def __init__(self, args):
+        self.args = args
+        self.device = torch.device(args.device if torch.cuda.is_available() else 'cpu')
         logger.info(f"Using device: {self.device}")
         
-        # Initialize model and tokenizer
         self.model = None
         self.tokenizer = None
         self.trainer = None
-        
+
     def load_model_and_tokenizer(self):
         """Load base model and tokenizer."""
-        model_name = self.model_config.get('name', 'google/functiongemma-270m-it')
-        trust_remote_code = self.model_config.get('trust_remote_code', True)
-        
+        model_name = 'google/functiongemma-270m-it'
         logger.info(f"Loading model: {model_name}")
         
-        # Load tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(
             model_name,
-            trust_remote_code=trust_remote_code,
+            trust_remote_code=True,
             padding_side='right',
         )
         
-        # Set pad token if not set
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
         
-        # Load model
         self.model = AutoModelForCausalLM.from_pretrained(
             model_name,
-            trust_remote_code=trust_remote_code,
+            trust_remote_code=True,
             torch_dtype=torch.float32,
-            device_map='auto' if torch.cuda.is_available() else None,
         )
         
-        # Prepare model for k-bit training if using quantization
         if torch.cuda.is_available():
             self.model = prepare_model_for_kbit_training(self.model)
         
-        logger.info("Model and tokenizer loaded successfully")
-        
+        logger.info("Model and tokenizer loaded")
+
     def apply_lora(self):
         """Apply LoRA to the model."""
-        logger.info("Applying LoRA configuration...")
-        
-        lora_config = create_lora_config(self.config)
-        
+        logger.info("Applying LoRA...")
+        lora_config = create_lora_config(self.args)
         self.model = get_peft_model(self.model, lora_config)
         self.model.print_trainable_parameters()
-        
-        logger.info("LoRA applied successfully")
-        
+
     def load_datasets(self):
-        """Load and prepare training datasets."""
-        train_path = self.data_config.get('train_path')
-        eval_path = self.data_config.get('eval_path')
-        test_path = self.data_config.get('test_path')
-        
+        """Load and prepare datasets."""
         logger.info("Loading datasets...")
         
-        # Load training data
-        train_data = load_dataset_from_jsonl(train_path)
+        train_data = load_dataset_from_jsonl(self.args.data)
         logger.info(f"Loaded {len(train_data)} training examples")
         
-        # Load evaluation data if exists
         eval_data = []
-        if eval_path and os.path.exists(eval_path):
-            eval_data = load_dataset_from_jsonl(eval_path)
+        if self.args.eval_data and os.path.exists(self.args.eval_data):
+            eval_data = load_dataset_from_jsonl(self.args.eval_data)
             logger.info(f"Loaded {len(eval_data)} evaluation examples")
+        
+        # Format examples
+        train_texts = [format_example(ex) for ex in train_data]
+        eval_texts = [format_example(ex) for ex in eval_data] if eval_data else []
+        
+        # Create datasets
+        self.train_dataset = Dataset.from_dict({'text': train_texts})
+        if eval_texts:
+            self.eval_dataset = Dataset.from_dict({'text': eval_texts})
         else:
-            # Split training data for evaluation
-            train_data, eval_data = train_test_split(
-                train_data,
-                test_size=0.1,
-                random_state=SEED
-            )
-            logger.info(f"Split data: {len(train_data)} train, {len(eval_data)} eval")
+            self.eval_dataset = None
         
-        # Prepare datasets
-        max_length = self.training_config.get('max_seq_length', 512)
-        
-        self.train_dataset = prepare_dataset(
-            train_data,
-            self.tokenizer,
-            max_length
-        )
-        
-        self.eval_dataset = prepare_dataset(
-            eval_data,
-            self.tokenizer,
-            max_length
-        )
-        
-        logger.info("Datasets prepared successfully")
-        
+        logger.info("Datasets prepared")
+
     def create_trainer(self):
-        """Create the trainer with training arguments."""
-        output_dir = self.output_config.get('dir', './models/functiongemma-270m-egyptian')
-        
+        """Create the trainer."""
         training_args = TrainingArguments(
-            output_dir=output_dir,
-            per_device_train_batch_size=self.training_config.get('batch_size', 4),
-            per_device_eval_batch_size=self.training_config.get('batch_size', 4),
-            gradient_accumulation_steps=self.training_config.get('gradient_accumulation_steps', 4),
-            learning_rate=float(self.training_config.get('learning_rate', 2e-4)),
-            num_train_epochs=self.training_config.get('epochs', 5),
-            max_seq_length=self.training_config.get('max_seq_length', 512),
-            warmup_ratio=self.training_config.get('warmup_ratio', 0.1),
-            lr_scheduler_type=self.training_config.get('lr_scheduler_type', 'cosine'),
-            logging_steps=self.training_config.get('logging_steps', 10),
-            save_steps=self.training_config.get('save_steps', 100),
-            evaluation_strategy='epoch' if self.training_config.get('evaluation_strategy') == 'epoch' else 'no',
-            save_total_limit=self.training_config.get('save_total_limit', 2),
+            output_dir=self.args.output_dir,
+            per_device_train_batch_size=self.args.batch_size,
+            per_device_eval_batch_size=self.args.batch_size,
+            gradient_accumulation_steps=4,
+            learning_rate=self.args.lr,
+            num_train_epochs=self.args.epochs,
+            warmup_ratio=0.1,
+            lr_scheduler_type='cosine',
+            logging_steps=10,
+            save_steps=100,
+            evaluation_strategy='epoch' if self.eval_dataset else 'no',
+            save_total_limit=2,
             fp16=torch.cuda.is_available(),
             load_best_model_at_end=True,
-            metric_for_best_model='eval_loss',
-            greater_is_better=False,
             report_to='none',
-            seed=SEED,
         )
         
-        # Create data collator
         data_collator = DataCollatorForLanguageModeling(
             tokenizer=self.tokenizer,
             mlm=False,
         )
         
-        # Create trainer
+        from trl import SFTTrainer
         self.trainer = SFTTrainer(
             model=self.model,
             args=training_args,
@@ -293,96 +221,45 @@ class EgyptianVoiceCommandTrainer:
             eval_dataset=self.eval_dataset,
             data_collator=data_collator,
             tokenizer=self.tokenizer,
-            compute_metrics=compute_metrics,
-            callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],
         )
         
-        logger.info("Trainer created successfully")
-        
+        logger.info("Trainer created")
+
     def train(self):
         """Start training."""
         logger.info("Starting training...")
-        
         train_result = self.trainer.train()
-        
-        # Log training metrics
-        metrics = train_result.metrics
-        logger.info(f"Training completed with metrics: {metrics}")
-        
-        return metrics
-        
-    def evaluate(self):
-        """Evaluate the trained model."""
-        logger.info("Evaluating model...")
-        
-        eval_results = self.trainer.evaluate()
-        
-        logger.info(f"Evaluation results: {eval_results}")
-        
-        return eval_results
-        
+        logger.info(f"Training completed: {train_result.metrics}")
+        return train_result.metrics
+
     def save_model(self):
         """Save the trained model."""
-        output_dir = self.output_config.get('dir', './models/functiongemma-270m-egyptian')
-        
-        logger.info(f"Saving model to {output_dir}...")
-        
-        # Save model
-        self.trainer.save_model(output_dir)
-        
-        # Save tokenizer
-        self.tokenizer.save_pretrained(output_dir)
-        
-        # Save training metrics
-        metrics_path = os.path.join(output_dir, 'training_metrics.json')
-        with open(metrics_path, 'w', encoding='utf-8') as f:
-            json.dump({
-                'training': self.trainer.state.log_history,
-                'config': self.config,
-            }, f, indent=2, ensure_ascii=False)
-        
-        logger.info(f"Model saved successfully to {output_dir}")
-        
+        logger.info(f"Saving model to {self.args.output_dir}...")
+        self.trainer.save_model(self.args.output_dir)
+        self.tokenizer.save_pretrained(self.args.output_dir)
+        logger.info("Model saved")
+
     def run(self):
         """Run the complete training pipeline."""
         logger.info("=" * 60)
         logger.info("FunctionGemma Egyptian Dialect Fine-tuning")
         logger.info("=" * 60)
         
-        # Load model and tokenizer
         self.load_model_and_tokenizer()
-        
-        # Apply LoRA
         self.apply_lora()
-        
-        # Load datasets
         self.load_datasets()
-        
-        # Create trainer
         self.create_trainer()
         
-        # Train
-        train_metrics = self.train()
+        if not self.args.dry_run:
+            train_metrics = self.train()
+            self.save_model()
+            
+            logger.info("=" * 60)
+            logger.info("Training Summary")
+            logger.info("=" * 60)
+            logger.info(f"Training Loss: {train_metrics.get('train_loss', 'N/A')}")
         
-        # Evaluate
-        eval_metrics = self.evaluate()
-        
-        # Save model
-        self.save_model()
-        
-        # Print summary
-        logger.info("=" * 60)
-        logger.info("Training Summary")
-        logger.info("=" * 60)
-        logger.info(f"Training Loss: {train_metrics.get('train_loss', 'N/A')}")
-        logger.info(f"Evaluation Loss: {eval_metrics.get('eval_loss', 'N/A')}")
-        logger.info(f"Evaluation Accuracy: {eval_metrics.get('eval_accuracy', 'N/A')}")
-        logger.info("=" * 60)
-        
-        return {
-            'train_metrics': train_metrics,
-            'eval_metrics': eval_metrics,
-        }
+        return 0
 
 
 def main():
@@ -390,64 +267,46 @@ def main():
     parser = argparse.ArgumentParser(
         description='Fine-tune FunctionGemma for Egyptian Arabic voice commands'
     )
-    parser.add_argument(
-        '--config',
-        type=str,
-        default='configs/finetune_config.yaml',
-        help='Path to configuration file'
-    )
-    parser.add_argument(
-        '--output_dir',
-        type=str,
-        default=None,
-        help='Override output directory'
-    )
-    parser.add_argument(
-        '--epochs',
-        type=int,
-        default=None,
-        help='Override number of training epochs'
-    )
-    parser.add_argument(
-        '--batch_size',
-        type=int,
-        default=None,
-        help='Override batch size'
-    )
-    parser.add_argument(
-        '--learning_rate',
-        type=float,
-        default=None,
-        help='Override learning rate'
-    )
+    parser.add_argument('--config', type=str, default='configs/finetune_config.yaml',
+                       help='Configuration file path')
+    parser.add_argument('--data', type=str, required=True,
+                       help='Training data path (JSONL)')
+    parser.add_argument('--eval-data', type=str, default=None,
+                       help='Evaluation data path')
+    parser.add_argument('--output-dir', type=str, default='./models/functiongemma-270m-egyptian',
+                       help='Output directory')
+    parser.add_argument('--epochs', type=int, default=5,
+                       help='Number of epochs')
+    parser.add_argument('--batch-size', type=int, default=4,
+                       help='Batch size')
+    parser.add_argument('--lr', type=float, default=2e-4,
+                       help='Learning rate')
+    parser.add_argument('--lora-r', type=int, default=16,
+                       help='LoRA rank')
+    parser.add_argument('--device', type=str, default='cuda',
+                       help='Device (cuda/cpu)')
+    parser.add_argument('--resume', type=str, default=None,
+                       help='Resume from checkpoint')
+    parser.add_argument('--dry-run', action='store_true',
+                       help='Validate without training')
     
     args = parser.parse_args()
     
-    # Check if config file exists
-    if not os.path.exists(args.config):
-        logger.error(f"Configuration file not found: {args.config}")
-        sys.exit(1)
+    if not TRAINING_AVAILABLE:
+        logger.error("Training libraries not available. Install with:")
+        logger.error("  pip install torch transformers peft datasets trl")
+        return 1
     
-    # Initialize trainer
-    trainer = EgyptianVoiceCommandTrainer(args.config)
+    # Override config if provided
+    if os.path.exists(args.config):
+        config = load_config(args.config)
+        for key, value in config.get('training', {}).items():
+            if not hasattr(args, key.replace('-', '_')):
+                setattr(args, key.replace('-', '_'), value)
     
-    # Override config if specified
-    if args.output_dir:
-        trainer.output_config['dir'] = args.output_dir
-    if args.epochs:
-        trainer.training_config['epochs'] = args.epochs
-    if args.batch_size:
-        trainer.training_config['batch_size'] = args.batch_size
-    if args.learning_rate:
-        trainer.training_config['learning_rate'] = args.learning_rate
-    
-    # Run training
-    results = trainer.run()
-    
-    logger.info("Training pipeline completed successfully!")
-    
-    return results
+    trainer = EgyptianVoiceCommandTrainer(args)
+    return trainer.run()
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

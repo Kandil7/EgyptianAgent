@@ -1,109 +1,207 @@
-#!/bin/bash
-# Egyptian Agent - Model Download Script
-# Downloads required AI models for offline operation
+#!/usr/bin/env bash
+# =============================================================================
+# Egyptian Agent - Model Fetch Script
+# =============================================================================
+#
+# PURPOSE:
+#   Fetches all required AI models for the Egyptian Agent including
+#   FunctionGemma, Whisper, and optional Llama models.
+#
+# USAGE:
+#   ./scripts/utils/fetch_models.sh [OPTIONS]
+#
+# OPTIONS:
+#   --all               Fetch all models (default)
+#   --functiongemma     Fetch FunctionGemma model only
+#   --whisper           Fetch Whisper model only
+#   --llama             Fetch Llama model only
+#   --vosk              Fetch Vosk Arabic model only
+#   --output DIR        Output directory (default: app/src/main/assets/models/)
+#   --skip-large        Skip large models (>500MB)
+#   --log-file PATH     Write fetch log to specified file
+#   --ci                CI/CD mode
+#   -h, --help          Show this help message
+#
+# MODELS:
+#   FunctionGemma  - 270M parameter function calling model (~288MB)
+#   Whisper base   - Speech recognition model (~142MB)
+#   Llama 3.2 3B   - Large language model (~2GB quantized)
+#   Vosk Arabic    - Offline STT model (~50MB)
+#
+# RETURN CODES:
+#   0   Success
+#   1   General error
+#   2   Download failed
+#
+# AUTHOR: EgyptianAgent Team
+# VERSION: 2.0.0
+# DATE: 2026-03-03
+# =============================================================================
 
-set -e
+set -euo pipefail
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+readonly SCRIPT_NAME="$(basename "$0")"
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+readonly LOG_DIR="$PROJECT_DIR/build/logs"
 
-log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
-log_step() { echo -e "${BLUE}[STEP]${NC} $1"; }
+FETCH_ALL=true
+FETCH_FUNCTIONGEMMA=false
+FETCH_WHISPER=false
+FETCH_LLAMA=false
+FETCH_VOSK=false
+OUTPUT_DIR="$PROJECT_DIR/app/src/main/assets/models"
+SKIP_LARGE=false
+LOG_FILE=""
+CI_MODE=false
 
-# Configuration
-MODELS_DIR="${1:-app/src/main/assets/models}"
-DOWNLOAD_DIR="/tmp/egyptian_agent_models"
+declare -A COLORS=([red]='\033[0;31m' [green]='\033[0;32m' [yellow]='\033[1;33m' [blue]='\033[0;34m' [cyan]='\033[0;36m' [nc]='\033[0m')
 
-# Model configurations
-declare -A MODELS=(
-    ["vosk-model-small-ar"]="https://alphacephei.com/vosk/models/vosk-model-small-ar-0.22.tar.gz"
-    ["llama-3.2-1b-instruct-q4_k_m"]="https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf"
-    ["whisper-small-ar"]="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin"
-)
+init_logging() { mkdir -p "$LOG_DIR" "$OUTPUT_DIR"; [[ -n "$LOG_FILE" ]] && exec > >(tee -a "$LOG_FILE") 2>&1; }
+log_info() { [[ "$CI_MODE" == "true" ]] && echo "[INFO] $*" || echo -e "${COLORS[green]}[INFO]${COLORS[nc]} $*"; }
+log_warn() { [[ "$CI_MODE" == "true" ]] && echo "[WARN] $*" || echo -e "${COLORS[yellow]}[WARN]${COLORS[nc]} $*"; }
+log_error() { [[ "$CI_MODE" == "true" ]] && echo "[ERROR] $*" >&2 || echo -e "${COLORS[red]}[ERROR]${COLORS[nc]} $*" >&2; }
+log_step() { [[ "$CI_MODE" == "true" ]] && echo "[STEP] $*" || echo -e "${COLORS[blue]}[STEP]${COLORS[nc]} $*"; }
+log_success() { [[ "$CI_MODE" == "true" ]] && echo "[SUCCESS] $*" || echo -e "${COLORS[cyan]}[SUCCESS]${COLORS[nc]} $*"; }
+print_header() { local w=60; [[ "$CI_MODE" == "true" ]] && echo "=== $1 ===" || { echo -e "${COLORS[blue]}$(printf '=%.0s' $(seq 1 $w))${COLORS[nc]}"; echo -e "${COLORS[blue]}  $1${COLORS[nc]}"; echo -e "${COLORS[blue]}$(printf '=%.0s' $(seq 1 $w))${COLORS[nc]}"; }; }
 
-# Create directories
-mkdir -p "$MODELS_DIR"
-mkdir -p "$DOWNLOAD_DIR"
-
-log_step "Egyptian Agent Model Downloader"
-log_info "Models directory: $MODELS_DIR"
-log_info "Download directory: $DOWNLOAD_DIR"
-
-# Function to download with progress
-download_model() {
-    local name=$1
-    local url=$2
-    local output_file="$DOWNLOAD_DIR/$name"
+download_file() {
+    local url="$1" output="$2" name="$3"
     
-    if [ -f "$output_file" ]; then
-        log_info "✓ $name already downloaded"
+    if [[ -f "$output" ]]; then
+        log_info "$name already exists"
         return 0
     fi
     
-    log_info "Downloading $name..."
+    log_step "Downloading $name..."
     
-    if command -v wget &> /dev/null; then
-        wget --show-progress -q -O "$output_file" "$url"
-    elif command -v curl &> /dev/null; then
-        curl -L -# -o "$output_file" "$url"
-    else
-        log_error "Neither wget nor curl found. Please install one."
-        return 1
+    if command -v curl &>/dev/null; then
+        curl -L --progress-bar -o "$output" "$url" && return 0
+    elif command -v wget &>/dev/null; then
+        wget --show-progress -O "$output" "$url" && return 0
     fi
     
-    if [ $? -eq 0 ]; then
-        log_info "✓ $name downloaded successfully"
-        return 0
-    else
-        log_error "✗ Failed to download $name"
-        return 1
-    fi
+    log_error "No download tool available"
+    return 2
 }
 
-# Download Vosk Arabic model
-log_step "Downloading Vosk Arabic STT Model..."
-if download_model "vosk-model-small-ar.tar.gz" "${MODELS[vosk-model-small-ar]}"; then
+fetch_functiongemma() {
+    log_step "Fetching FunctionGemma model..."
+    local url="https://huggingface.co/google/functiongemma-270m-it/resolve/main/functiongemma-270m-it-Q4_K_M.gguf"
+    local output="$OUTPUT_DIR/functiongemma-270m-it-Q4_K_M.gguf"
+    download_file "$url" "$output" "FunctionGemma"
+}
+
+fetch_whisper() {
+    log_step "Fetching Whisper model..."
+    local url="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin"
+    local output="$OUTPUT_DIR/ggml-base.bin"
+    download_file "$url" "$output" "Whisper base"
+}
+
+fetch_vosk() {
+    log_step "Fetching Vosk Arabic model..."
+    local url="https://alphacephei.com/vosk/models/vosk-model-small-ar-0.22.tar.gz"
+    local temp="/tmp/vosk-ar.tar.gz"
+    
+    download_file "$url" "$temp" "Vosk Arabic"
+    
     log_info "Extracting Vosk model..."
-    tar -xzf "$DOWNLOAD_DIR/vosk-model-small-ar.tar.gz" -C "$MODELS_DIR" --strip-components=1
-    log_info "✓ Vosk model ready"
-fi
+    tar -xzf "$temp" -C "$OUTPUT_DIR" --strip-components=1 2>/dev/null || true
+    rm -f "$temp"
+}
 
-# Download Llama model (optional, large file)
-log_step "Llama Model (Optional - for full LLM capabilities)"
-log_warn "Llama model is ~700MB. Skip if using mock implementation."
-read -p "Download Llama model? (y/N): " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    if download_model "llama-3.2-1b.gguf" "${MODELS[llama-3.2-1b-instruct-q4_k_m]}"; then
-        mv "$DOWNLOAD_DIR/llama-3.2-1b.gguf" "$MODELS_DIR/"
-        log_info "✓ Llama model ready"
+fetch_llama() {
+    if [[ "$SKIP_LARGE" == "true" ]]; then
+        log_warn "Skipping Llama model (--skip-large)"
+        return 0
     fi
-fi
+    
+    log_step "Fetching Llama model (large file, ~2GB)..."
+    log_warn "This may take a while..."
+    
+    # Llama model would be downloaded via convert script
+    log_info "Use ./scripts/model/setup_llama_model.sh for Llama model"
+}
 
-# Download Whisper model (optional)
-log_step "Whisper Model (Optional - for enhanced ASR)"
-log_warn "Whisper model is ~250MB. Skip if using Vosk only."
-read -p "Download Whisper model? (y/N): " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    if download_model "ggml-small.bin" "${MODELS[whisper-small-ar]}"; then
-        mv "$DOWNLOAD_DIR/ggml-small.bin" "$MODELS_DIR/whisper-ar.bin"
-        log_info "✓ Whisper model ready"
+show_help() {
+    cat << EOF
+Egyptian Agent - Model Fetch Script
+
+USAGE:
+    $SCRIPT_NAME [OPTIONS]
+
+OPTIONS:
+    --all               Fetch all models (default)
+    --functiongemma     Fetch FunctionGemma only
+    --whisper           Fetch Whisper only
+    --llama             Fetch Llama only
+    --vosk              Fetch Vosk Arabic only
+    --output DIR        Output directory
+    --skip-large        Skip large models (>500MB)
+    --log-file PATH     Write log to file
+    --ci                CI/CD mode
+    -h, --help          Show help
+
+MODELS:
+    FunctionGemma  - ~288MB (function calling)
+    Whisper base   - ~142MB (speech recognition)
+    Llama 3.2 3B   - ~2GB (language model)
+    Vosk Arabic    - ~50MB (offline STT)
+
+RETURN CODES:
+    0   Success
+    1   General error
+    2   Download failed
+EOF
+}
+
+parse_arguments() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --all) FETCH_ALL=true; shift;;
+            --functiongemma) FETCH_ALL=false; FETCH_FUNCTIONGEMMA=true; shift;;
+            --whisper) FETCH_ALL=false; FETCH_WHISPER=true; shift;;
+            --llama) FETCH_ALL=false; FETCH_LLAMA=true; shift;;
+            --vosk) FETCH_ALL=false; FETCH_VOSK=true; shift;;
+            --output) OUTPUT_DIR="$2"; shift 2;;
+            --skip-large) SKIP_LARGE=true; shift;;
+            --log-file) LOG_FILE="$2"; shift 2;;
+            --ci) CI_MODE=true; COLORS=([red]='' [green]='' [yellow]='' [blue]='' [cyan]='' [nc]=''); shift;;
+            -h|--help) show_help; exit 0;;
+            -*) log_error "Unknown option: $1"; exit 1;;
+            *) log_error "Unexpected argument: $1"; exit 1;;
+        esac
+    done
+}
+
+main() {
+    parse_arguments
+    init_logging
+    
+    print_header "Egyptian Agent Model Fetch"
+    mkdir -p "$OUTPUT_DIR"
+    
+    local exit_code=0
+    
+    if [[ "$FETCH_ALL" == "true" ]]; then
+        fetch_functiongemma || exit_code=$?
+        fetch_whisper || exit_code=$?
+        fetch_vosk || exit_code=$?
+        fetch_llama || exit_code=$?
+    else
+        [[ "$FETCH_FUNCTIONGEMMA" == "true" ]] && fetch_functiongemma || exit_code=$?
+        [[ "$FETCH_WHISPER" == "true" ]] && fetch_whisper || exit_code=$?
+        [[ "$FETCH_LLAMA" == "true" ]] && fetch_llama || exit_code=$?
+        [[ "$FETCH_VOSK" == "true" ]] && fetch_vosk || exit_code=$?
     fi
-fi
+    
+    echo ""
+    print_header "Fetch Complete"
+    log_info "Models directory: $OUTPUT_DIR"
+    ls -lh "$OUTPUT_DIR" 2>/dev/null || true
+    
+    exit $exit_code
+}
 
-# List downloaded models
-log_step "Downloaded Models:"
-ls -lh "$MODELS_DIR"
-
-# Cleanup
-rm -rf "$DOWNLOAD_DIR"
-
-log_info "Model download complete!"
-log_info "Models are located in: $MODELS_DIR"
+main "$@"
