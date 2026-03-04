@@ -110,7 +110,7 @@ models/
 !models/.gitkeep
 
 # Dataset files (keep structure, not large data)
-datasets/*/large_*.json
+# datasets/*/large_*.json
 datasets/*/*.parquet
 
 #===============================================================================
