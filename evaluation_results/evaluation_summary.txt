@@ -1,0 +1,24 @@
+============================================================
+Egyptian Voice Command Model Evaluation Report
+============================================================
+
+Overall Accuracy: 87.25%
+Number of Examples: 102
+Number of Errors: 13
+
+Per-Class Accuracy:
+  call_contact: 100.00%
+  device_control: 61.11%
+  emergency: 100.00%
+  open_app: 90.00%
+  read_contacts: 80.00%
+  read_missed_calls: 100.00%
+  read_time: 60.00%
+  send_voice_message: 100.00%
+  send_whatsapp: 90.00%
+  set_alarm: 100.00%
+
+Latency Statistics:
+  mean_ms: 721.66 ms
+  median_ms: 725.29 ms
+  p95_ms: 973.35 ms

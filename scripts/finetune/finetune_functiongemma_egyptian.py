@@ -130,7 +130,10 @@ class EgyptianVoiceCommandTrainer:
 
     def __init__(self, args):
         self.args = args
-        self.device = torch.device(args.device if torch.cuda.is_available() else "cpu")
+        device = args.device if args.device else "cpu"
+        if device == "cuda" and not torch.cuda.is_available():
+            device = "cpu"
+        self.device = torch.device(device)
         logger.info(f"Using device: {self.device}")
 
         self.model = None

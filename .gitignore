@@ -106,8 +106,8 @@ temp/
 *.onnx
 *.tflite
 *.h5
-models/
-!models/.gitkeep
+# models/
+# !models/.gitkeep
 
 # Dataset files (keep structure, not large data)
 # datasets/*/large_*.json

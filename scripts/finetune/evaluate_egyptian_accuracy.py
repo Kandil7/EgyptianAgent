@@ -105,10 +105,8 @@ class EgyptianVoiceCommandEvaluator:
             trust_remote_code=True,
             torch_dtype=torch.float32,
         )
-        
-        if not torch.cuda.is_available():
-            self.model = self.model.to(self.device)
-        
+
+        self.model = self.model.to(self.device)
         self.model.eval()
         logger.info("Model loaded")
 

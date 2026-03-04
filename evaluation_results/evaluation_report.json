@@ -1,0 +1,84 @@
+{
+  "overall_accuracy": 0.8725490196078431,
+  "num_examples": 102,
+  "per_class_accuracy": {
+    "call_contact": 1.0,
+    "send_whatsapp": 0.9,
+    "set_alarm": 1.0,
+    "emergency": 1.0,
+    "read_time": 0.6,
+    "open_app": 0.9,
+    "device_control": 0.6111111111111112,
+    "send_voice_message": 1.0,
+    "read_missed_calls": 1.0,
+    "read_contacts": 0.8
+  },
+  "latency_stats": {
+    "mean_ms": 721.6570868211634,
+    "median_ms": 725.2871990203857,
+    "p95_ms": 973.3507394790648
+  },
+  "num_errors": 13,
+  "sample_errors": [
+    {
+      "user_input": "قول للعيادة انى مؤكد",
+      "expected_function": "send_whatsapp",
+      "predicted_function": "emergency",
+      "correct": false
+    },
+    {
+      "user_input": "الساعة ايه يا ريت تقول",
+      "expected_function": "read_time",
+      "predicted_function": "read_contacts",
+      "correct": false
+    },
+    {
+      "user_input": "كم الساعة يا ابني؟",
+      "expected_function": "read_time",
+      "predicted_function": "read_missed_calls",
+      "correct": false
+    },
+    {
+      "user_input": "شغل الطقس اشوف الجو",
+      "expected_function": "open_app",
+      "predicted_function": "device_control",
+      "correct": false
+    },
+    {
+      "user_input": "افتح الواي فاي",
+      "expected_function": "device_control",
+      "predicted_function": "open_app",
+      "correct": false
+    },
+    {
+      "user_input": "خفت الصوت شوية",
+      "expected_function": "device_control",
+      "predicted_function": "emergency",
+      "correct": false
+    },
+    {
+      "user_input": "شغل وضع الطيران",
+      "expected_function": "device_control",
+      "predicted_function": "open_app",
+      "correct": false
+    },
+    {
+      "user_input": "شغل البيانات",
+      "expected_function": "device_control",
+      "predicted_function": "open_app",
+      "correct": false
+    },
+    {
+      "user_input": "شغل الوضع الليلي",
+      "expected_function": "device_control",
+      "predicted_function": "open_app",
+      "correct": false
+    },
+    {
+      "user_input": "خد لقطة شاشة",
+      "expected_function": "device_control",
+      "predicted_function": "emergency",
+      "correct": false
+    }
+  ]
+}
