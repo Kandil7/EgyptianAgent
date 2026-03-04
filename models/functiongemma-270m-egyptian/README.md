@@ -1,12 +1,15 @@
 ---
 base_model: google/functiongemma-270m-it
-library_name: transformers
+library_name: peft
 model_name: functiongemma-270m-egyptian
 tags:
-- generated_from_trainer
+- base_model:adapter:google/functiongemma-270m-it
+- lora
 - sft
+- transformers
 - trl
 licence: license
+pipeline_tag: text-generation
 ---
 
 # Model Card for functiongemma-270m-egyptian
@@ -35,6 +38,7 @@ This model was trained with SFT.
 
 ### Framework versions
 
+- PEFT 0.18.1
 - TRL: 0.29.0
 - Transformers: 5.2.0
 - Pytorch: 2.5.1+cu121
