@@ -114,11 +114,11 @@ android {
         test {
             java.srcDirs += ['src/test/cpp']
         }
-        // AI-specific source sets for FunctionGemma
-        ai {
-            java.srcDirs = ['src/ai/java', 'src/ai/kotlin']
-            resources.srcDirs = ['src/ai/assets']
-        }
+        // AI-specific source sets for FunctionGemma - commented out due to AGP compatibility
+        // ai {
+        //     java.srcDirs = ['src/ai/java', 'src/ai/kotlin']
+        //     resources.srcDirs = ['src/ai/assets']
+        // }
     }
 
     // CMake configuration for native libraries
@@ -169,7 +169,7 @@ android {
             useLegacyPackaging = false
         }
         // Exclude duplicate native libraries for llama.cpp
-        nativeLibs {
+        jniLibs {
             excludes += ['**/libllama.so']
         }
     }
@@ -210,8 +210,11 @@ android {
                 }
             }
         }
-        androidTest {
-            useAndroidXTest = true
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
         }
     }
 
@@ -404,11 +407,26 @@ dependencies {
     // Material design
     implementation "com.google.android.material:material:$rootProject.ext.materialVersion"
 
-    // Vosk STT engine - critical dependency (local AAR)
-    implementation files('libs/vosk-android-0.3.44.aar')
+    // CardView - required for senior mode cards
+    implementation "androidx.cardview:cardview:1.0.0"
+
+    // Vosk STT engine - from Maven Central
+    implementation 'com.alphacephei:vosk-android:0.3.47@aar'
 
     // Java Native Access for Vosk
     implementation 'net.java.dev.jna:jna:5.14.0@aar'
+
+    // PyTorch Android for model inference - using available version
+    implementation 'org.pytorch:pytorch_android_lite:1.13.1'
+    implementation 'org.pytorch:pytorch_android_torchvision_lite:1.13.1'
+
+    // TensorFlow Lite for intent classification
+    implementation 'org.tensorflow:tensorflow-lite:2.14.0'
+    implementation 'org.tensorflow:tensorflow-lite-support:0.4.4'
+    implementation 'org.tensorflow:tensorflow-lite-gpu:2.14.0'
+
+    // LibSuperUser for root operations
+    implementation 'com.github.topjohnwu.libsu:core:3.2.1'
 
     // Networking for LLM fallback
     implementation "com.squareup.okhttp3:okhttp:$rootProject.ext.okhttpVersion"
@@ -429,9 +447,9 @@ dependencies {
     // WorkManager for background tasks
     implementation "androidx.work:work-runtime:$rootProject.ext.workRuntimeVersion"
 
-    // PyTorch for model optimization
-    implementation "org.pytorch:pytorch_android_lite:$rootProject.ext.pytorchVersion"
-    implementation "org.pytorch:pytorch_android_torchvision_lite:$rootProject.ext.pytorchVersion"
+    // PyTorch for model optimization - COMMENTED OUT UNTIL NEEDED
+    // implementation "org.pytorch:pytorch_android_lite:$rootProject.ext.pytorchVersion"
+    // implementation "org.pytorch:pytorch_android_torchvision_lite:$rootProject.ext.pytorchVersion"
 
     // For model optimization and startup
     implementation "androidx.profileinstaller:profileinstaller:$rootProject.ext.profileInstallerVersion"
@@ -445,8 +463,8 @@ dependencies {
     // FunctionGemma-270M-IT Dependencies
     // ===========================================
 
-    // llama.cpp for efficient LLM inference on Android
-    implementation "com.github.ggerganov:llama.cpp:$rootProject.ext.llamaCppVersion"
+    // llama.cpp for efficient LLM inference on Android - COMMENTED OUT (local build)
+    // implementation "com.github.ggerganov:llama.cpp:$rootProject.ext.llamaCppVersion"
 
     // ML Kit for on-device machine learning
     implementation "com.google.mlkit:text-recognition:$rootProject.ext.mlKitTextRecognitionVersion"
@@ -458,6 +476,16 @@ dependencies {
     // Shizuku API for system privileges
     implementation "dev.rikka.shizuku:api:$rootProject.ext.shizukuVersion"
     implementation "dev.rikka.shizuku:provider:$rootProject.ext.shizukuVersion"
+
+    // ===========================================
+    // Hybrid Architecture Dependencies (Phase 4)
+    // ===========================================
+
+    // SnakeYAML 2.0 for workflow parsing
+    implementation 'org.yaml:snakeyaml:2.3'
+
+    // kotlinx-coroutines-android 1.7.3 for async operations
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
 
     // ===========================================
     // Testing Dependencies - Comprehensive Suite
@@ -517,8 +545,8 @@ dependencies {
     // --- Coverage Support ---
     testImplementation 'org.jacoco:org.jacoco.core:0.8.12'
 
-    // Special Honor device support (compile only - provided by system)
-    compileOnly files('libs/honor-system-api.jar')
+    // Special Honor device support (compile only - provided by system) - COMMENTED OUT (corrupted JAR)
+    // compileOnly files('libs/honor-system-api.jar')
 }
 
 // Task to create debug keystore if it doesn't exist

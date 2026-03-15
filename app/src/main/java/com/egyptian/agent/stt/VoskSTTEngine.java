@@ -3,6 +3,9 @@ package com.egyptian.agent.stt;
 import android.content.Context;
 import android.util.Log;
 
+import com.egyptian.agent.asr.ASREngineInterface;
+import com.egyptian.agent.asr.ASRResult;
+
 import org.vosk.LibVosk;
 import org.vosk.Model;
 import org.vosk.Recognizer;
@@ -18,7 +21,7 @@ import java.util.concurrent.Executors;
  * Vosk Speech-to-Text Engine
  * Handles speech recognition using the Vosk library
  */
-public class VoskSTTEngine {
+public class VoskSTTEngine implements ASREngineInterface {
     private static final String TAG = "VoskSTTEngine";
     
     private Context context;
@@ -342,6 +345,66 @@ public class VoskSTTEngine {
         }
 
         return null;
+    }
+
+    // ASREngineInterface implementation methods
+
+    @Override
+    public boolean initialize() {
+        // Model is already initialized in constructor
+        return isInitialized;
+    }
+
+    @Override
+    public ASRResult transcribe(String audioPath) {
+        // For file-based transcription
+        try {
+            java.io.FileInputStream fis = new java.io.FileInputStream(audioPath);
+            byte[] audioData = fis.readAllBytes();
+            fis.close();
+            
+            String result = recognizeAudio(audioData, audioData.length);
+            return new ASRResult(result != null ? result : "", 0.7f, 0L, true);
+        } catch (Exception e) {
+            Log.e(TAG, "Error transcribing file", e);
+            return new ASRResult("", 0.0f, 0L, false);
+        }
+    }
+
+    @Override
+    public ASRResult transcribeStream(short[] audioData) {
+        // Convert short array to byte array for Vosk
+        byte[] byteData = new byte[audioData.length * 2];
+        for (int i = 0; i < audioData.length; i++) {
+            short s = audioData[i];
+            byteData[i * 2] = (byte) (s & 0xFF);
+            byteData[i * 2 + 1] = (byte) ((s >> 8) & 0xFF);
+        }
+        
+        String result = recognizeAudio(byteData, byteData.length);
+        return new ASRResult(result != null ? result : "", 0.7f, 0L, true);
+    }
+
+    @Override
+    public void startListening(RecognitionCallback callback) {
+        isListening = true;
+        // Use the existing STTCallback adapter
+        this.callback = result -> {
+            if (callback != null) {
+                callback.onResult(new ASRResult(result, 0.7f, 0L, true));
+            }
+        };
+        simulateRecognition();
+    }
+
+    @Override
+    public void stopListening() {
+        isListening = false;
+    }
+
+    @Override
+    public boolean isReady() {
+        return isInitialized;
     }
 
     /**

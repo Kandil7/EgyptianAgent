@@ -102,7 +102,7 @@ public class IntegrationTestActivity extends Activity {
             return "{\"intent\":\"SEND_WHATSAPP\", \"entities\":{\"person_name\":\"بابا\", \"message\":\"مرحبا\"}, \"confidence\":0.92}";
         } else if (lowerText.contains("نبهني") || lowerText.contains("ذكرني")) {
             return "{\"intent\":\"SET_ALARM\", \"entities\":{\"time\":\"الساعة 8\"}, \"confidence\":0.89}";
-        } else if (lowerText.contains(" emergencies") != -1 || lowerText.contains("njda") != -1 || lowerText.contains("استغاثة") != -1) {
+        } else if (lowerText.contains(" emergencies") || lowerText.contains("njda") || lowerText.contains("استغاثة")) {
             return "{\"intent\":\"EMERGENCY\", \"entities\":{}, \"confidence\":0.98}";
         } else {
             return "{\"intent\":\"UNKNOWN\", \"entities\":{}, \"confidence\":0.3}";

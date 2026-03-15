@@ -1,5 +1,6 @@
 package com.egyptian.agent.performance;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;

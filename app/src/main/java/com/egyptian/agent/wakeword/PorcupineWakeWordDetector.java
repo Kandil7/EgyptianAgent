@@ -15,10 +15,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Porcupine Wake Word Detector
- * 
+ *
  * Primary wake word detection engine using Picovoice Porcupine.
  * Optimized for Egyptian Arabic wake words: "يا صاحبي" and "يا كبير"
- * 
+ *
  * Features:
  * - Low-power continuous listening (<3% battery/hour)
  * - Fast detection (<200ms latency)
@@ -330,16 +330,4 @@ public class PorcupineWakeWordDetector implements WakeWordDetectorInterface {
     private native long initPorcupineNative(String[] modelPaths, float[] sensitivities);
     private native int processFrameNative(long handle, short[] audioBuffer);
     private native void deletePorcupineNative(long handle);
-    
-    /**
-     * Interface for wake word detection.
-     */
-    public interface WakeWordDetectorInterface {
-        void setCallback(WakeWordCallback callback);
-        void start();
-        void stop();
-        void restart();
-        boolean isListening();
-        void destroy();
-    }
 }

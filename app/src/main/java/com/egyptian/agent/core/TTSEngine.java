@@ -1,6 +1,7 @@
 package com.egyptian.agent.core;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
@@ -96,13 +97,13 @@ public class TTSEngine implements TTSEngineInterface {
         }
 
         // Speak the text
-        HashMap<String, String> paramsMap = new HashMap<>();
-        paramsMap.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utteranceId);
+        Bundle paramsBundle = new Bundle();
+        paramsBundle.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utteranceId);
         if (params != null) {
-            paramsMap.put(TextToSpeech.Engine.KEY_PARAM_VOLUME, String.valueOf(params.getVolume()));
+            paramsBundle.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, params.getVolume());
         }
 
-        int result = textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, paramsMap, utteranceId);
+        int result = textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, paramsBundle, utteranceId);
         if (result == TextToSpeech.ERROR) {
             Log.e(TAG, "Error occurred while speaking");
             if (callback != null) {

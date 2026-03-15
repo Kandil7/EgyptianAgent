@@ -286,9 +286,6 @@ public class FallDetector implements SensorEventListener {
 
         return null;
     }
-        //     }
-        // });
-    }
 
     private void cancelFallSuspicion() {
         Log.i(TAG, "Fall suspicion cancelled - false alarm");

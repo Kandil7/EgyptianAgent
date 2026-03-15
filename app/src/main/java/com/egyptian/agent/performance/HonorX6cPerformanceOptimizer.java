@@ -2,8 +2,8 @@ package com.egyptian.agent.performance;
 
 import android.content.Context;
 import android.os.Build;
-import android.util.Log;
 import android.os.Process;
+import android.util.Log;
 import java.io.*;
 import java.util.regex.Pattern;
 
@@ -231,16 +231,16 @@ public class HonorX6cPerformanceOptimizer {
      */
     private static String getCpuInfo() {
         try {
-            ProcessBuilder cmd = new ProcessBuilder("cat", "/proc/cpuinfo");
-            Process process = cmd.start();
+            java.lang.ProcessBuilder cmd = new java.lang.ProcessBuilder("cat", "/proc/cpuinfo");
+            java.lang.Process process = cmd.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             StringBuilder output = new StringBuilder();
             String line;
-            
+
             while ((line = reader.readLine()) != null) {
                 output.append(line).append("\n");
             }
-            
+
             process.waitFor();
             return output.toString();
         } catch (Exception e) {
@@ -248,23 +248,23 @@ public class HonorX6cPerformanceOptimizer {
             return "Unknown";
         }
     }
-    
+
     /**
      * Gets memory information
      * @return Memory info string
      */
     public static String getMemoryInfo() {
         try {
-            ProcessBuilder cmd = new ProcessBuilder("cat", "/proc/meminfo");
-            Process process = cmd.start();
+            java.lang.ProcessBuilder cmd = new java.lang.ProcessBuilder("cat", "/proc/meminfo");
+            java.lang.Process process = cmd.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             StringBuilder output = new StringBuilder();
             String line;
-            
+
             while ((line = reader.readLine()) != null) {
                 output.append(line).append("\n");
             }
-            
+
             process.waitFor();
             return output.toString();
         } catch (Exception e) {

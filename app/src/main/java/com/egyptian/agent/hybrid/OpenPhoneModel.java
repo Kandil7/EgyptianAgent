@@ -113,7 +113,7 @@ public class OpenPhoneModel {
             } else if (lowerText.contains("نبهني") || lowerText.contains("ذكرني") || lowerText.contains("المنبه")) {
                 intent = "SET_ALARM";
                 confidence = 0.7f;
-            } else if (lowerText.contains(" emergencies") != -1 || lowerText.contains("نجدة") != -1 || lowerText.contains("استغاثة") != -1) {
+            } else if (lowerText.contains(" emergencies") || lowerText.contains("نجدة") || lowerText.contains("استغاثة")) {
                 intent = "EMERGENCY";
                 confidence = 0.9f;
             }

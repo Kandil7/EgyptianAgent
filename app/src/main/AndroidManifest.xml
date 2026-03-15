@@ -89,7 +89,7 @@
             android:name=".core.VoiceService"
             android:enabled="true"
             android:exported="true"
-            android:foregroundServiceType="microphone|sensors"
+            android:foregroundServiceType="microphone|health"
             android:permission="android.permission.BIND_DEVICE_ADMIN">
             <intent-filter>
                 <action android:name="com.egyptian.agent.action.START_VOICE_SERVICE" />
@@ -101,7 +101,7 @@
             android:name=".accessibility.FallDetectionService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="sensors">
+            android:foregroundServiceType="health">
         </service>
 
         <!-- Boot receiver (start service on boot) -->
@@ -149,7 +149,7 @@
         <!-- Saiy-PS SelfAwareService -->
         <service
             android:name="com.saiy.android.service.SelfAwareService"
-            android:foregroundServiceType="microphone|sensors"
+            android:foregroundServiceType="microphone|health"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.saiy.android.service.SELF_AWARE_SERVICE" />

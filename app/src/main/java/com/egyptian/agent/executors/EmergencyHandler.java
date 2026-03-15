@@ -90,6 +90,15 @@ public class EmergencyHandler {
      * @param context Context for the operation
      */
     public static void trigger(Context context) {
+        trigger(context, false); // Default: not automated
+    }
+
+    /**
+     * Triggers emergency response with option for automated trigger
+     * @param context Context for the operation
+     * @param isAutomated true if triggered automatically (e.g., fall detection)
+     */
+    public static synchronized void trigger(Context context, boolean isAutomated) {
         // Check rate limiting
         if (!isEmergencyAllowed()) {
             TTSManager.speak(context, "تم الاتصال بالطوارئ مؤخراً. انتظر قبل المحاولة تانية");
@@ -102,10 +111,12 @@ public class EmergencyHandler {
             return;
         }
 
-        Log.i(TAG, "Emergency triggered!");
+        Log.i(TAG, "Emergency triggered! Automated: " + isAutomated);
 
-        // Check if context is an Activity (required for dialog)
-        if (context instanceof Activity) {
+        // For automated triggers (e.g., fall detection), skip confirmation
+        if (isAutomated) {
+            executeEmergency(context);
+        } else if (context instanceof Activity) {
             // Show confirmation dialog with 10-second countdown
             showEmergencyConfirmationDialog((Activity) context);
         } else {
@@ -113,6 +124,55 @@ public class EmergencyHandler {
             Log.w(TAG, "Context is not an Activity, proceeding without confirmation dialog");
             executeEmergency(context);
         }
+    }
+
+    /**
+     * Executes emergency calls to specified contacts
+     * @param context Context for the operation
+     * @param contacts List of contact numbers to call
+     */
+    public static void executeEmergencyCalls(Context context, List<String> contacts) {
+        if (contacts == null || contacts.isEmpty()) {
+            Log.w(TAG, "No contacts provided for emergency calls");
+            return;
+        }
+
+        Log.i(TAG, "Executing emergency calls to " + contacts.size() + " contacts");
+
+        for (String contact : contacts) {
+            attemptCall(context, contact);
+            try {
+                Thread.sleep(2000); // Small delay between calls
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        TTSManager.speak(context, "تم الاتصال بجهات الطوارئ");
+    }
+
+    /**
+     * Sends location details to emergency contacts
+     * @param context Context for the operation
+     * @param locationDetails Formatted location details string
+     */
+    public static void sendLocationDetailsToEmergencyContacts(Context context, String locationDetails) {
+        Log.d(TAG, "Sending location details to emergency contacts: " + locationDetails);
+
+        String[] emergencyContacts = getEmergencyContacts(context);
+        if (emergencyContacts != null) {
+            for (String contactNumber : emergencyContacts) {
+                sendLocationSms(context, contactNumber, locationDetails);
+            }
+        }
+    }
+
+    /**
+     * Checks if an emergency is currently active
+     * @return true if emergency is in progress, false otherwise
+     */
+    public static synchronized boolean isEmergencyActive() {
+        return isEmergencyInProgress;
     }
 
     /**

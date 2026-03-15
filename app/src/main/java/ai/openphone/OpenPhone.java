@@ -67,7 +67,7 @@ public class OpenPhone {
 
         // Enhanced detection logic for Egyptian dialect
         if (containsAny(normalizedPrompt, new String[]{"call", "connect", "ring", "contact", "tel", "اتصل", "كلم", "رن", "بعت", "ابعت", "wasl"})) {
-            result.setIntentType(com.egyptian.agent.core.IntentType.CALL_CONTACT);
+            result.setIntentType(com.egyptian.agent.nlp.IntentType.CALL_CONTACT);
             result.setConfidence(0.85f);
 
             // Extract contact name
@@ -77,7 +77,7 @@ public class OpenPhone {
             }
         }
         else if (containsAny(normalizedPrompt, new String[]{"whatsapp", "message", "send", "whats", "wts", "rsala", "b3t", "ab3t", "kalam"})) {
-            result.setIntentType(com.egyptian.agent.core.IntentType.SEND_WHATSAPP);
+            result.setIntentType(com.egyptian.agent.nlp.IntentType.SEND_WHATSAPP);
             result.setConfidence(0.82f);
 
             // Extract contact and message
@@ -92,7 +92,7 @@ public class OpenPhone {
             }
         }
         else if (containsAny(normalizedPrompt, new String[]{"alarm", "remind", "timer", "notify", "think", "nbhny", "anbhny", "zkry", "thker", "mr"})) {
-            result.setIntentType(com.egyptian.agent.core.IntentType.SET_ALARM);
+            result.setIntentType(com.egyptian.agent.nlp.IntentType.SET_ALARM);
             result.setConfidence(0.78f);
 
             // Extract time
@@ -102,15 +102,15 @@ public class OpenPhone {
             }
         }
         else if (containsAny(normalizedPrompt, new String[]{"time", "hour", "clock", "sa3a", "kam", "alwqt", "alsaa", "cam"})) {
-            result.setIntentType(com.egyptian.agent.core.IntentType.READ_TIME);
+            result.setIntentType(com.egyptian.agent.nlp.IntentType.READ_TIME);
             result.setConfidence(0.95f);
         }
         else if (containsAny(normalizedPrompt, new String[]{" emergencies", "emergency", "ngda", "estghatha", "tawari", "escaf", "police", "najda", "استغاثة", "نجدة", "طوارئ"})) {
-            result.setIntentType(com.egyptian.agent.core.IntentType.EMERGENCY);
+            result.setIntentType(com.egyptian.agent.nlp.IntentType.EMERGENCY);
             result.setConfidence(0.98f);
         }
         else {
-            result.setIntentType(com.egyptian.agent.core.IntentType.UNKNOWN);
+            result.setIntentType(com.egyptian.agent.nlp.IntentType.UNKNOWN);
             result.setConfidence(0.30f);
         }
 

@@ -1,7 +1,7 @@
 package com.egyptian.agent.test;
 
 import com.egyptian.agent.stt.EgyptianNormalizer;
-import com.egyptian.agent.core.IntentType;
+import com.egyptian.agent.nlp.IntentType;
 import com.egyptian.agent.hybrid.OpenPhoneIntegration;
 import com.egyptian.agent.hybrid.HybridOrchestrator;
 import com.egyptian.agent.nlp.IntentResult;

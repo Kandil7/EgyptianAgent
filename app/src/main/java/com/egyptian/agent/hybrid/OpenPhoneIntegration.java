@@ -4,10 +4,12 @@ import android.content.Context;
 import android.util.Log;
 import com.egyptian.agent.core.TTSManager;
 import com.egyptian.agent.nlp.IntentResult;
+import com.egyptian.agent.nlp.IntentType;
 import com.egyptian.agent.stt.EgyptianNormalizer;
 import com.egyptian.agent.utils.MemoryOptimizer;
 import com.egyptian.agent.utils.CrashLogger;
 import org.json.JSONObject;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 

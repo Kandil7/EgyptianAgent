@@ -93,6 +93,14 @@ public class IntentResult {
     }
 
     /**
+     * Gets all entities (alias for getEntities)
+     * @return Map of all entities
+     */
+    public Map<String, String> getAllEntities() {
+        return getEntities();
+    }
+
+    /**
      * Checks if the result is unknown
      * @return true if intent type is UNKNOWN, false otherwise
      */

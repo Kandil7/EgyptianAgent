@@ -6,8 +6,10 @@ import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
 import com.egyptian.agent.core.TTSManager;
+import com.egyptian.agent.nlp.IntentType;
 import com.egyptian.agent.utils.CrashLogger;
 import com.topjohnwu.superuser.Shell;
+import com.topjohnwu.superuser.ShellUtils;
 
 /**
  * Executor for system settings commands like brightness, volume, etc.
@@ -50,7 +52,7 @@ public class SystemSettingsExecutor {
     }
 
     private static boolean isRootAvailable() {
-        return Shell.rootAccess();
+        return ShellUtils.fastCmdResult("id");
     }
 
     private static void adjustBrightness(Context context, boolean increase) {
@@ -59,12 +61,12 @@ public class SystemSettingsExecutor {
                 // Use root to set brightness directly
                 int current = 128; // Default fallback
                 try {
-                    String res = Shell.cmd("settings get system screen_brightness").exec().getOut().get(0);
+                    String res = ShellUtils.fastCmd("settings get system screen_brightness");
                     current = Integer.parseInt(res);
                 } catch (Exception e) {}
-                
+
                 int newValue = increase ? Math.min(current + 50, 255) : Math.max(current - 50, 0);
-                Shell.cmd("settings put system screen_brightness " + newValue).submit();
+                ShellUtils.fastCmd("settings put system screen_brightness " + newValue);
                 TTSManager.speak(context, increase ? "عليت الإضاءة" : "وطيت الإضاءة");
                 return;
             }
@@ -134,15 +136,13 @@ public class SystemSettingsExecutor {
             // Toggle airplane mode using root
             // 1 = on, 0 = off. We need to check current state.
             try {
-                String current = Shell.cmd("settings get global airplane_mode_on").exec().getOut().get(0);
+                String current = ShellUtils.fastCmd("settings get global airplane_mode_on");
                 boolean isOn = "1".equals(current);
                 String newState = isOn ? "0" : "1";
-                
-                Shell.cmd(
-                    "settings put global airplane_mode_on " + newState,
-                    "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state " + (isOn ? "false" : "true")
-                ).submit();
-                
+
+                ShellUtils.fastCmd("settings put global airplane_mode_on " + newState);
+                ShellUtils.fastCmd("am broadcast -a android.intent.action.AIRPLANE_MODE --ez state " + (isOn ? "false" : "true"));
+
                 TTSManager.speak(context, isOn ? "قفلت وضع الطيران" : "شغلت وضع الطيران");
             } catch (Exception e) {
                 Log.e(TAG, "Error checking airplane mode", e);
@@ -161,9 +161,9 @@ public class SystemSettingsExecutor {
             // Try enabling/disabling via svc
             android.net.wifi.WifiManager wifiManager = (android.net.wifi.WifiManager) context.getSystemService(Context.WIFI_SERVICE);
             boolean isEnabled = wifiManager.isWifiEnabled();
-            
+
             String cmd = isEnabled ? "disable" : "enable";
-            Shell.cmd("svc wifi " + cmd).submit();
+            ShellUtils.fastCmd("svc wifi " + cmd);
             TTSManager.speak(context, isEnabled ? "قفلت الواي فاي" : "شغلت الواي فاي");
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -178,41 +178,42 @@ public class SystemSettingsExecutor {
 
     private static void toggleBluetooth(Context context) {
         if (isRootAvailable()) {
-            Shell.cmd("svc bluetooth toggle").submit(); // Works on many roms
+            ShellUtils.fastCmd("svc bluetooth toggle"); // Works on many roms
             TTSManager.speak(context, "غيرت حالة البلوتوث");
         } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                Intent intent = new Intent(Settings.Panel.ACTION_BLUETOOTH);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent);
-            } else {
-                TTSManager.speak(context, "البلوتوث مظبط من الإعدادات");
-            }
+            // Use standard Bluetooth settings (Settings.Panel requires API 30+)
+            fallbackToBluetoothSettings(context);
         }
+    }
+
+    private static void fallbackToBluetoothSettings(Context context) {
+        TTSManager.speak(context, "البلوتوث مظبط من الإعدادات");
+        Intent intent = new Intent(Settings.ACTION_BLUETOOTH_SETTINGS);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
     }
 
     private static void toggleLocation(Context context) {
         if (isRootAvailable()) {
             // settings put secure location_mode 3 (high accuracy) or 0 (off)
             try {
-                String current = Shell.cmd("settings get secure location_mode").exec().getOut().get(0);
+                String current = ShellUtils.fastCmd("settings get secure location_mode");
                 boolean isOn = !"0".equals(current);
                 String newState = isOn ? "0" : "3";
-                Shell.cmd("settings put secure location_mode " + newState).submit();
+                ShellUtils.fastCmd("settings put secure location_mode " + newState);
                 TTSManager.speak(context, isOn ? "قفلت الموقع" : "شغلت الموقع");
             } catch (Exception e) {
                 Log.e(TAG, "Error toggling location", e);
             }
         } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                Intent intent = new Intent(Settings.Panel.ACTION_LOCATION);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent);
-            } else {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent);
-            }
+            // Use standard location settings (Settings.Panel requires API 30+)
+            fallbackToLocationSettings(context);
         }
+    }
+
+    private static void fallbackToLocationSettings(Context context) {
+        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
     }
 }

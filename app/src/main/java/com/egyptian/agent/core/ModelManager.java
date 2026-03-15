@@ -92,6 +92,52 @@ public class ModelManager {
     }
 
     /**
+     * Gets the LLM model path (alias for getLlamaModelPath)
+     * @return The LLM model path
+     */
+    public String getLlmModelPath() {
+        return getLlamaModelPath();
+    }
+
+    /**
+     * Gets the TTS model path based on device class
+     * @return The TTS model path
+     */
+    public String getTtsModelPath() {
+        // Return the Piper TTS model path
+        String modelPath = "models/piper-tts-ar.bin";
+
+        // Check if model exists in assets
+        if (modelExists(modelPath)) {
+            return modelPath;
+        } else {
+            Log.w(TAG, "TTS model not found: " + modelPath);
+            // Return fallback TTS indicator
+            return "system_tts"; // Use system TTS as fallback
+        }
+    }
+
+    /**
+     * Checks if Whisper ASR engine is supported on this device
+     * @return true if Whisper is supported, false otherwise
+     */
+    public boolean supportsWhisper() {
+        // Whisper requires more resources, only support on HIGH and ELITE devices
+        return deviceClass == DeviceClassDetector.DeviceClass.HIGH ||
+               deviceClass == DeviceClassDetector.DeviceClass.ELITE;
+    }
+
+    /**
+     * Cleanup resources
+     */
+    public void cleanup() {
+        Log.d(TAG, "Cleaning up ModelManager resources");
+        // Release any held resources
+        // Clear model caches if any
+        ModelCacheManager.clear();
+    }
+
+    /**
      * Checks if a model exists in assets
      * @param modelPath The path to check
      * @return true if exists, false otherwise

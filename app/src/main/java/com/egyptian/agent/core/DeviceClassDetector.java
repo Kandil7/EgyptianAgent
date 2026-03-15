@@ -167,15 +167,11 @@ public class DeviceClassDetector {
         } catch (Exception e) {
             Log.e(TAG, "Error reading total RAM", e);
         }
-        
+
         // Fallback: estimate based on available memory info
-        ActivityManager am = (ActivityManager) 
-            android.app.ApplicationProvider.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
-        ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
-        am.getMemoryInfo(memInfo);
-        
-        // This is an approximation - available memory is not total memory
-        return memInfo.totalMem;
+        // Note: This requires a Context which should be passed as parameter
+        // For now, return a default value
+        return 4L * 1024 * 1024 * 1024; // Default 4GB
     }
     
     /**
@@ -239,20 +235,35 @@ public class DeviceClassDetector {
         public final String ttsEngine;
         public final String intentMethod;
         public final int maxInferenceTimeMs;
-        
-        public ModelConfiguration(String asrModel, String llmModel, String ttsEngine, 
+        private final String modelSize;
+
+        public ModelConfiguration(String asrModel, String llmModel, String ttsEngine,
                                  String intentMethod, int maxInferenceTimeMs) {
+            this(asrModel, llmModel, ttsEngine, intentMethod, maxInferenceTimeMs, "small");
+        }
+
+        public ModelConfiguration(String asrModel, String llmModel, String ttsEngine,
+                                 String intentMethod, int maxInferenceTimeMs, String modelSize) {
             this.asrModel = asrModel;
             this.llmModel = llmModel;
             this.ttsEngine = ttsEngine;
             this.intentMethod = intentMethod;
             this.maxInferenceTimeMs = maxInferenceTimeMs;
+            this.modelSize = modelSize;
         }
-        
+
+        /**
+         * Gets the model size recommendation
+         * @return "small", "medium", or "large"
+         */
+        public String getModelSize() {
+            return modelSize != null ? modelSize : "small";
+        }
+
         @Override
         public String toString() {
-            return String.format("ModelConfig{ASR=%s, LLM=%s, TTS=%s, Intent=%s, MaxTime=%dms}",
-                    asrModel, llmModel, ttsEngine, intentMethod, maxInferenceTimeMs);
+            return String.format("ModelConfig{ASR=%s, LLM=%s, TTS=%s, Intent=%s, MaxTime=%dms, Size=%s}",
+                    asrModel, llmModel, ttsEngine, intentMethod, maxInferenceTimeMs, modelSize);
         }
     }
 }

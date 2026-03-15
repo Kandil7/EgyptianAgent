@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Build;
+import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
@@ -200,14 +201,14 @@ public class PiperTTSEngine {
         final String utteranceId = "piper_utt_" + System.currentTimeMillis();
         
         Log.i(TAG, "Speaking with fallback TTS: " + text);
-        
+
         // Set up parameters
-        HashMap<String, String> params = new HashMap<>();
-        params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utteranceId);
-        
+        Bundle params = new Bundle();
+        params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utteranceId);
+
         // Speak the text
         int result = fallbackTTS.speak(text, TextToSpeech.QUEUE_FLUSH, params, utteranceId);
-        
+
         if (result == TextToSpeech.ERROR) {
             Log.e(TAG, "Fallback TTS speak failed for text: " + text);
             if (callback != null) {
@@ -224,7 +225,7 @@ public class PiperTTSEngine {
                     break;
                 }
             }
-            
+
             if (callback != null) {
                 callback.onComplete();
             }

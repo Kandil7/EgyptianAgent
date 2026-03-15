@@ -15,7 +15,55 @@ import java.util.Date;
  */
 public class GuardianNotificationSystem {
     private static final String TAG = "GuardianNotification";
-    
+
+    /**
+     * Notifies guardians of a system issue
+     * @param context Application context
+     * @param issueDescription Description of the issue
+     */
+    public static void notifyGuardiansOfIssue(Context context, String issueDescription) {
+        String guardianNumber = SeniorModeManager.getInstance(context).getGuardianPhoneNumber();
+
+        if (guardianNumber == null || guardianNumber.isEmpty()) {
+            Log.w(TAG, "No guardian phone number configured");
+            return;
+        }
+
+        // Check for SMS permission
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS)
+            != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "Missing SEND_SMS permission for guardian notification");
+            return;
+        }
+
+        String message = createIssueMessage(issueDescription);
+
+        try {
+            android.telephony.SmsManager smsManager = android.telephony.SmsManager.getDefault();
+            smsManager.sendTextMessage(guardianNumber, null, message, null, null);
+            Log.d(TAG, "Issue notification sent to guardian: " + guardianNumber);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to send issue notification to guardian", e);
+            CrashLogger.logError(context, e);
+        }
+    }
+
+    /**
+     * Creates an issue notification message
+     */
+    private static String createIssueMessage(String issueDescription) {
+        String timestamp = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
+            .format(new Date());
+
+        StringBuilder message = new StringBuilder();
+        message.append("⚠️ تنبيه مشكلة - الوكيل المصري ⚠️\n");
+        message.append("الوقت: ").append(timestamp).append("\n");
+        message.append("المشكلة: ").append(issueDescription).append("\n");
+        message.append("الرجاء التحقق من النظام.");
+
+        return message.toString();
+    }
+
     /**
      * Sends an emergency notification to the guardian
      * @param context Application context
@@ -24,12 +72,12 @@ public class GuardianNotificationSystem {
      */
     public static void sendEmergencyNotification(Context context, String eventType, String details) {
         String guardianNumber = SeniorModeManager.getInstance(context).getGuardianPhoneNumber();
-        
+
         if (guardianNumber == null || guardianNumber.isEmpty()) {
             Log.w(TAG, "No guardian phone number configured");
             return;
         }
-        
+
         // Check for SMS permission
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS)
             != PackageManager.PERMISSION_GRANTED) {
@@ -37,14 +85,14 @@ public class GuardianNotificationSystem {
             TTSManager.speak(context, "محتاج إذن لإرسال تنبيهات للوصي");
             return;
         }
-        
+
         String message = createEmergencyMessage(eventType, details);
-        
+
         try {
             android.telephony.SmsManager smsManager = android.telephony.SmsManager.getDefault();
             smsManager.sendTextMessage(guardianNumber, null, message, null, null);
             Log.d(TAG, "Emergency notification sent to guardian: " + guardianNumber);
-            
+
             // Also send via WhatsApp if available
             sendWhatsAppNotification(context, guardianNumber, message);
         } catch (Exception e) {

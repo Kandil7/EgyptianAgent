@@ -26,7 +26,14 @@ public enum IntentType {
     AIRPLANE_MODE,
     WIFI_TOGGLE,
     BLUETOOTH_TOGGLE,
-    LOCATION_TOGGLE;
+    LOCATION_TOGGLE,
+    TOGGLE_WIFI,
+    TOGGLE_BLUETOOTH,
+    TOGGLE_FLASHLIGHT,
+    WEATHER_QUERY,
+    GREETING,
+    THANK_YOU,
+    GOODBYE;
 
     /**
      * Converts from OpenPhone string representation
@@ -87,6 +94,20 @@ public enum IntentType {
                 return BLUETOOTH_TOGGLE;
             case "LOCATION_TOGGLE":
                 return LOCATION_TOGGLE;
+            case "TOGGLE_WIFI":
+                return TOGGLE_WIFI;
+            case "TOGGLE_BLUETOOTH":
+                return TOGGLE_BLUETOOTH;
+            case "TOGGLE_FLASHLIGHT":
+                return TOGGLE_FLASHLIGHT;
+            case "WEATHER_QUERY":
+                return WEATHER_QUERY;
+            case "GREETING":
+                return GREETING;
+            case "THANK_YOU":
+                return THANK_YOU;
+            case "GOODBYE":
+                return GOODBYE;
             default:
                 return UNKNOWN;
         }
@@ -140,6 +161,20 @@ public enum IntentType {
                 return "BLUETOOTH_TOGGLE";
             case LOCATION_TOGGLE:
                 return "LOCATION_TOGGLE";
+            case TOGGLE_WIFI:
+                return "TOGGLE_WIFI";
+            case TOGGLE_BLUETOOTH:
+                return "TOGGLE_BLUETOOTH";
+            case TOGGLE_FLASHLIGHT:
+                return "TOGGLE_FLASHLIGHT";
+            case WEATHER_QUERY:
+                return "WEATHER_QUERY";
+            case GREETING:
+                return "GREETING";
+            case THANK_YOU:
+                return "THANK_YOU";
+            case GOODBYE:
+                return "GOODBYE";
             default:
                 return "UNKNOWN";
         }

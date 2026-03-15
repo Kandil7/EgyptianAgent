@@ -191,7 +191,9 @@ public class LlamaModelIntegration {
                 // Extract entities
                 if (jsonResponse.has("entities")) {
                     JSONObject entities = jsonResponse.getJSONObject("entities");
-                    for (String key : entities.keySet()) {
+                    java.util.Iterator<String> keys = entities.keys();
+                    while (keys.hasNext()) {
+                        String key = keys.next();
                         result.setEntity(key, entities.getString(key));
                     }
                 }

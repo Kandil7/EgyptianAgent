@@ -14,6 +14,8 @@ This directory contains all project scripts organized by function.
 - `deploy_production.sh` - Production deployment script
 - `deploy_functiongemma.sh` - FunctionGemma deployment script
 - `initialize_submodules.sh` - Git submodules initialization
+- `verify_deployment.sh` - Deployment verification (Bash/Linux/macOS)
+- `verify_deployment.ps1` - Deployment verification (PowerShell/Windows) ⭐ NEW
 
 ### 🤖 Model Scripts (`model/`)
 - `download_functiongemma_model.sh` - Download FunctionGemma model
@@ -37,10 +39,33 @@ This directory contains all project scripts organized by function.
 - `honor_battery_fix.sh` - Honor device battery optimization fix
 - `install_as_system_app.sh` - Install as system application
 - `complete_build.sh` - Complete build process
+- `init_gradle_wrapper.ps1` - Initialize Gradle wrapper (Windows) ⭐ NEW
+
+### 🪟 Windows Setup (`setup/`) ⭐ NEW
+- `windows_setup.ps1` - Automated Windows development environment setup
 
 ## Usage
 
-All scripts should be executed from the project root:
+### Windows (PowerShell)
+
+```powershell
+# Setup development environment
+.\scripts\setup\windows_setup.ps1 -Auto
+
+# Initialize Gradle wrapper
+.\scripts\utils\init_gradle_wrapper.ps1
+
+# Build the project
+.\gradlew.bat assembleDebug
+
+# Deploy to production
+.\scripts\deploy\deploy_production.sh
+
+# Run verification
+.\scripts\deploy\verify_deployment.ps1
+```
+
+### Linux/macOS (Bash)
 
 ```bash
 # Build the project
@@ -54,6 +79,9 @@ All scripts should be executed from the project root:
 
 # Download models
 ./scripts/model/download_functiongemma_model.sh
+
+# Run verification
+./scripts/deploy/verify_deployment.sh
 ```
 
 ## Making Scripts Executable
@@ -61,4 +89,22 @@ All scripts should be executed from the project root:
 If scripts are not executable, run:
 ```bash
 chmod +x scripts/**/*.sh
+```
+
+## Windows Setup Guide
+
+For Windows developers, see:
+- [Windows Quick Start Guide](../docs/deployment/WINDOWS_QUICKSTART.md)
+- [Deployment Prerequisites](../docs/deployment/DEPLOYMENT_PREREQUISITES.md)
+
+## Script Execution Policy (Windows)
+
+If you encounter execution policy errors on Windows:
+
+```powershell
+# For current session only
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+# Or allow signed scripts
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 ```

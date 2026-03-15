@@ -13,11 +13,11 @@ import java.util.Locale
 
 /**
  * Emergency Confirmation Dialog
- * 
+ *
  * Safety-critical component that provides a 10-second countdown
  * before initiating emergency calls, allowing users to cancel
  * accidental emergency triggers.
- * 
+ *
  * Features:
  * - 10-second countdown with visual feedback
  * - Arabic voice warning: "هيتم الاتصال بالطوارئ خلال 10 ثواني"
@@ -26,8 +26,8 @@ import java.util.Locale
  */
 class EmergencyConfirmationDialog(
     private val context: Context,
-    private val onConfirmCallback: () -> Unit,
-    private val onCancelCallback: () -> Unit
+    private val onConfirmCallback: Runnable,
+    private val onCancelCallback: Runnable
 ) {
     companion object {
         private const val TAG = "EmergencyConfirmationDialog"
@@ -81,7 +81,7 @@ class EmergencyConfirmationDialog(
         } catch (e: Exception) {
             Log.e(TAG, "Error showing emergency confirmation dialog", e)
             // If dialog fails, proceed with emergency call directly
-            onConfirmCallback()
+            onConfirmCallback.run()
         }
     }
 
@@ -159,8 +159,8 @@ class EmergencyConfirmationDialog(
                 )
 
                 // Call the confirm callback to initiate emergency call
-                onConfirmCallback()
-                
+                onConfirmCallback.run()
+
                 // Dismiss dialog
                 alertDialog?.dismiss()
             }
@@ -194,7 +194,7 @@ class EmergencyConfirmationDialog(
         }
 
         // Call the cancel callback
-        onCancelCallback()
+        onCancelCallback.run()
     }
 
     /**

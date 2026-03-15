@@ -475,7 +475,7 @@ public class FunctionGemmaConfig {
                     paramObj.put("type", param.getType());
                     paramObj.put("description", param.getDescription());
 
-                    if (param.getEnumValues() != null && !param.getEnumValues().isEmpty()) {
+                    if (param.getEnumValues() != null && param.getEnumValues().length > 0) {
                         JSONArray enumArray = new JSONArray(param.getEnumValues());
                         paramObj.put("enum", enumArray);
                     }

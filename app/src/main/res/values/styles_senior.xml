@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- 
+    <!--
         Senior Mode Theme and Styles
         Optimized for elderly users (65+) with:
         - Larger text sizes
@@ -15,14 +15,14 @@
         <item name="android:textSize">24sp</item>
         <item name="android:textColorPrimary">@color/senior_text_primary</item>
         <item name="android:textColorSecondary">@color/senior_text_secondary</item>
-        
+
         <!-- High contrast background -->
         <item name="android:colorBackground">@color/senior_background</item>
         <item name="android:windowBackground">@color/senior_background</item>
-        
+
         <!-- Large button style -->
         <item name="android:buttonStyle">@style/SeniorButton</item>
-        
+
         <!-- Accessibility settings -->
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textStyle">normal</item>
@@ -38,8 +38,8 @@
         <item name="android:background">@drawable/senior_button_background</item>
     </style>
 
-    <!-- Senior Button Outlined Style -->
-    <style name="SeniorButtonOutlined" parent="Widget.AppCompat.Button.OutlinedButton">
+    <!-- Senior Button Outlined Style - using Material style as parent -->
+    <style name="SeniorButtonOutlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
         <item name="android:minHeight">80dp</item>
         <item name="android:minWidth">200dp</item>
         <item name="android:textSize">22sp</item>
@@ -47,8 +47,8 @@
         <item name="android:textStyle">bold</item>
     </style>
 
-    <!-- Senior Text Button Style -->
-    <style name="SeniorButtonText" parent="Widget.AppCompat.Button.TextButton">
+    <!-- Senior Text Button Style - using Material style as parent -->
+    <style name="SeniorButtonText" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:minHeight">60dp</item>
         <item name="android:textSize">20sp</item>
         <item name="android:padding">12dp</item>
@@ -85,8 +85,8 @@
         <item name="android:textColor">@color/senior_text_secondary</item>
     </style>
 
-    <!-- Senior Card Style -->
-    <style name="SeniorCard" parent="Widget.AppCompat.CardView">
+    <!-- Senior Card Style - using CardView parent -->
+    <style name="SeniorCard" parent="CardView">
         <item name="cardCornerRadius">16dp</item>
         <item name="cardElevation">4dp</item>
         <item name="cardBackgroundColor">@color/senior_card_background</item>
@@ -149,14 +149,14 @@
         <item name="android:textSize">22sp</item>
     </style>
 
-    <!-- Senior FAB Style -->
-    <style name="SeniorFAB" parent="Widget.AppCompat.FloatingActionButton">
+    <!-- Senior FAB Style - using Material style as parent -->
+    <style name="SeniorFAB" parent="Widget.MaterialComponents.FloatingActionButton">
         <item name="fabSize">normal</item>
         <item name="fabCustomSize">80dp</item>
     </style>
 
-    <!-- Senior Bottom Navigation Style -->
-    <style name="SeniorBottomNavigation" parent="Widget.Design.BottomNavigationView">
+    <!-- Senior Bottom Navigation Style - using Material style as parent -->
+    <style name="SeniorBottomNavigation" parent="Widget.MaterialComponents.BottomNavigationView">
         <item name="itemTextSize">18sp</item>
         <item name="itemIconSize">36dp</item>
         <item name="android:minHeight">80dp</item>

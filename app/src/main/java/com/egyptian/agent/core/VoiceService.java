@@ -2,10 +2,12 @@ package com.egyptian.agent.core;
 
 import android.app.*;
 import android.content.*;
+import android.media.AudioManager;
 import android.os.*;
 import android.provider.Settings;
 import android.speech.tts.*;
 import android.util.*;
+import androidx.core.app.NotificationCompat;
 import com.egyptian.agent.accessibility.SeniorMode;
 import com.egyptian.agent.executors.EmergencyHandler;
 import com.egyptian.agent.asr.ASREngineInterface;
@@ -121,7 +123,7 @@ public class VoiceService extends Service implements AudioManager.OnAudioFocusCh
 
     private void initializeHybridOrchestrator() {
         try {
-            hybridOrchestrator = new HybridOrchestrator(this);
+            hybridOrchestrator = HybridOrchestrator.create(this);
             Log.i(TAG, "Hybrid Orchestrator initialized successfully");
         } catch (Exception e) {
             Log.e(TAG, "Failed to initialize Hybrid Orchestrator", e);

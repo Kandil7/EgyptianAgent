@@ -35,11 +35,20 @@
     <string msgid="8875138169939072951" name="abc_shareactionprovider_share_with">"مشاركة مع"</string>
     <string msgid="9055268688411532828" name="abc_shareactionprovider_share_with_application">"مشاركة مع <ns1:g id="APPLICATION_NAME">%s</ns1:g>"</string>
     <string msgid="1656852541809559762" name="abc_toolbar_collapse_description">"تصغير"</string>
+    <string name="accessibility">إمكانية الوصول</string>
+    <string name="activate_assistant">تفعيل المساعد</string>
+    <string name="add_emergency_contact">إضافة جهة اتصال طوارئ</string>
+    <string name="afternoon">الظهر</string>
+    <string name="app_name">الوكيل المصري</string>
+    <string name="are_you_ok">يا كبير، لقيت إنك وقعت؟</string>
+    <string name="baba">بابا</string>
     <string name="bottomsheet_action_collapse">تصغير البطاقة السفلية</string>
     <string name="bottomsheet_action_expand">توسيع البطاقة السفلية</string>
     <string name="bottomsheet_action_expand_halfway">توسيع البطاقة السفلية</string>
     <string name="bottomsheet_drag_handle_clicked">تم النقر مرّتين على مقبض السحب.</string>
     <string name="bottomsheet_drag_handle_content_description">مقبض السحب</string>
+    <string name="brother">أخويا</string>
+    <string name="call_contact">الاتصال بجهة</string>
     <string msgid="881409763997275156" name="call_notification_answer_action">"ردّ"</string>
     <string msgid="8793775615905189152" name="call_notification_answer_video_action">"فيديو"</string>
     <string msgid="3229508546291798546" name="call_notification_decline_action">"رفض"</string>
@@ -47,6 +56,8 @@
     <string msgid="6107532579223922871" name="call_notification_incoming_text">"مكالمة واردة"</string>
     <string msgid="8623827134497363134" name="call_notification_ongoing_text">"مكالمة جارية"</string>
     <string msgid="59049573811482460" name="call_notification_screening_text">"يتم فحص المكالمة الواردة"</string>
+    <string name="calling_emergency">جارٍ الاتصال بالطوارئ…</string>
+    <string name="cancel">إلغاء</string>
     <string name="character_counter_content_description">تمّ إدخال %1$d حرف من إجمالي %2$d.</string>
     <string name="character_counter_overflowed_content_description">تجاوز عدد الأحرف المسموح به %1$d من %2$d.</string>
     <string name="clear_text_end_icon_content_description">محو النص</string>
@@ -68,10 +79,41 @@
     <string name="common_open_on_phone">فتح على الهاتف</string>
     <string name="common_signin_button_text">تسجل الدخول</string>
     <string name="common_signin_button_text_long">‏تسجيل الدخول عبر Google</string>
+    <string name="confirm">تأكيد</string>
+    <string name="connected">متصل</string>
+    <string name="connecting">جارٍ الاتصال…</string>
+    <string name="contact_not_found">الجهة المطلوبة غير موجودة</string>
+    <string name="contacts_permission">مطلوب إذن جهات الاتصال</string>
+    <string name="didnt_hear">مسمعتكش كويس</string>
+    <string name="disconnected">غير متصل</string>
+    <string name="emergency_call">اتصال طوارئ</string>
+    <string name="emergency_contacts">جهة اتصال طوارئ</string>
+    <string name="emergency_detected">تم اكتشاف طوارئ!</string>
+    <string name="error_a11y_label">خطأ: غير صالح</string>
     <string name="error_icon_content_description">خطأ</string>
+    <string name="error_occurred">حدث خطأ</string>
+    <string name="evening">المساء</string>
+    <string name="executing">جارٍ التنفيذ…</string>
     <string name="exposed_dropdown_menu_content_description">عرض القائمة المنسدلة</string>
+    <string name="failed">فشل في التنفيذ</string>
+    <string name="fall_detected">تم اكتشاف سقوط!</string>
+    <string name="friday">الجمعة</string>
+    <string name="good_evening">مساء الخير</string>
+    <string name="good_morning">صباح الخير</string>
+    <string name="good_night">تصبح على خير</string>
+    <string name="goodbye">مع السلامة</string>
+    <string name="grant_permission">منح الإذن</string>
+    <string name="hello">أهلا</string>
+    <string name="high_contrast">تباين عالي</string>
+    <string name="how_are_you">عامل إيه</string>
     <string name="icon_content_description">رمز مربع الحوار</string>
+    <string name="im_ok">أنا تمام</string>
     <string name="item_view_role_description">علامة تبويب</string>
+    <string name="language">اللغة</string>
+    <string name="large_text">نص كبير</string>
+    <string name="listening">اسمعك…</string>
+    <string name="location_permission">مطلوب إذن الموقع</string>
+    <string name="mama">ماما</string>
     <string name="material_clock_toggle_content_description">يُرجى اختيار صباحًا أو مساءً.</string>
     <string name="material_hour_24h_suffix">%1$s ساعة</string>
     <string name="material_hour_selection">تحديد الساعة</string>
@@ -85,7 +127,13 @@
     <string name="material_timepicker_pm">مساءً</string>
     <string name="material_timepicker_select_time">اختيار الوقت</string>
     <string name="material_timepicker_text_input_mode_description">يُرجى التبديل إلى وضع إدخال النص لإدخال الوقت.</string>
+    <string name="microphone_permission">مطلوب إذن الميكروفون</string>
+    <string name="monday">الاثنين</string>
+    <string name="morning">الصباح</string>
     <string name="mtrl_badge_numberless_content_description">إشعار جديد</string>
+    <string name="mtrl_checkbox_state_description_checked">تم وضع علامة في المربّع</string>
+    <string name="mtrl_checkbox_state_description_indeterminate">يجوز أنه تم وضع علامة في المربّع</string>
+    <string name="mtrl_checkbox_state_description_unchecked">لم يتم وضع علامة في المربّع</string>
     <string name="mtrl_chip_close_icon_content_description">إزالة %1$s</string>
     <string name="mtrl_exceed_max_badge_number_content_description" ns2:ignore="PluralsCandidate">يبلغ عدد الإشعارات الجديدة أكثر من %1$d.</string>
     <string name="mtrl_picker_a11y_next_month">التغيير إلى الشهر التالي</string>
@@ -98,7 +146,7 @@
     <string name="mtrl_picker_date_header_selected">%1$s</string>
     <string name="mtrl_picker_date_header_title">يُرجى اختيار تاريخ.</string>
     <string name="mtrl_picker_date_header_unselected">التاريخ المحدَّد</string>
-    <string name="mtrl_picker_day_of_week_column_header">عمود الأيام: %1$s</string>
+    <string name="mtrl_picker_day_of_week_column_header">%1$s</string>
     <string name="mtrl_picker_end_date_description">تاريخ الانتهاء: %1$s</string>
     <string name="mtrl_picker_invalid_format">التنسيق غير صالح</string>
     <string name="mtrl_picker_invalid_format_example">مثال: %1$s</string>
@@ -127,7 +175,56 @@
     <string name="mtrl_picker_toggle_to_year_selection">يمكنك النقر للتبديل إلى عرض السنة.</string>
     <string name="mtrl_timepicker_cancel">إلغاء</string>
     <string name="mtrl_timepicker_confirm">حسنًا</string>
+    <string name="need_help">محتاج مساعدة</string>
+    <string name="network_error">خطأ في الشبكة</string>
+    <string name="night">الليل</string>
+    <string name="no">لا</string>
+    <string name="no_internet">لا يوجد اتصال بالإنترنت</string>
+    <string name="ok">تمام</string>
     <string name="password_toggle_content_description">عرض كلمة المرور</string>
+    <string name="permission_required">مطلوب إذن</string>
+    <string name="phone_permission">مطلوب إذن الاتصال</string>
+    <string name="please_repeat">ممكن تعيد تاني؟</string>
+    <string name="processing">جارٍ المعالجة…</string>
+    <string name="read_missed_calls">قراءة المكالمات الفائتة</string>
+    <string name="read_time">معرفة الوقت</string>
+    <string name="saturday">السبت</string>
     <string msgid="6264217191555673260" name="search_menu_title">"البحث"</string>
+    <string name="searchview_clear_text_content_description">محو النص</string>
+    <string name="searchview_navigation_content_description">رجوع</string>
+    <string name="see_you">بكره</string>
+    <string name="send_message">إرسال رسالة</string>
+    <string name="sending_location">جارٍ إرسال الموقع…</string>
+    <string name="senior_mode">وضع كبار السن</string>
+    <string name="senior_mode_description">يتميز وضع كبار السن بحجم خط أكبر وأوامر صوتية مبسطة</string>
+    <string name="senior_mode_disabled">تم إيقاف وضع كبار السن</string>
+    <string name="senior_mode_enabled">تم تفعيل وضع كبار السن</string>
+    <string name="sensitivity">الحساسية</string>
+    <string name="service_running">الخدمة تعمل</string>
+    <string name="service_status">حالة الخدمة: %s</string>
+    <string name="service_stopped">الخدمة متوقفة</string>
+    <string name="set_alarm">ضبط منبه</string>
+    <string name="settings">الإعدادات</string>
+    <string name="side_sheet_accessibility_pane_title">ورقة جانبية</string>
+    <string name="sister">اختي</string>
+    <string name="start_service">تشغيل خدمة الصوت</string>
     <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string name="stop_service">إيقاف خدمة الصوت</string>
+    <string name="success">تم بنجاح</string>
+    <string name="sunday">الأحد</string>
+    <string name="thank_you">شكرا</string>
+    <string name="thursday">الخميس</string>
+    <string name="today">النهاردة</string>
+    <string name="toggle_senior_mode">وضع كبار السن</string>
+    <string name="tomorrow">بكرة</string>
+    <string name="try_again">حاول مرة أخرى</string>
+    <string name="tuesday">الثلاثاء</string>
+    <string name="voice_settings">إعدادات الصوت</string>
+    <string name="volume">مستوى الصوت</string>
+    <string name="wake_word">قول \"يا صاحبي\" أو \"يا كبير\" للتفعيل</string>
+    <string name="wake_word_settings">إعدادات كلمة التنبيه</string>
+    <string name="wednesday">الأربعاء</string>
+    <string name="welcome">أهلا وسهلا</string>
+    <string name="yes">أيوه</string>
+    <string name="yesterday">امبارح</string>
 </resources>

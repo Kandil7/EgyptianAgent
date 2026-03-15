@@ -3,6 +3,7 @@ package com.egyptian.agent.core;
 import android.content.Context;
 import android.os.Build;
 import android.util.Log;
+import com.egyptian.agent.stt.VoskSTTEngine;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;

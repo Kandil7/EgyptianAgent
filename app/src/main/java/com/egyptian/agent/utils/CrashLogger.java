@@ -1,5 +1,6 @@
 package com.egyptian.agent.utils;
 
+import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 
@@ -17,7 +18,33 @@ import java.util.Locale;
 public class CrashLogger {
     private static final String TAG = "CrashLogger";
     private static final String LOG_FILE_NAME = "crash_logs.txt";
-    
+
+    /**
+     * Registers a global exception handler
+     * @param application The application instance
+     */
+    public static void registerGlobalExceptionHandler(Application application) {
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            Log.e(TAG, "Uncaught exception in thread: " + thread.getName(), throwable);
+            logError(application, throwable);
+            
+            // Let the system handle the crash
+            android.os.Process.killProcess(android.os.Process.myPid());
+            System.exit(10);
+        });
+        Log.d(TAG, "Global exception handler registered");
+    }
+
+    /**
+     * Logs a warning message
+     * @param context Context for the operation
+     * @param message The warning message
+     */
+    public static void logWarning(Context context, String message) {
+        Log.w(TAG, message);
+        writeToFile(context, "WARNING: " + message);
+    }
+
     /**
      * Logs an error with context
      * @param context Context for the operation
@@ -26,11 +53,11 @@ public class CrashLogger {
     public static void logError(Context context, Throwable throwable) {
         String errorMessage = formatError(throwable);
         Log.e(TAG, errorMessage, throwable);
-        
+
         // Write to file for persistent logging
         writeToFile(context, errorMessage);
     }
-    
+
     /**
      * Logs an error with message
      * @param context Context for the operation
@@ -40,7 +67,7 @@ public class CrashLogger {
     public static void logError(Context context, String message, Throwable throwable) {
         String errorMessage = formatError(message, throwable);
         Log.e(TAG, errorMessage, throwable);
-        
+
         // Write to file for persistent logging
         writeToFile(context, errorMessage);
     }

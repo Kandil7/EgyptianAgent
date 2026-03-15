@@ -209,7 +209,9 @@ public class LlamaNLUClassifier {
                 // Extract entities
                 if (json.has("entities")) {
                     JSONObject entities = json.getJSONObject("entities");
-                    for (String key : entities.keySet()) {
+                    java.util.Iterator<String> keys = entities.keys();
+                    while (keys.hasNext()) {
+                        String key = keys.next();
                         result.setEntity(key, entities.getString(key));
                     }
                 }

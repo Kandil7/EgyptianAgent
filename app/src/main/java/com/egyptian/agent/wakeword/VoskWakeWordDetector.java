@@ -14,16 +14,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Vosk-based Wake Word Detector
- * 
+ *
  * Fallback wake word detection using Vosk STT engine.
  * Less accurate than Porcupine but works without additional SDK.
- * 
+ *
  * Features:
  * - Uses existing Vosk STT infrastructure
  * - No additional dependencies
  * - Higher battery usage than Porcupine
  */
-public class VoskWakeWordDetector implements PorcupineWakeWordDetector.WakeWordDetectorInterface {
+public class VoskWakeWordDetector implements WakeWordDetectorInterface {
     private static final String TAG = "VoskWakeWord";
     
     // Audio configuration
