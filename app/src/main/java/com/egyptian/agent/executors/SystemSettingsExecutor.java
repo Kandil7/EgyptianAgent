@@ -166,13 +166,12 @@ public class SystemSettingsExecutor {
             ShellUtils.fastCmd("svc wifi " + cmd);
             TTSManager.speak(context, isEnabled ? "قفلت الواي فاي" : "شغلت الواي فاي");
         } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                Intent intent = new Intent(Settings.Panel.ACTION_WIFI);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent);
-            } else {
-                TTSManager.speak(context, "الواي فاي مظبط من الإعدادات");
-            }
+            // Settings.Panel.ACTION_WIFI requires API 29+ and is not consistently supported
+            // Use standard WiFi settings instead
+            TTSManager.speak(context, "الواي فاي مظبط من الإعدادات");
+            Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
         }
     }
 
@@ -206,7 +205,7 @@ public class SystemSettingsExecutor {
                 Log.e(TAG, "Error toggling location", e);
             }
         } else {
-            // Use standard location settings (Settings.Panel requires API 30+)
+            // Use standard location settings instead of Settings.Panel
             fallbackToLocationSettings(context);
         }
     }

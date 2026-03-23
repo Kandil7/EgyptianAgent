@@ -1,0 +1,1121 @@
+=== EgyptianAgent Build ===
+JAVA_HOME: C:\Program Files\Java\jdk-21
+ANDROID_HOME: C:\Android\Sdk
+Java version:
+java version "21.0.5" 2024-10-15 LTS
+Java(TM) SE Runtime Environment (build 21.0.5+9-LTS-239)
+Java HotSpot(TM) 64-Bit Server VM (build 21.0.5+9-LTS-239, mixed mode, sharing)
+
+Building...
+
+Starting a Gradle Daemon (subsequent builds will be faster)
+Configuration on demand is an incubating feature.
+
+> Configure project :app
+WARNING: BuildType 'staging' is both debuggable and has 'isMinifyEnabled' set to true.
+All code optimizations and obfuscation are disabled for debuggable builds.
+
+> Task :app:externalNativeBuildCleanDebug
+Clean whisper_native-armeabi-v7a, llama_native-armeabi-v7a
+Clean whisper_native-arm64-v8a, llama_native-arm64-v8a
+
+> Task :app:externalNativeBuildCleanRelease
+
+> Task :app:externalNativeBuildCleanStaging
+Clean whisper_native-armeabi-v7a, llama_native-armeabi-v7a
+Clean whisper_native-arm64-v8a, llama_native-arm64-v8a
+
+> Task :app:clean
+> Task :app:createDebugKeystore
+> Task :app:preBuild
+> Task :app:preDebugBuild
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:generateDebugResValues FROM-CACHE
+> Task :app:dataBindingMergeDependencyArtifactsDebug
+> Task :app:generateDebugResources FROM-CACHE
+> Task :app:mergeDebugResources FROM-CACHE
+> Task :app:packageDebugResources FROM-CACHE
+> Task :app:processDebugNavigationResources FROM-CACHE
+> Task :app:parseDebugLocalResources FROM-CACHE
+> Task :app:dataBindingGenBaseClassesDebug FROM-CACHE
+> Task :app:dataBindingTriggerDebug
+> Task :app:generateDebugBuildConfig FROM-CACHE
+> Task :app:compileDebugNavigationResources FROM-CACHE
+> Task :app:checkDebugAarMetadata
+> Task :app:mapDebugSourceSetPaths
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug FROM-CACHE
+> Task :app:processDebugMainManifest FROM-CACHE
+> Task :app:processDebugManifest FROM-CACHE
+> Task :app:processDebugManifestForPackage FROM-CACHE
+> Task :app:processDebugResources FROM-CACHE
+> Task :app:javaPreCompileDebug FROM-CACHE
+> Task :app:mergeDebugShaders
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:compressDebugAssets FROM-CACHE
+> Task :app:l8DexDesugarLibDebug FROM-CACHE
+> Task :app:desugarDebugFileDependencies FROM-CACHE
+> Task :app:preStagingBuild
+> Task :app:checkDebugDuplicateClasses
+> Task :app:configureCMakeDebug[arm64-v8a]
+> Task :app:mergeExtDexDebug FROM-CACHE
+> Task :app:mergeLibDexDebug FROM-CACHE
+> Task :app:buildCMakeDebug[arm64-v8a]
+> Task :app:configureCMakeDebug[armeabi-v7a]
+> Task :app:buildCMakeDebug[armeabi-v7a]
+> Task :app:mergeDebugJniLibFolders
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :app:mergeDebugNativeLibs
+
+> Task :app:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libjnidispatch.so. Run with --info option to learn more.
+
+> Task :app:compileDebugKotlin
+w: file:///K:/business/projects_v2/EgyptianAgent/app/src/main/java/com/egyptian/agent/accessibility/ui/AccessibilityTreeParser.kt:123:27 'fun recycle(): Unit' is deprecated. Deprecated in Java.
+w: file:///K:/business/projects_v2/EgyptianAgent/app/src/main/java/com/egyptian/agent/hybrid/HybridOrchestrator.kt:569:5 '@JvmOverloads' annotation has no effect for methods without default arguments.
+w: file:///K:/business/projects_v2/EgyptianAgent/app/src/main/java/com/egyptian/agent/hybrid/HybridOrchestrator.kt:571:28 This is a delicate API and its use requires care. Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.
+w: file:///K:/business/projects_v2/EgyptianAgent/app/src/main/java/com/egyptian/agent/navigation/UINavigationEngine.kt:136:26 'fun recycle(): Unit' is deprecated. Deprecated in Java.
+w: file:///K:/business/projects_v2/EgyptianAgent/app/src/main/java/com/egyptian/agent/navigation/UINavigationEngine.kt:187:18 'fun recycle(): Unit' is deprecated. Deprecated in Java.
+w: file:///K:/business/projects_v2/EgyptianAgent/app/src/main/java/com/egyptian/agent/navigation/UINavigationEngine.kt:205:22 'fun recycle(): Unit' is deprecated. Deprecated in Java.
+w: file:///K:/business/projects_v2/EgyptianAgent/app/src/main/java/com/egyptian/agent/navigation/UINavigationEngine.kt:223:26 'fun recycle(): Unit' is deprecated. Deprecated in Java.
+w: file:///K:/business/projects_v2/EgyptianAgent/app/src/main/java/com/egyptian/agent/navigation/UINavigationEngine.kt:259:22 'fun recycle(): Unit' is deprecated. Deprecated in Java.
+w: file:///K:/business/projects_v2/EgyptianAgent/app/src/main/java/com/egyptian/agent/navigation/UINavigationEngine.kt:705:27 'fun recycle(): Unit' is deprecated. Deprecated in Java.
+w: file:///K:/business/projects_v2/EgyptianAgent/app/src/main/java/com/egyptian/agent/workflow/WorkflowEngine.kt:58:49 Unchecked cast of 'kotlin.Any?' to 'kotlin.collections.List<kotlin.Any>'.
+
+> Task :app:compileDebugJavaWithJavac
+Java compiler version 21 has deprecated support for compiling with source/target version 8.
+Try one of the following options:
+    1. [Recommended] Use Java toolchain with a lower language version
+    2. Set a higher source/target version
+    3. Use a lower version of the JDK running the build (if you're not using Java toolchain)
+For more details on how to configure these settings, see https://developer.android.com/build/jdks.
+To suppress this warning, set android.javaCompile.suppressSourceTargetDeprecationWarning=true in gradle.properties.
+warning: [options] source value 8 is obsolete and will be removed in a future release
+warning: [options] target value 8 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\utils\SensorManager.java:7: error: SensorManager is already defined in this compilation unit
+import android.hardware.SensorManager;
+^
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\hybrid\EgyptianDialectAccuracyTester.java:133: error: method does not override or implement a method from a supertype
+                @Override
+                ^
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\hybrid\EgyptianDialectAccuracyTester.java:139: error: method does not override or implement a method from a supertype
+                @Override
+                ^
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\hybrid\ModelManager.java:68: error: incompatible types: AssetManager cannot be converted to Context
+                OpenPhoneModel model = new OpenPhoneModel(context.getAssets(), config.getModelPath());
+                                                                           ^
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:20: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("خده", "خذه");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:21: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("جيب", "أحضر");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:22: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("روح", "اذهب");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:23: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("نام", "نم");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:24: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("قوم", "قم");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:25: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("خلاص", "انتهى");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:26: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("استنى", "انتظر");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:27: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("فهم", "افهم");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:28: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("عرف", "اعرف");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:29: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("قدر", "استطاع");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:30: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("لاقى", "وجد");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:31: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("مشى", "ذهب");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:32: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("رجع", "عاد");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:33: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("سيب", "اترك");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:34: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("خد", "خذ");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:37: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("مش", "ليس");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:38: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("مفيش", "لا يوجد");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:39: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("مقدرش", "لا أستطيع");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:40: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("معاياش", "ليس معي");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:41: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("معرش", "لا أعرف");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:42: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("مفيش حاجة", "لا شيء");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:45: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("أنا", "أنا");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:46: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("انتا", "أنت");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:47: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("انتي", "أنتِ");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:48: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("احنا", "نحن");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:49: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("هما", "هما");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:50: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("هم", "هم");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:51: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("هيا", "هي");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:54: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("إيه", "ماذا");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:55: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("إيه ده", "ما هذا");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:56: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("إزاي", "كيف");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:57: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("إمتى", "متى");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:58: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("فين", "أين");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:59: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("ليه", "لماذا");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:60: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("كام", "كم");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:61: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("مين", "من");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:64: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("بدري", "مبكراً");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:65: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("متأخر", "متأخراً");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:66: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("حالاً", "فوراً");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:67: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("هنا", "هنا");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:68: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("هناك", "هناك");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:69: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("بعد شوية", "بعد قليل");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:70: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("بعدين", "لاحقاً");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:71: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("قبل كده", "سابقاً");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:72: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("من زمان", "منذ فترة");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:73: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("دلوقتي حالا", "الآن فوراً");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:76: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("أه", "نعم");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:77: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("أيوة", "نعم");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:78: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("إيه", "نعم");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:79: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("لا", "لا");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:80: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("معلش", "عفواً");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:81: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("خلاص", "حسناً");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:82: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("تمام", "جيد");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:83: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("زي الفل", "ممتاز");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:84: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("بلاش", "لا شكراً");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:87: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("يعني", "أي");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:88: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("كده", "هكذا");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:89: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("برضه", "أيضاً");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:90: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("أصلاً", "في الأصل");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:91: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("فعلاً", "حقاً");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:92: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("بالظبط", "بالضبط");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:95: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("عامل إيه", "كيف حالك");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:96: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("أخبار إيه", "ما الأخبار");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:97: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("إيه الأخبار", "ما الأخبار");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:98: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("كله تمام", "كل شيء جيد");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:99: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("الحمد لله", "الحمد لله");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:100: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("سلامتك", "سلامتك");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:101: error: cannot find symbol
+        EGYPTIAN_TO_MSA.put("الف سلامة", "ألف سلامة");
+        ^
+  symbol:   variable EGYPTIAN_TO_MSA
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:111: error: cannot find symbol
+        CONTACT_MAPPINGS.put("حبيبي", "زوجي");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:112: error: cannot find symbol
+        CONTACT_MAPPINGS.put("حبيبتي", "زوجتي");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:113: error: cannot find symbol
+        CONTACT_MAPPINGS.put("ريّس", "الرئيس");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:114: error: cannot find symbol
+        CONTACT_MAPPINGS.put("أستاذ", "الأستاذ");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:115: error: cannot find symbol
+        CONTACT_MAPPINGS.put("دكتور", "الدكتور");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:116: error: cannot find symbol
+        CONTACT_MAPPINGS.put("مهندس", "المهندس");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:117: error: cannot find symbol
+        CONTACT_MAPPINGS.put("عم", "عمي");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:118: error: cannot find symbol
+        CONTACT_MAPPINGS.put("خالة", "خالتي");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:119: error: cannot find symbol
+        CONTACT_MAPPINGS.put("عمة", "عمتي");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:120: error: cannot find symbol
+        CONTACT_MAPPINGS.put("ابني", "ولدي");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:121: error: cannot find symbol
+        CONTACT_MAPPINGS.put("بنتي", "ابنتي");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:122: error: cannot find symbol
+        CONTACT_MAPPINGS.put("أختي", "أختي");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:123: error: cannot find symbol
+        CONTACT_MAPPINGS.put("أخويا", "أخي");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:124: error: cannot find symbol
+        CONTACT_MAPPINGS.put("خويا", "أخي");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:125: error: cannot find symbol
+        CONTACT_MAPPINGS.put("ختي", "أختي");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:128: error: cannot find symbol
+        CONTACT_MAPPINGS.put("باشا", "السيد");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:129: error: cannot find symbol
+        CONTACT_MAPPINGS.put("هانم", "السيدة");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:130: error: cannot find symbol
+        CONTACT_MAPPINGS.put("بيك", "السيد");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:131: error: cannot find symbol
+        CONTACT_MAPPINGS.put("كابتن", "الكابتن");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:132: error: cannot find symbol
+        CONTACT_MAPPINGS.put("شاويش", "العريف");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:135: error: cannot find symbol
+        CONTACT_MAPPINGS.put("يا روحي", "حبيبي");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:136: error: cannot find symbol
+        CONTACT_MAPPINGS.put("يا عمري", "حبيبي");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:137: error: cannot find symbol
+        CONTACT_MAPPINGS.put("يا قمر", "حبيبي");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:138: error: cannot find symbol
+        CONTACT_MAPPINGS.put("يا غالي", "حبيبي");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:139: error: cannot find symbol
+        CONTACT_MAPPINGS.put("يا جميل", "حبيبي");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:142: error: cannot find symbol
+        CONTACT_MAPPINGS.put("أحمدو", "أحمد");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:143: error: cannot find symbol
+        CONTACT_MAPPINGS.put("محمودو", "محمود");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:144: error: cannot find symbol
+        CONTACT_MAPPINGS.put("سوسو", "سوزان");
+        ^
+  symbol:   variable CONTACT_MAPPINGS
+  location: class EgyptianNormalizer_Fixes
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+100 errors
+3 warnings
+
+> Task :app:compileDebugJavaWithJavac FAILED
+
+[Incubating] Problems report is available at: file:///K:/business/projects_v2/EgyptianAgent/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  warning: [options] source value 8 is obsolete and will be removed in a future release
+  warning: [options] target value 8 is obsolete and will be removed in a future release
+  warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\utils\SensorManager.java:7: error: SensorManager is already defined in this compilation unit
+  import android.hardware.SensorManager;
+  ^
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\hybrid\EgyptianDialectAccuracyTester.java:133: error: method does not override or implement a method from a supertype
+                  @Override
+                  ^
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\hybrid\EgyptianDialectAccuracyTester.java:139: error: method does not override or implement a method from a supertype
+                  @Override
+                  ^
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\hybrid\ModelManager.java:68: error: incompatible types: AssetManager cannot be converted to Context
+                  OpenPhoneModel model = new OpenPhoneModel(context.getAssets(), config.getModelPath());
+                                                                             ^
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:20: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("خده", "خذه");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:21: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("جيب", "أحضر");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:22: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("روح", "اذهب");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:23: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("نام", "نم");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:24: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("قوم", "قم");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:25: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("خلاص", "انتهى");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:26: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("استنى", "انتظر");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:27: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("فهم", "افهم");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:28: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("عرف", "اعرف");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:29: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("قدر", "استطاع");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:30: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("لاقى", "وجد");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:31: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("مشى", "ذهب");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:32: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("رجع", "عاد");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:33: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("سيب", "اترك");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:34: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("خد", "خذ");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:37: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("مش", "ليس");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:38: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("مفيش", "لا يوجد");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:39: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("مقدرش", "لا أستطيع");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:40: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("معاياش", "ليس معي");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:41: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("معرش", "لا أعرف");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:42: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("مفيش حاجة", "لا شيء");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:45: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("أنا", "أنا");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:46: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("انتا", "أنت");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:47: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("انتي", "أنتِ");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:48: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("احنا", "نحن");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:49: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("هما", "هما");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:50: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("هم", "هم");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:51: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("هيا", "هي");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:54: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("إيه", "ماذا");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:55: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("إيه ده", "ما هذا");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:56: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("إزاي", "كيف");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:57: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("إمتى", "متى");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:58: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("فين", "أين");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:59: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("ليه", "لماذا");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:60: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("كام", "كم");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:61: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("مين", "من");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:64: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("بدري", "مبكراً");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:65: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("متأخر", "متأخراً");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:66: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("حالاً", "فوراً");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:67: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("هنا", "هنا");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:68: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("هناك", "هناك");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:69: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("بعد شوية", "بعد قليل");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:70: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("بعدين", "لاحقاً");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:71: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("قبل كده", "سابقاً");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:72: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("من زمان", "منذ فترة");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:73: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("دلوقتي حالا", "الآن فوراً");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:76: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("أه", "نعم");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:77: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("أيوة", "نعم");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:78: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("إيه", "نعم");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:79: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("لا", "لا");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:80: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("معلش", "عفواً");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:81: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("خلاص", "حسناً");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:82: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("تمام", "جيد");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:83: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("زي الفل", "ممتاز");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:84: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("بلاش", "لا شكراً");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:87: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("يعني", "أي");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:88: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("كده", "هكذا");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:89: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("برضه", "أيضاً");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:90: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("أصلاً", "في الأصل");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:91: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("فعلاً", "حقاً");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:92: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("بالظبط", "بالضبط");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:95: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("عامل إيه", "كيف حالك");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:96: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("أخبار إيه", "ما الأخبار");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:97: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("إيه الأخبار", "ما الأخبار");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:98: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("كله تمام", "كل شيء جيد");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:99: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("الحمد لله", "الحمد لله");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:100: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("سلامتك", "سلامتك");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:101: error: cannot find symbol
+          EGYPTIAN_TO_MSA.put("الف سلامة", "ألف سلامة");
+          ^
+    symbol:   variable EGYPTIAN_TO_MSA
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:111: error: cannot find symbol
+          CONTACT_MAPPINGS.put("حبيبي", "زوجي");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:112: error: cannot find symbol
+          CONTACT_MAPPINGS.put("حبيبتي", "زوجتي");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:113: error: cannot find symbol
+          CONTACT_MAPPINGS.put("ريّس", "الرئيس");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:114: error: cannot find symbol
+          CONTACT_MAPPINGS.put("أستاذ", "الأستاذ");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:115: error: cannot find symbol
+          CONTACT_MAPPINGS.put("دكتور", "الدكتور");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:116: error: cannot find symbol
+          CONTACT_MAPPINGS.put("مهندس", "المهندس");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:117: error: cannot find symbol
+          CONTACT_MAPPINGS.put("عم", "عمي");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:118: error: cannot find symbol
+          CONTACT_MAPPINGS.put("خالة", "خالتي");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:119: error: cannot find symbol
+          CONTACT_MAPPINGS.put("عمة", "عمتي");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:120: error: cannot find symbol
+          CONTACT_MAPPINGS.put("ابني", "ولدي");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:121: error: cannot find symbol
+          CONTACT_MAPPINGS.put("بنتي", "ابنتي");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:122: error: cannot find symbol
+          CONTACT_MAPPINGS.put("أختي", "أختي");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:123: error: cannot find symbol
+          CONTACT_MAPPINGS.put("أخويا", "أخي");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:124: error: cannot find symbol
+          CONTACT_MAPPINGS.put("خويا", "أخي");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:125: error: cannot find symbol
+          CONTACT_MAPPINGS.put("ختي", "أختي");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:128: error: cannot find symbol
+          CONTACT_MAPPINGS.put("باشا", "السيد");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:129: error: cannot find symbol
+          CONTACT_MAPPINGS.put("هانم", "السيدة");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:130: error: cannot find symbol
+          CONTACT_MAPPINGS.put("بيك", "السيد");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:131: error: cannot find symbol
+          CONTACT_MAPPINGS.put("كابتن", "الكابتن");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:132: error: cannot find symbol
+          CONTACT_MAPPINGS.put("شاويش", "العريف");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:135: error: cannot find symbol
+          CONTACT_MAPPINGS.put("يا روحي", "حبيبي");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:136: error: cannot find symbol
+          CONTACT_MAPPINGS.put("يا عمري", "حبيبي");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:137: error: cannot find symbol
+          CONTACT_MAPPINGS.put("يا قمر", "حبيبي");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:138: error: cannot find symbol
+          CONTACT_MAPPINGS.put("يا غالي", "حبيبي");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:139: error: cannot find symbol
+          CONTACT_MAPPINGS.put("يا جميل", "حبيبي");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:142: error: cannot find symbol
+          CONTACT_MAPPINGS.put("أحمدو", "أحمد");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:143: error: cannot find symbol
+          CONTACT_MAPPINGS.put("محمودو", "محمود");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  K:\business\projects_v2\EgyptianAgent\app\src\main\java\com\egyptian\agent\nlu\EgyptianNormalizer_Fixes.java:144: error: cannot find symbol
+          CONTACT_MAPPINGS.put("سوسو", "سوزان");
+          ^
+    symbol:   variable CONTACT_MAPPINGS
+    location: class EgyptianNormalizer_Fixes
+  Note: Some input files use or override a deprecated API.
+  Note: Recompile with -Xlint:deprecation for details.
+  Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+  100 errors
+  3 warnings
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.13/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 1m 5s
+45 actionable tasks: 25 executed, 20 from cache
+0 was unexpected at this time.

@@ -25,12 +25,12 @@ import java.util.Arrays;
  */
 public class SelfAwareService extends Service {
     private static final String TAG = "SelfAwareService";
-    
+
     private VoskSTTEngine egyptianASR;
     private EgyptianTTS egyptianTTS;
     private WakeWordDetector wakeWordDetector;
     private HybridOrchestrator hybridOrchestrator;
-    
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -50,7 +50,7 @@ public class SelfAwareService extends Service {
         // Setup Egyptian wake words
         setupEgyptianWakeWords();
 
-        // Initialize hybrid orchestrator
+        // Initialize hybrid orchestrator using factory method
         initializeHybridOrchestrator();
 
         // Enable senior mode if configured
@@ -62,7 +62,7 @@ public class SelfAwareService extends Service {
             // Initialize Vosk with Egyptian model
             egyptianASR = new VoskSTTEngine(this);
             Log.i(TAG, "Egyptian ASR engine initialized successfully");
-            
+
             // Initialize Egyptian TTS
             TTSManager.initialize(this);
             Log.i(TAG, "Egyptian TTS initialized successfully");
@@ -81,16 +81,16 @@ public class SelfAwareService extends Service {
         );
 
         // Initialize wake word detector with Egyptian variations
-        wakeWordDetector = new WakeWordDetector(this, () -> {
-            handleWakeWordDetected();
-        });
+        wakeWordDetector = new WakeWordDetector(this, this::handleWakeWordDetected);
 
         Log.i(TAG, "Egyptian wake words configured: " + egyptianWakeWords);
     }
 
     private void initializeHybridOrchestrator() {
         try {
-            hybridOrchestrator = new HybridOrchestrator(this);
+            // Use the Kotlin factory method to create the orchestrator
+            hybridOrchestrator = HybridOrchestrator.create(this);
+            hybridOrchestrator.initialize();
             Log.i(TAG, "Hybrid Orchestrator initialized successfully");
         } catch (Exception e) {
             Log.e(TAG, "Failed to initialize Hybrid Orchestrator", e);

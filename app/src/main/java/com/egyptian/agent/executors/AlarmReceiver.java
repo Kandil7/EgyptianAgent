@@ -7,6 +7,7 @@ import android.os.PowerManager;
 import android.util.Log;
 import com.egyptian.agent.core.TTSManager;
 import com.egyptian.agent.utils.VibrationManager;
+import com.egyptian.agent.accessibility.SeniorMode;
 
 public class AlarmReceiver extends BroadcastReceiver {
 

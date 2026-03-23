@@ -21,7 +21,8 @@ public class EmergencyFollowupWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        List<String> contacts = getInputData().getStringArrayList("contacts");
+        String[] contactsArray = getInputData().getStringArray("contacts");
+        List<String> contacts = contactsArray != null ? java.util.Arrays.asList(contactsArray) : null;
         if (contacts == null || contacts.isEmpty()) {
             Log.w(TAG, "No contacts provided for emergency follow-up");
             return Result.failure();
