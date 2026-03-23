@@ -1,0 +1,45 @@
+{
+  "buildFiles": [
+    "K:\\business\\projects_v2\\EgyptianAgent\\app\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "C:\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "K:\\business\\projects_v2\\EgyptianAgent\\app\\.cxx\\Debug\\71f2jt4j\\arm64-v8a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "C:\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "K:\\business\\projects_v2\\EgyptianAgent\\app\\.cxx\\Debug\\71f2jt4j\\arm64-v8a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "llama_native::@6890427a1f51a3e7e1df": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "llama_native",
+      "output": "K:\\business\\projects_v2\\EgyptianAgent\\app\\build\\intermediates\\cxx\\Debug\\71f2jt4j\\obj\\arm64-v8a\\libllama_native.so",
+      "runtimeFiles": []
+    },
+    "whisper_native::@6890427a1f51a3e7e1df": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "whisper_native",
+      "output": "K:\\business\\projects_v2\\EgyptianAgent\\app\\build\\intermediates\\cxx\\Debug\\71f2jt4j\\obj\\arm64-v8a\\libwhisper_native.so",
+      "runtimeFiles": []
+    }
+  },
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "C:\\Android\\Sdk\\ndk\\25.2.9519653\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang.exe",
+      "cppCompilerExecutable": "C:\\Android\\Sdk\\ndk\\25.2.9519653\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}

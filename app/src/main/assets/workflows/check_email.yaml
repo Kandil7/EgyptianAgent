@@ -1,0 +1,22 @@
+# Check Email Workflow - اقرا الايميل
+# Checks Gmail inbox for new emails
+appId: com.google.android.gm
+name: Check Email
+nameAr: اقرا الايميل
+description: Check Gmail inbox for new emails
+descriptionAr: فحص صندوق الوارد في جي ميل
+---
+- launchApp: com.google.android.gm
+- wait: 2000
+- findAndTap: Inbox
+- wait: 1000
+- scroll: down
+- wait: 500
+- readScreen
+- wait: 500
+- findAndTap: First email
+- wait: 1000
+- readScreen
+- back
+- wait: 500
+- done: تم قراءة الايميلات

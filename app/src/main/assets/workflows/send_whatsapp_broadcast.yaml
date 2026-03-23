@@ -1,0 +1,30 @@
+# WhatsApp Broadcast Workflow - ابعت للجميع
+# Sends message to multiple contacts
+appId: com.whatsapp
+name: WhatsApp Broadcast
+nameAr: ابعت للجميع
+description: Send message to multiple contacts
+descriptionAr: إرسال رسالة لجهات اتصال متعددة
+---
+- launchApp: com.whatsapp
+- wait: 2000
+- findAndTap: ماما
+- wait: 1000
+- type: السلام عليكم، عاملين إيه؟
+- tap: Send
+- wait: 1000
+- back
+- wait: 500
+- findAndTap: بابا
+- wait: 1000
+- type: السلام عليكم، عاملين إيه؟
+- tap: Send
+- wait: 1000
+- back
+- wait: 500
+- findAndTap: أحمد
+- wait: 1000
+- type: السلام عليكم، عاملين إيه؟
+- tap: Send
+- wait: 500
+- done: تم الإرسال للجميع

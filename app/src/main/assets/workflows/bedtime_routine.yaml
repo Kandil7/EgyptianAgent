@@ -1,0 +1,22 @@
+# Bedtime Routine Workflow - وقت النوم
+# Sets alarms, turns off lights, enables Do Not Disturb
+appId: com.google.android.deskclock
+name: Bedtime
+nameAr: وقت النوم
+description: Set alarms, turn off lights, enable Do Not Disturb
+descriptionAr: ضبط المنبهات وإطفاء الإضاءة وتفعيل وضع عدم الإزعاج
+---
+- launchApp: com.google.android.deskclock
+- wait: 1000
+- findAndTap: Add alarm
+- wait: 500
+- type: 07:00
+- tap: Save
+- wait: 500
+- home
+- wait: 500
+- shell: cmd media_control set_dnd_mode priority
+- wait: 500
+- shell: svc wifi disable
+- wait: 500
+- done: تصبح على خير

@@ -1,0 +1,22 @@
+# Book Uber Workflow - احجز أوبر
+# Books an Uber ride to home
+appId: com.ubercab
+name: Book Uber
+nameAr: احجز أوبر
+description: Book Uber ride to home
+descriptionAr: حجز رحلة أوبر للبيت
+---
+- launchApp: com.ubercab
+- wait: 3000
+- findAndTap: Where to?
+- wait: 500
+- type: Home
+- wait: 1000
+- tap: Confirm Location
+- wait: 1000
+- tap: Choose UberX
+- wait: 2000
+- tap: Confirm UberX
+- wait: 3000
+- readScreen
+- done: تم حجز الأوبر، السابعة في الطريق

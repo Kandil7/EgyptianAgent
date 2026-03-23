@@ -1,0 +1,5 @@
+# ninja log v5
+22	2753	7952396334802227	CMakeFiles/whisper_native.dir/src/main/cpp/whisper_native.cpp.o	cf6a7f96ab1df937
+1	2819	7952396335395637	CMakeFiles/llama_native.dir/src/main/cpp/llama_native.cpp.o	ae105964f4030bf5
+2764	3088	7952396338213868	../../../../build/intermediates/cxx/Debug/71f2jt4j/obj/arm64-v8a/libwhisper_native.so	7b1fe1c56007642e
+2819	3103	7952396338400481	../../../../build/intermediates/cxx/Debug/71f2jt4j/obj/arm64-v8a/libllama_native.so	3e78b12a54102453

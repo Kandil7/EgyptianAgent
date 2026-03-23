@@ -1,0 +1,24 @@
+# Morning Routine Workflow - روتين الصباح
+# Checks weather, news, and sends morning WhatsApp message
+appId: com.google.android.googlequicksearchbox
+name: Morning Routine
+nameAr: روتين الصباح
+description: Check weather, news, and send morning message
+descriptionAr: فحص الطقس والأخبار وإرسال رسالة صباحية
+---
+- launchApp: com.google.android.googlequicksearchbox
+- wait: 2000
+- type: أخبار مصر اليوم
+- enter
+- wait: 3000
+- readScreen
+- back
+- wait: 500
+- launchApp: com.whatsapp
+- wait: 2000
+- findAndTap: ماما
+- wait: 1000
+- type: صباح الخير يا حبيبتي، يومك سعيد
+- tap: Send
+- wait: 500
+- done: تم روتين الصباح بنجاح

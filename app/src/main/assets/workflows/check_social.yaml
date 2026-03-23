@@ -1,0 +1,30 @@
+# Check Social Media Workflow - شوف السوشيال
+# Checks Facebook, Instagram, and Twitter feeds
+appId: com.facebook.katana
+name: Check Social Media
+nameAr: شوف السوشيال
+description: Check Facebook, Instagram, and Twitter updates
+descriptionAr: فحص تحديثات فيسبوك وانستجرام وتويتر
+---
+- launchApp: com.facebook.katana
+- wait: 2000
+- scroll: down
+- wait: 1000
+- scroll: down
+- wait: 1000
+- readScreen
+- back
+- wait: 500
+- launchApp: com.instagram.android
+- wait: 2000
+- scroll: down
+- wait: 1000
+- readScreen
+- back
+- wait: 500
+- launchApp: com.twitter.android
+- wait: 2000
+- scroll: down
+- wait: 1000
+- readScreen
+- done: تم فحص السوشيال ميديا

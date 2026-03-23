@@ -1,0 +1,31 @@
+# Settings Toggle Workflow - غيّر الإعدادات
+# Toggles WiFi, Bluetooth, and brightness
+appId: com.android.settings
+name: Settings Toggle
+nameAr: غيّر الإعدادات
+description: Toggle WiFi, Bluetooth, and adjust brightness
+descriptionAr: تبديل الواي فاي والبلوتوث وضبط السطوع
+---
+- launchApp: com.android.settings
+- wait: 1000
+- findAndTap: Network & internet
+- wait: 500
+- findAndTap: Internet
+- wait: 500
+- tap: WiFi toggle
+- wait: 500
+- back
+- wait: 500
+- findAndTap: Connected devices
+- wait: 500
+- findAndTap: Bluetooth
+- wait: 500
+- tap: Bluetooth toggle
+- wait: 500
+- back
+- wait: 500
+- findAndTap: Display
+- wait: 500
+- findAndTap: Brightness
+- wait: 500
+- done: تم تغيير الإعدادات

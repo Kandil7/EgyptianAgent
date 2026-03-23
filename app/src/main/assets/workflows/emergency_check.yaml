@@ -1,0 +1,23 @@
+# Emergency Check Workflow - اطمن على العيلة
+# Calls family members sequentially
+appId: com.android.dialer
+name: Emergency Check
+nameAr: اطمن على العيلة
+description: Call family members to check on them
+descriptionAr: الاتصال بأفراد العائلة للاطمئنان عليهم
+---
+- launchApp: com.android.dialer
+- wait: 1000
+- findAndTap: ماما
+- wait: 30000
+- back
+- wait: 1000
+- findAndTap: بابا
+- wait: 30000
+- back
+- wait: 1000
+- findAndTap: أحمد
+- wait: 30000
+- back
+- wait: 500
+- done: تم الاطمئنان على الجميع

@@ -1,0 +1,21 @@
+# YouTube Search Workflow - دور على فيديو
+# Searches and plays videos on YouTube
+appId: com.google.android.youtube
+name: YouTube Search
+nameAr: دور على فيديو
+description: Search and play videos on YouTube
+descriptionAr: البحث وتشغيل الفيديوهات على يوتيوب
+---
+- launchApp: com.google.android.youtube
+- wait: 2000
+- findAndTap: Search
+- wait: 500
+- type: أغاني محمد عبد الوهاب
+- enter
+- wait: 2000
+- scroll: down
+- wait: 500
+- tap: First video
+- wait: 3000
+- readScreen
+- done: جاري تشغيل الفيديو

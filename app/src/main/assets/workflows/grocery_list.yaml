@@ -1,0 +1,30 @@
+# Grocery List Workflow - قائمة المشتريات
+# Adds items to notes app
+appId: com.google.android.keep
+name: Grocery List
+nameAr: قائمة المشتريات
+description: Add items to shopping list in notes
+descriptionAr: إضافة عناصر لقائمة التسوق في الملاحظات
+---
+- launchApp: com.google.android.keep
+- wait: 1000
+- findAndTap: New note
+- wait: 500
+- type: قائمة المشتريات
+- wait: 500
+- tap: Body
+- wait: 500
+- type: عيش
+- enter
+- type: لبن
+- enter
+- type: بيض
+- enter
+- type: جبنة
+- enter
+- type: طماطم
+- enter
+- wait: 500
+- tap: Save
+- wait: 500
+- done: تمت إضافة قائمة المشتريات
