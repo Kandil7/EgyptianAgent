@@ -587,17 +587,28 @@ public class EgyptianNormalizer {
      */
     public static void applyPostProcessingRules(IntentResult result) {
         if (result == null) return;
-        
+
         // Normalize contact names
         if (result.getEntity("contact") != null) {
             String contact = result.getEntity("contact");
             result.setEntity("contact", normalizeContactName(contact));
         }
-        
+
         // Normalize time expressions
         if (result.getEntity("time") != null) {
             String time = result.getEntity("time");
             result.setEntity("time", normalizeTimeExpression(time));
         }
+    }
+
+    /**
+     * Extract contact name from command.
+     * Stub implementation for compatibility.
+     * @param command The command to extract contact from
+     * @return Contact name or null
+     */
+    public static String extractContactName(String command) {
+        // Stub implementation
+        return null;
     }
 }

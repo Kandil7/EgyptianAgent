@@ -33,7 +33,8 @@ public enum IntentType {
     WEATHER_QUERY,
     GREETING,
     THANK_YOU,
-    GOODBYE;
+    GOODBYE,
+    CONVERSATION;
 
     /**
      * Converts from OpenPhone string representation
@@ -108,6 +109,8 @@ public enum IntentType {
                 return THANK_YOU;
             case "GOODBYE":
                 return GOODBYE;
+            case "CONVERSATION":
+                return CONVERSATION;
             default:
                 return UNKNOWN;
         }
@@ -175,6 +178,8 @@ public enum IntentType {
                 return "THANK_YOU";
             case GOODBYE:
                 return "GOODBYE";
+            case CONVERSATION:
+                return "CONVERSATION";
             default:
                 return "UNKNOWN";
         }

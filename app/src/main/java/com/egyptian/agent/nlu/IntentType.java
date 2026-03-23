@@ -37,7 +37,8 @@ public enum IntentType {
     GREETING("GREETING", "تحية"),
     THANK_YOU("THANK_YOU", "شكر"),
     GOODBYE("GOODBYE", "وداع"),
-    
+    CONVERSATION("CONVERSATION", "محادثة"),
+
     // Unknown
     UNKNOWN("UNKNOWN", "غير معروف");
     

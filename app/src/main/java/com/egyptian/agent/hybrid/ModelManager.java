@@ -65,7 +65,7 @@ public class ModelManager {
         if ("openphone-3b".equalsIgnoreCase(modelName)) {
             try {
                 // Attempt to load the OpenPhone model
-                OpenPhoneModel model = new OpenPhoneModel(context.getAssets(), config.getModelPath());
+                OpenPhoneModel model = new OpenPhoneModel(context, config.getModelPath());
                 return model;
             } catch (Exception e) {
                 Log.e(TAG, "Error creating OpenPhone model instance", e);

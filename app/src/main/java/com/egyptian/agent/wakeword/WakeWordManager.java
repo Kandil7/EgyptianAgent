@@ -259,33 +259,33 @@ public class WakeWordManager {
         if (isDestroyed.get()) {
             return;
         }
-        
+
         Log.d(TAG, "Destroying wake word manager");
-        
+
         stop();
-        
+
         if (porcupineDetector != null) {
             porcupineDetector.destroy();
             porcupineDetector = null;
         }
-        
+
         if (voskDetector != null) {
             voskDetector.destroy();
             voskDetector = null;
         }
-        
+
         activeDetector = null;
         currentDetectorType = DetectorType.NONE;
         isDestroyed.set(true);
-        
+
         // Clear singleton for recreation
         instance = null;
     }
-    
+
     /**
      * Interface for wake word detection.
      */
-    private interface WakeWordDetectorInterface {
+    public interface WakeWordDetectorInterface {
         void setCallback(WakeWordCallback callback);
         void start();
         void stop();

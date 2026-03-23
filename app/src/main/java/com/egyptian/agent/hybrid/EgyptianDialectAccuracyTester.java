@@ -131,16 +131,23 @@ public class EgyptianDialectAccuracyTester {
             // Call the async method and wait for completion
             modelIntegration.analyzeText(command, new OpenPhoneIntegration.AnalysisCallback() {
                 @Override
-                public void onSuccess(IntentResult result) {
+                public void onResult(IntentResult result) {
                     resultHolder[0] = result;
                     latch.countDown();
                 }
 
                 @Override
-                public void onError(Exception error) {
+                public void onFallbackRequired(String reason) {
+                    // Fallback to default result
                     resultHolder[0] = new IntentResult();
                     resultHolder[0].setIntentType(com.egyptian.agent.nlp.IntentType.UNKNOWN);
                     resultHolder[0].setConfidence(0.0f);
+                    latch.countDown();
+                }
+
+                @Override
+                public void onResult(IntentResult result) {
+                    resultHolder[0] = result;
                     latch.countDown();
                 }
             });

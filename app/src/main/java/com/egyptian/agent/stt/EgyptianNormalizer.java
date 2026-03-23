@@ -204,10 +204,10 @@ public class EgyptianNormalizer {
      */
     public static IntentResult classifyBasicIntent(String text) {
         IntentResult result = new IntentResult();
-        
+
         // Basic pattern matching for Egyptian dialect
         String lowerText = text.toLowerCase();
-        
+
         if (lowerText.contains("اتصل") || lowerText.contains("كلم") || lowerText.contains("رن على")) {
             result.setIntentType(IntentType.CALL_CONTACT);
             result.setConfidence(0.7f);
@@ -217,14 +217,25 @@ public class EgyptianNormalizer {
         } else if (lowerText.contains("نبهني") || lowerText.contains("ذكرني") || lowerText.contains("المنبه")) {
             result.setIntentType(IntentType.SET_ALARM);
             result.setConfidence(0.7f);
-        } else if (lowerText.contains(" emergencies") != -1 || lowerText.contains("نجدة") != -1 || lowerText.contains("استغاثة") != -1) {
+        } else if (lowerText.contains("نجدة") || lowerText.contains("استغاثة")) {
             result.setIntentType(IntentType.EMERGENCY);
             result.setConfidence(0.9f);
         } else {
             result.setIntentType(IntentType.UNKNOWN);
             result.setConfidence(0.3f);
         }
-        
+
         return result;
+    }
+
+    /**
+     * Extract contact name from command.
+     * Stub implementation for compatibility.
+     * @param command The command to extract contact from
+     * @return Contact name or null
+     */
+    public static String extractContactName(String command) {
+        // Stub implementation
+        return null;
     }
 }
