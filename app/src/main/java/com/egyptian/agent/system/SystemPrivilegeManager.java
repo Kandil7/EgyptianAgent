@@ -1,6 +1,7 @@
 package com.egyptian.agent.system;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.util.Log;
 
 import rikka.shizuku.Shizuku;
@@ -9,7 +10,7 @@ import com.egyptian.agent.security.CommandSanitizer;
 /**
  * System Privilege Manager
  * Handles system-level privileges for the application
- * 
+ *
  * Security hardened with:
  * - Command allowlisting via CommandSanitizer
  * - Rate limiting (max 5 commands per 5 minutes)
@@ -17,6 +18,10 @@ import com.egyptian.agent.security.CommandSanitizer;
  */
 public class SystemPrivilegeManager {
     private static final String TAG = "SystemPrivilegeManager";
+
+    // Shizuku constants for permission handling
+    public static final int RESULT_SUCCESS = PackageManager.PERMISSION_GRANTED;
+    public static final int PERMISSION_GRANTED = PackageManager.PERMISSION_GRANTED;
 
     private static boolean hasSystemPrivileges = false;
     private static Context appContext = null;
@@ -58,7 +63,7 @@ public class SystemPrivilegeManager {
             // Set up Shizuku callbacks
             Shizuku.addRequestPermissionResultListener((requestCode, grantResult) -> {
                 if (requestCode == 1) { // Our request code
-                    if (grantResult == Shizuku.RESULT_SUCCESS) {
+                    if (grantResult == PackageManager.PERMISSION_GRANTED) {
                         Log.i(TAG, "System privileges granted");
                         hasSystemPrivileges = true;
                     } else {
@@ -69,7 +74,7 @@ public class SystemPrivilegeManager {
             });
 
             // Check if already granted
-            if (Shizuku.checkSelfPermission() == Shizuku.PERMISSION_GRANTED) {
+            if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
                 hasSystemPrivileges = true;
                 Log.i(TAG, "System privileges already granted");
             } else {

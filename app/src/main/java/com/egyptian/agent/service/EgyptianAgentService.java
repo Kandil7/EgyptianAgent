@@ -15,11 +15,11 @@ import com.egyptian.agent.executor.CommandExecutor;
 
 /**
  * Egyptian Agent Voice Interaction Service
- * 
+ *
  * System-level voice interaction service that integrates with Android's
  * voice assistant framework. Allows the agent to be set as the default
  * voice assistant and work with home button / gesture activation.
- * 
+ *
  * Features:
  * - System-level integration
  * - Home button activation
@@ -28,21 +28,21 @@ import com.egyptian.agent.executor.CommandExecutor;
  */
 public class EgyptianAgentService extends VoiceInteractionService {
     private static final String TAG = "EgyptianAgentService";
-    
+
     private NLUManager nluManager;
     private WakeWordManager wakeWordManager;
     private CommandExecutor commandExecutor;
-    
+
     private boolean isReady;
-    
+
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "VoiceInteractionService created");
-        
+
         initializeComponents();
     }
-    
+
     /**
      * Initialize core components.
      */
@@ -51,14 +51,14 @@ public class EgyptianAgentService extends VoiceInteractionService {
             // Initialize NLU manager
             nluManager = NLUManager.getInstance(this);
             nluManager.initialize(true);
-            
+
             // Initialize wake word manager
             wakeWordManager = WakeWordManager.getInstance(this);
             wakeWordManager.initialize();
-            
+
             // Initialize command executor
             commandExecutor = CommandExecutor.getInstance(this);
-            
+
             isReady = true;
             Log.i(TAG, "All components initialized");
         } catch (Exception e) {
@@ -66,53 +66,51 @@ public class EgyptianAgentService extends VoiceInteractionService {
             isReady = false;
         }
     }
-    
+
     @Override
     public void onReady() {
         super.onReady();
         Log.i(TAG, "VoiceInteractionService ready");
-        
+
         // Start wake word detection
         if (wakeWordManager != null) {
             wakeWordManager.setCallback(wakeWordCallback);
             wakeWordManager.start();
         }
     }
-    
+
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "VoiceInteractionService destroyed");
-        
+
         if (wakeWordManager != null) {
             wakeWordManager.destroy();
         }
-        
+
         if (nluManager != null) {
             nluManager.destroy();
         }
-        
+
         if (commandExecutor != null) {
             commandExecutor.destroy();
         }
     }
-    
+
     @Override
     public VoiceInteractionSession onCreateNewSession() {
         Log.d(TAG, "Creating new voice interaction session");
         return new EgyptianAgentSession(this);
     }
-    
+
     @Override
-    public void onShow() {
-        super.onShow();
-        Log.d(TAG, "Voice interaction shown");
-    }
-    
-    @Override
-    public void onHide() {
-        super.onHide();
-        Log.d(TAG, "Voice interaction hidden");
+    public void onShowSession(VoiceInteractionSession session, boolean show) {
+        super.onShowSession(session, show);
+        if (show) {
+            Log.d(TAG, "Voice interaction session shown");
+        } else {
+            Log.d(TAG, "Voice interaction session hidden");
+        }
     }
     
     /**

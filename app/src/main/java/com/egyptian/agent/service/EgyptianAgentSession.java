@@ -15,62 +15,64 @@ import com.egyptian.agent.executor.CommandExecutor;
 
 /**
  * Egyptian Agent Voice Interaction Session
- * 
+ *
  * Handles individual voice interaction sessions.
  * Manages the UI and interaction flow for each voice command.
  */
 public class EgyptianAgentSession extends VoiceInteractionSession {
     private static final String TAG = "EgyptianAgentSession";
-    
+
     private NLUManager nluManager;
     private CommandExecutor commandExecutor;
     private View contentView;
-    
+
     private boolean isListening;
     private boolean isProcessing;
-    
+
     public EgyptianAgentSession(Context context) {
         super(context);
         Log.d(TAG, "Session created");
     }
-    
+
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "Session onCreate");
-        
+
         nluManager = NLUManager.getInstance(getContext());
         commandExecutor = CommandExecutor.getInstance(getContext());
     }
-    
+
     @Override
     public View onCreateContentView() {
         Log.d(TAG, "Creating content view");
-        
+
         LayoutInflater inflater = LayoutInflater.from(getContext());
         contentView = inflater.inflate(R.layout.voice_session_overlay, null);
-        
+
         return contentView;
     }
-    
+
     @Override
-    public void onShow(boolean recompute) {
-        super.onShow(recompute);
-        Log.d(TAG, "Session onShow");
-        
-        // Start listening
-        startListening();
+    public void onShowSession(Bundle activeFlags, boolean show) {
+        super.onShowSession(activeFlags, show);
+        Log.d(TAG, "Session onShow: " + show);
+
+        if (show) {
+            // Start listening
+            startListening();
+        }
     }
-    
+
     @Override
     public void onHide() {
         super.onHide();
         Log.d(TAG, "Session onHide");
-        
+
         // Stop listening
         stopListening();
     }
-    
+
     @Override
     public void onDestroy() {
         super.onDestroy();

@@ -7,5 +7,6 @@ public enum IntentType {
     READ_MISSED_CALLS,
     READ_TIME,
     EMERGENCY,
+    CONVERSATION,
     UNKNOWN
 }

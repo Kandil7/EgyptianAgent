@@ -10,6 +10,7 @@ import com.egyptian.agent.backup.BackupRestoreManager;
 import com.egyptian.agent.feedback.UserFeedbackSystem;
 import com.egyptian.agent.performance.HonorX6cPerformanceOptimizer;
 import com.egyptian.agent.core.DeviceClassDetector;
+import com.egyptian.agent.core.TTSManager;
 
 public class MainApplication extends Application {
 

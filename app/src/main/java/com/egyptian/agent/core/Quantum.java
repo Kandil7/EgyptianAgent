@@ -7,6 +7,7 @@ import com.egyptian.agent.executors.WhatsAppExecutor;
 import com.egyptian.agent.executors.AlarmExecutor;
 import com.egyptian.agent.stt.EgyptianNormalizer;
 import com.egyptian.agent.utils.CrashLogger;
+import com.egyptian.agent.core.TTSManager;
 
 /**
  * Quantum class for advanced command processing
@@ -27,27 +28,27 @@ public class Quantum {
      */
     public void processCommand(String command) {
         Log.d(TAG, "Processing command: " + command);
-        
+
         try {
             // Normalize the command using Egyptian dialect processing
             String normalizedCommand = EgyptianNormalizer.normalize(command);
-            
+
             // Try different processing strategies
             if (processCallCommand(normalizedCommand)) {
                 return;
             }
-            
+
             if (processWhatsAppCommand(normalizedCommand)) {
                 return;
             }
-            
+
             if (processAlarmCommand(normalizedCommand)) {
                 return;
             }
-            
+
             // If no specific command matched, try general processing
             processGeneralCommand(normalizedCommand);
-            
+
         } catch (Exception e) {
             Log.e(TAG, "Error processing command: " + command, e);
             CrashLogger.logError(context, e);
@@ -85,7 +86,7 @@ public class Quantum {
             // Extract recipient and message
             String recipient = extractContactName(command);
             String message = extractMessage(command);
-            
+
             if (!recipient.isEmpty()) {
                 lastContact = recipient;
                 WhatsAppExecutor.handleCommand(context, command);
@@ -122,13 +123,13 @@ public class Quantum {
             TTSManager.speak(context, "الساعة " + currentTime);
             return;
         }
-        
+
         if (command.contains("المكالمات") || command.contains("الفايتة")) {
             // Read missed calls
             TTSManager.speak(context, "بتشوف المكالمات الفايتة");
             return;
         }
-        
+
         // If no pattern matched, inform user
         TTSManager.speak(context, "مش فاهمك. قول الأمر تاني");
     }
