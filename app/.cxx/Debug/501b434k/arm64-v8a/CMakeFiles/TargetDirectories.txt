@@ -1,3 +1,0 @@
-K:/projects/mobile/EgyptianAgent/app/.cxx/Debug/501b434k/arm64-v8a/CMakeFiles/llama_native.dir
-K:/projects/mobile/EgyptianAgent/app/.cxx/Debug/501b434k/arm64-v8a/CMakeFiles/edit_cache.dir
-K:/projects/mobile/EgyptianAgent/app/.cxx/Debug/501b434k/arm64-v8a/CMakeFiles/rebuild_cache.dir

@@ -1,1 +1,0 @@
-K:\projects\mobile\EgyptianAgent\app\CMakeLists.txt
