@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Custom attributes for Senior Mode components -->
+    
+    <!-- Text size attributes for custom views -->
+    <attr name="itemTextSize" format="dimension" />
+    <attr name="titleTextSize" format="dimension" />
+    <attr name="subtitleTextSize" format="dimension" />
+    
+    <!-- Additional custom attributes for future use -->
+    <attr name="seniorModeEnabled" format="boolean" />
+    <attr name="highContrast" format="boolean" />
+    <attr name="largeTouchTarget" format="boolean" />
+</resources>

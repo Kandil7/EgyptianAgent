@@ -111,4 +111,10 @@
     <string name="language">Language</string>
     <string name="volume">Volume</string>
     <string name="sensitivity">Sensitivity</string>
+
+    <!-- Voice session overlay -->
+    <string name="listening_indicator">Listening indicator</string>
+    <string name="listening_prompt">أوامرك؟</string>
+    <string name="processing_voice">Processing your command...</string>
+    <string name="voice_session_title">Voice Assistant</string>
 </resources>

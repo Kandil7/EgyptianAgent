@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Voice Session Overlay Layout
+  Used by EgyptianAgentSession for voice interaction UI
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/voice_session_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#80000000">
+
+    <LinearLayout
+        android:id="@+id/voice_session_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:padding="32dp">
+
+        <!-- Listening indicator -->
+        <ImageView
+            android:id="@+id/voice_listening_indicator"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@android:drawable/ic_btn_speak_now"
+            android:contentDescription="@string/listening_indicator" />
+
+        <!-- Status text -->
+        <TextView
+            android:id="@+id/voice_status_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:text="@string/listening_prompt"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <!-- Transcription text -->
+        <TextView
+            android:id="@+id/voice_transcription_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:text=""
+            android:textColor="#CCCCCC"
+            android:textSize="16sp"
+            android:visibility="gone" />
+
+        <!-- Progress bar for processing -->
+        <ProgressBar
+            android:id="@+id/voice_processing_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:indeterminate="true"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+</FrameLayout>
