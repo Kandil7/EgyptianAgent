@@ -1,173 +1,151 @@
 package com.egyptian.agent.service;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Intent;
-import android.os.Bundle;
-import android.service.voice.VoiceInteractionService;
-import android.service.voice.VoiceInteractionSession;
-import android.service.voice.VoiceInteractionSessionService;
+import android.os.Build;
+import android.os.IBinder;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
-import com.egyptian.agent.core.TTSManager;
-import com.egyptian.agent.nlu.IntentResult;
-import com.egyptian.agent.nlu.NLUManager;
-import com.egyptian.agent.wakeword.WakeWordManager;
-import com.egyptian.agent.executor.CommandExecutor;
+import com.egyptian.agent.R;
+import com.egyptian.agent.ui.MainActivity;
+
+import java.util.Locale;
 
 /**
- * Egyptian Agent Voice Interaction Service
- *
- * System-level voice interaction service that integrates with Android's
- * voice assistant framework. Allows the agent to be set as the default
- * voice assistant and work with home button / gesture activation.
- *
- * Features:
- * - System-level integration
- * - Home button activation
- * - VoiceInteractionSession support
- * - Background operation
+ * Egyptian Agent Voice Service
+ * Handles voice commands and speech output
  */
-public class EgyptianAgentService extends VoiceInteractionService {
+public class EgyptianAgentService extends Service {
     private static final String TAG = "EgyptianAgentService";
-
-    private NLUManager nluManager;
-    private WakeWordManager wakeWordManager;
-    private CommandExecutor commandExecutor;
-
-    private boolean isReady;
+    private static final int NOTIFICATION_ID = 1001;
+    private static final String CHANNEL_ID = "egyptian_voice_channel";
+    
+    private boolean isRunning = false;
+    private TextToSpeech textToSpeech;
+    private boolean ttsReady = false;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(TAG, "VoiceInteractionService created");
-
-        initializeComponents();
+        Log.i(TAG, "Egyptian Agent Voice Service created");
+        createNotificationChannel();
+        initializeTTS();
     }
 
-    /**
-     * Initialize core components.
-     */
-    private void initializeComponents() {
-        try {
-            // Initialize NLU manager
-            nluManager = NLUManager.getInstance(this);
-            nluManager.initialize(true);
+    private void initializeTTS() {
+        textToSpeech = new TextToSpeech(this, status -> {
+            if (status == TextToSpeech.SUCCESS) {
+                int result = textToSpeech.setLanguage(new Locale("ar", "EG"));
+                if (result != TextToSpeech.LANG_MISSING_DATA && 
+                    result != TextToSpeech.LANG_NOT_SUPPORTED) {
+                    ttsReady = true;
+                    Log.i(TAG, "TTS initialized for Egyptian Arabic");
+                    speak("مساعدك الصوتي جاهز");
+                }
+            }
+        });
+    }
 
-            // Initialize wake word manager
-            wakeWordManager = WakeWordManager.getInstance(this);
-            wakeWordManager.initialize();
-
-            // Initialize command executor
-            commandExecutor = CommandExecutor.getInstance(this);
-
-            isReady = true;
-            Log.i(TAG, "All components initialized");
-        } catch (Exception e) {
-            Log.e(TAG, "Error initializing components", e);
-            isReady = false;
+    private void speak(String text) {
+        if (ttsReady && textToSpeech != null) {
+            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "egyptian_tts");
         }
     }
 
     @Override
-    public void onReady() {
-        super.onReady();
-        Log.i(TAG, "VoiceInteractionService ready");
-
-        // Start wake word detection
-        if (wakeWordManager != null) {
-            wakeWordManager.setCallback(wakeWordCallback);
-            wakeWordManager.start();
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.i(TAG, "Voice service started");
+        
+        if (intent != null && "STOP".equals(intent.getAction())) {
+            speak("تم إيقاف المساعد الصوتي");
+            stopSelf();
+            return START_NOT_STICKY;
         }
+        
+        if (intent != null && "SPEAK".equals(intent.getAction())) {
+            String message = intent.getStringExtra("message");
+            if (message != null) {
+                speak(message);
+            }
+        }
+        
+        startForeground(NOTIFICATION_ID, createNotification("جاري العمل..."));
+        isRunning = true;
+        
+        return START_STICKY;
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                CHANNEL_ID,
+                "Egyptian Agent Voice",
+                NotificationManager.IMPORTANCE_LOW
+            );
+            channel.setDescription("مساعد صوتي للمصريين");
+            channel.setShowBadge(false);
+            
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            if (manager != null) {
+                manager.createNotificationChannel(channel);
+            }
+        }
+    }
+
+    private Notification createNotification(String text) {
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+            this, 0, notificationIntent, 
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        Intent stopIntent = new Intent(this, EgyptianAgentService.class);
+        stopIntent.setAction("STOP");
+        PendingIntent stopPendingIntent = PendingIntent.getService(
+            this, 1, stopIntent, 
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        Notification.Builder builder;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder = new Notification.Builder(this, CHANNEL_ID);
+        } else {
+            builder = new Notification.Builder(this);
+        }
+
+        return builder
+            .setContentTitle("Egyptian Agent 🎤")
+            .setContentText(text)
+            .setSmallIcon(android.R.drawable.ic_btn_speak_now)
+            .setContentIntent(pendingIntent)
+            .addAction(android.R.drawable.ic_media_pause, "إيقاف", stopPendingIntent)
+            .setOngoing(true)
+            .setPriority(Notification.PRIORITY_LOW)
+            .build();
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "VoiceInteractionService destroyed");
-
-        if (wakeWordManager != null) {
-            wakeWordManager.destroy();
+        isRunning = false;
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
         }
-
-        if (nluManager != null) {
-            nluManager.destroy();
-        }
-
-        if (commandExecutor != null) {
-            commandExecutor.destroy();
-        }
+        Log.i(TAG, "Voice service stopped");
     }
 
-    @Override
-    public VoiceInteractionSession onCreateNewSession() {
-        Log.d(TAG, "Creating new voice interaction session");
-        return new EgyptianAgentSession(this);
-    }
-
-    @Override
-    public void onShowSession(VoiceInteractionSession session, boolean show) {
-        super.onShowSession(session, show);
-        if (show) {
-            Log.d(TAG, "Voice interaction session shown");
-        } else {
-            Log.d(TAG, "Voice interaction session hidden");
-        }
-    }
-    
-    /**
-     * Handle wake word detection.
-     */
-    private final com.egyptian.agent.wakeword.WakeWordCallback wakeWordCallback = 
-        new com.egyptian.agent.wakeword.WakeWordCallback() {
-        @Override
-        public void onWakeWordDetected(String wakeWord, float confidence) {
-            Log.i(TAG, "Wake word detected: " + wakeWord + " (confidence: " + confidence + ")");
-            
-            // Show voice interaction UI
-            showSession();
-            
-            // Speak confirmation
-            if ("يا كبير".equals(wakeWord)) {
-                TTSManager.speak(EgyptianAgentService.this, "أوامرك يا كبير");
-            } else {
-                TTSManager.speak(EgyptianAgentService.this, "أوامرك؟");
-            }
-        }
-        
-        @Override
-        public void onError(Exception error) {
-            Log.e(TAG, "Wake word error: " + error.getMessage());
-        }
-        
-        @Override
-        public void onStateChanged(boolean isListening) {
-            Log.d(TAG, "Wake word state changed: " + isListening);
-        }
-    };
-    
-    /**
-     * Process voice command.
-     */
-    public void processCommand(String command) {
-        if (!isReady || nluManager == null) {
-            Log.w(TAG, "Service not ready");
-            return;
-        }
-        
-        Log.d(TAG, "Processing command: " + command);
-        
-        // Classify intent
-        IntentResult result = nluManager.classify(command);
-        
-        // Execute command
-        if (commandExecutor != null) {
-            commandExecutor.execute(result);
-        }
-    }
-    
-    /**
-     * Check if service is ready.
-     */
-    public boolean isReady() {
-        return isReady;
+    public boolean isRunning() {
+        return isRunning;
     }
 }

@@ -39,16 +39,10 @@ public class DataEncryptionManager {
 
     private void initializeEncryption() {
         try {
-            // Create or retrieve the master key
-            masterKey = new MasterKey.Builder(context, MasterKey.DEFAULT_MASTER_KEY_ALIAS)
-                    .setKeyGenParameterSpec(
-                            new KeyGenParameterSpec.Builder(
-                                    MASTER_KEY_ALIAS,
-                                    KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                                    .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                                    .setKeySize(256)
-                                    .build())
+            // Use the default AndroidX Security Master Key
+            // This ensures compatibility with existing keys on the device
+            masterKey = new MasterKey.Builder(context)
+                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
                     .build();
 
             // Create encrypted shared preferences

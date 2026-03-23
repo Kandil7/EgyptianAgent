@@ -186,16 +186,12 @@
             android:foregroundServiceType="dataSync">
         </service>
 
-        <!-- Egyptian Agent Voice Interaction Service -->
+        <!-- Egyptian Agent Voice Service (Foreground) -->
         <service
             android:name=".service.EgyptianAgentService"
             android:enabled="true"
-            android:exported="true"
-            android:permission="android.permission.BIND_VOICE_INTERACTION">
-            <meta-data
-                android:name="android.voice_interaction"
-                android:resource="@xml/voice_interaction_service" />
-        </service>
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
 
         <!-- Egyptian Agent Session Service -->
         <service
