@@ -1,0 +1,3 @@
+@echo off
+echo Checking SDK installation...
+dir "C:\Android\Sdk\cmdline-tools\latest\bin"
