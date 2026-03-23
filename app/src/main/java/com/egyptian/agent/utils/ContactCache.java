@@ -82,12 +82,22 @@ public class ContactCache {
      */
     public static void remove(Context context, String contactName) {
         memoryCache.remove(contactName);
-        
+
         SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.remove(contactName);
         editor.apply();
-        
+
         Log.d(TAG, "Contact removed from cache: " + contactName);
+    }
+
+    /**
+     * Find a contact number - alias for get() method
+     * @param context Application context
+     * @param contactName Name of the contact
+     * @return Contact number if found, null otherwise
+     */
+    public static String findContact(Context context, String contactName) {
+        return get(context, contactName);
     }
 }

@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import androidx.core.app.ActivityCompat;
 
@@ -21,6 +22,7 @@ public class TelephonyService implements TelephonyServiceInterface {
     private static final String TAG = "TelephonyService";
     private Context context;
     private android.telephony.PhoneStateListener phoneStateListener;
+    private TelephonyManager telephonyManager;
 
     public TelephonyService() {
         // Default constructor
@@ -31,7 +33,7 @@ public class TelephonyService implements TelephonyServiceInterface {
         this.context = context;
 
         // Check for CALL_PHONE permission
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) 
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE)
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("CALL_PHONE permission not granted");
         }
@@ -50,7 +52,7 @@ public class TelephonyService implements TelephonyServiceInterface {
         this.context = context;
         List<CallLogEntry> missedCalls = new ArrayList<>();
 
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_CALL_LOG) 
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_CALL_LOG)
             != PackageManager.PERMISSION_GRANTED) {
             Log.e(TAG, "READ_CALL_LOG permission not granted");
             return missedCalls;
@@ -59,7 +61,7 @@ public class TelephonyService implements TelephonyServiceInterface {
         // Query call log for missed calls
         String[] projection = {
             CallLog.Calls.NUMBER,
-            CallLog.Calls.NAME,
+            CallLog.Calls.CACHED_NAME,  // Use CACHED_NAME instead of NAME (deprecated in Android 10+)
             CallLog.Calls.DATE,
             CallLog.Calls.DURATION,
             CallLog.Calls.TYPE
@@ -79,10 +81,11 @@ public class TelephonyService implements TelephonyServiceInterface {
 
         if (cursor != null) {
             while (cursor.moveToNext() && missedCalls.size() < limit) {
-                String number = cursor.getString(cursor.getColumnIndex(CallLog.Calls.NUMBER));
-                String name = cursor.getString(cursor.getColumnIndex(CallLog.Calls.NAME));
-                long date = cursor.getLong(cursor.getColumnIndex(CallLog.Calls.DATE));
-                int duration = cursor.getInt(cursor.getColumnIndex(CallLog.Calls.DURATION));
+                String number = cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.NUMBER));
+                // Use CACHED_NAME instead of NAME (deprecated in Android 10+)
+                String name = cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.CACHED_NAME));
+                long date = cursor.getLong(cursor.getColumnIndexOrThrow(CallLog.Calls.DATE));
+                int duration = cursor.getInt(cursor.getColumnIndexOrThrow(CallLog.Calls.DURATION));
 
                 // Get contact name if not available in call log
                 if (name == null || name.isEmpty()) {
@@ -117,9 +120,17 @@ public class TelephonyService implements TelephonyServiceInterface {
 
     @Override
     public void setCallStateListener(CallStateListener listener) {
+        // Initialize TelephonyManager
+        if (telephonyManager == null && context != null) {
+            telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        }
+
         // Register a listener for call state changes using PhoneStateListener
         if (telephonyManager != null) {
             telephonyManager.listen(phoneStateListener = new android.telephony.PhoneStateListener() {
+                private boolean wasRinging = false;
+                private boolean wasOffhook = false;
+
                 @Override
                 public void onCallStateChanged(int state, String phoneNumber) {
                     super.onCallStateChanged(state, phoneNumber);
@@ -128,19 +139,29 @@ public class TelephonyService implements TelephonyServiceInterface {
                         case TelephonyManager.CALL_STATE_IDLE:
                             Log.d(TAG, "Call state: IDLE");
                             if (listener != null) {
-                                listener.onCallStateChanged(CallState.IDLE, phoneNumber);
+                                if (wasOffhook) {
+                                    listener.onCallEnded();
+                                }
+                                wasRinging = false;
+                                wasOffhook = false;
                             }
                             break;
                         case TelephonyManager.CALL_STATE_OFFHOOK:
                             Log.d(TAG, "Call state: OFFHOOK");
                             if (listener != null) {
-                                listener.onCallStateChanged(CallState.OFFHOOK, phoneNumber);
+                                if (wasRinging) {
+                                    listener.onCallAnswered();
+                                } else {
+                                    listener.onCallStarted(phoneNumber);
+                                }
+                                wasOffhook = true;
+                                wasRinging = false;
                             }
                             break;
                         case TelephonyManager.CALL_STATE_RINGING:
                             Log.d(TAG, "Call state: RINGING");
                             if (listener != null) {
-                                listener.onCallStateChanged(CallState.RINGING, phoneNumber);
+                                wasRinging = true;
                             }
                             break;
                     }

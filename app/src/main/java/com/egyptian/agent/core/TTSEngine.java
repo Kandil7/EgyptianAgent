@@ -5,8 +5,6 @@ import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
-import com.egyptian.agent.accessibility.SeniorMode;
-import com.egyptian.agent.utils.CrashLogger;
 
 import java.util.HashMap;
 import java.util.Locale;

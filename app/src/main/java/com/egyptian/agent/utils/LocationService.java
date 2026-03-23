@@ -20,6 +20,15 @@ public class LocationService implements LocationServiceInterface {
         // Default constructor
     }
 
+    /**
+     * Get singleton instance of LocationService.
+     * @param context Context for the operation
+     * @return LocationService instance
+     */
+    public static LocationService getInstance(Context context) {
+        return new LocationService();
+    }
+
     @Override
     public Location getLastKnownLocation(Context context) {
         this.context = context;
@@ -48,6 +57,18 @@ public class LocationService implements LocationServiceInterface {
         }
 
         return currentLocation;
+    }
+
+    /**
+     * Get last known location without context parameter.
+     * Uses stored context if available.
+     * @return Location or null
+     */
+    public Location getLastKnownLocation() {
+        if (context != null) {
+            return getLastKnownLocation(context);
+        }
+        return null;
     }
 
     @Override

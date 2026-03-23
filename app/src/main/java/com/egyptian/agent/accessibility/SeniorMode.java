@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.egyptian.agent.core.TTSManager;
-
 /**
  * Senior Mode Manager
  * Handles special accessibility features for elderly users
@@ -25,10 +23,7 @@ public class SeniorMode {
     public static void initialize(Context context) {
         sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         isEnabled = sharedPreferences.getBoolean(KEY_SENIOR_MODE_ENABLED, false);
-        
-        if (isEnabled) {
-            TTSManager.setSeniorSettings(context);
-        }
+        Log.i(TAG, "Senior Mode initialized, enabled: " + isEnabled);
     }
     
     /**
@@ -37,11 +32,11 @@ public class SeniorMode {
      */
     public static void enable(Context context) {
         isEnabled = true;
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(KEY_SENIOR_MODE_ENABLED, true);
-        editor.apply();
-        
-        TTSManager.setSeniorSettings(context);
+        if (sharedPreferences != null) {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(KEY_SENIOR_MODE_ENABLED, true);
+            editor.apply();
+        }
         Log.i(TAG, "Senior mode enabled");
     }
     
@@ -51,11 +46,11 @@ public class SeniorMode {
      */
     public static void disable(Context context) {
         isEnabled = false;
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(KEY_SENIOR_MODE_ENABLED, false);
-        editor.apply();
-        
-        TTSManager.resetNormalSettings();
+        if (sharedPreferences != null) {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(KEY_SENIOR_MODE_ENABLED, false);
+            editor.apply();
+        }
         Log.i(TAG, "Senior mode disabled");
     }
     
@@ -74,7 +69,6 @@ public class SeniorMode {
      */
     public static boolean isCommandAllowed(String command) {
         // In senior mode, restrict certain complex commands
-        // this could filter out complex or potentially confusing commands
         return true;
     }
     
@@ -85,6 +79,5 @@ public class SeniorMode {
      */
     public static void handleRestrictedCommand(Context context, String command) {
         Log.d(TAG, "Restricted command in senior mode: " + command);
-        TTSManager.speak(context, "الأمر ده مش متاح في وضع كبار السن");
     }
 }
