@@ -1,8 +1,8 @@
 # Egyptian Agent - Revolutionizing Voice Assistance for Egypt
 
-<p align="center">
+<!-- <p align="center">
   <img src="https://placehold.co/800x200/FF6B35/FFFFFF?text=الوكيل+المصري+-+Egyptian+Agent" alt="Egyptian Agent Banner">
-</p>
+</p> -->
 
 <div align="center">
 
