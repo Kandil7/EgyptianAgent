@@ -351,15 +351,18 @@ public class EgyptianDialectTestSuite {
         }
     }
 
-    static class MockContext {
-        public Object getSystemService(String name) {
-            // Mock implementation
-            return new Object();
+    /**
+     * Minimal stand-in Context. Extends the platform mock so it can be passed
+     * anywhere a real {@link android.content.Context} is required.
+     */
+    static class MockContext extends android.content.ContextWrapper {
+        MockContext() {
+            super(null);
         }
 
-        public Object getAssets() {
-            // Mock implementation
-            return new Object();
+        @Override
+        public Object getSystemService(String name) {
+            return null;
         }
     }
 }

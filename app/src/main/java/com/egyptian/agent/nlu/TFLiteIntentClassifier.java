@@ -106,21 +106,13 @@ public class TFLiteIntentClassifier {
      * Loads the TFLite model from assets
      */
     private MappedByteBuffer loadModelFile(Context context, String modelFile) throws IOException {
-        AssetFileDescriptor fileDescriptor = null;
         try {
-            fileDescriptor = context.getAssets().openFd(modelFile);
-            return FileUtil.loadMappedFile(context, fileDescriptor);
+            // FileUtil.loadMappedFile takes the asset *path*, not a descriptor,
+            // and handles opening/closing the descriptor itself.
+            return FileUtil.loadMappedFile(context, modelFile);
         } catch (IOException e) {
             Log.e(TAG, "Error loading model file: " + modelFile, e);
             return null;
-        } finally {
-            if (fileDescriptor != null) {
-                try {
-                    fileDescriptor.close();
-                } catch (IOException e) {
-                    Log.w(TAG, "Error closing file descriptor", e);
-                }
-            }
         }
     }
     

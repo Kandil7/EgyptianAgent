@@ -15,6 +15,7 @@ public enum IntentType {
     SEND_VOICE_MESSAGE,
     READ_CONTACTS,
     ADD_CONTACT,
+    MEDICATION_REMINDER,
     READ_SMS,
     SEND_SMS,
     OPEN_APP,
@@ -71,6 +72,8 @@ public enum IntentType {
                 return READ_CONTACTS;
             case "ADD_CONTACT":
                 return ADD_CONTACT;
+            case "MEDICATION_REMINDER":
+                return MEDICATION_REMINDER;
             case "READ_SMS":
                 return READ_SMS;
             case "SEND_SMS":
@@ -140,6 +143,8 @@ public enum IntentType {
                 return "READ_CONTACTS";
             case ADD_CONTACT:
                 return "ADD_CONTACT";
+            case MEDICATION_REMINDER:
+                return "MEDICATION_REMINDER";
             case READ_SMS:
                 return "READ_SMS";
             case SEND_SMS:

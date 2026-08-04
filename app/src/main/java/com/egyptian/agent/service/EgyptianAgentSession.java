@@ -26,6 +26,9 @@ public class EgyptianAgentSession extends VoiceInteractionSession {
     private CommandExecutor commandExecutor;
     private View contentView;
 
+    private final android.os.Handler mainHandler =
+            new android.os.Handler(android.os.Looper.getMainLooper());
+
     private boolean isListening;
     private boolean isProcessing;
 
@@ -54,14 +57,12 @@ public class EgyptianAgentSession extends VoiceInteractionSession {
     }
 
     @Override
-    public void onShowSession(Bundle activeFlags, boolean show) {
-        super.onShowSession(activeFlags, show);
-        Log.d(TAG, "Session onShow: " + show);
+    public void onShow(Bundle args, int showFlags) {
+        super.onShow(args, showFlags);
+        Log.d(TAG, "Session onShow, flags=" + showFlags);
 
-        if (show) {
-            // Start listening
-            startListening();
-        }
+        // Start listening as soon as the session is shown.
+        startListening();
     }
 
     @Override
@@ -170,13 +171,7 @@ public class EgyptianAgentSession extends VoiceInteractionSession {
      * Hide session after delay.
      */
     private void hideDelayed(long delayMs) {
-        getHandler().postDelayed(this::hide, delayMs);
-    }
-    
-    @Override
-    public void onShowSessionError(Bundle error) {
-        super.onShowSessionError(error);
-        Log.e(TAG, "Session error: " + error);
-        handleError("حدث خطأ في المعالجة");
+        // VoiceInteractionSession exposes no getHandler(); use our own.
+        mainHandler.postDelayed(this::hide, delayMs);
     }
 }

@@ -16,7 +16,7 @@ public class CallLogExecutor {
         
         // Check if command is related to missed calls
         if (isReadMissedCallsCommand(command)) {
-            readMissedCalls(context);
+            TTSManager.speak(context, readMissedCalls(context));
         } else {
             TTSManager.speak(context, "الأمر غير مدعوم");
         }
@@ -31,7 +31,19 @@ public class CallLogExecutor {
                lowerCommand.contains("اللي فاتت");
     }
     
-    private static void readMissedCalls(Context context) {
+    private static final String NO_MISSED_CALLS = "مافيش مكالمات فايتة";
+
+    /**
+     * Reads recent missed calls and returns a spoken-form summary.
+     *
+     * <p>This method does not speak; callers decide whether to route the text
+     * to TTS. Returns a user-facing Arabic message on permission/query errors
+     * rather than throwing.
+     *
+     * @param context android context
+     * @return summary of up to 5 recent missed calls, never null
+     */
+    public static String readMissedCalls(Context context) {
         try {
             // Query for missed calls
             String[] projection = {CallLog.Calls.NUMBER, CallLog.Calls.CACHED_NAME};
@@ -69,27 +81,25 @@ public class CallLogExecutor {
                 }
                 
                 cursor.close();
-                
+
                 if (count > 0) {
-                    TTSManager.speak(context, missedCalls.toString());
-                } else {
-                    TTSManager.speak(context, "مافيش مكالمات فايتة");
+                    return missedCalls.toString();
                 }
-            } else {
-                TTSManager.speak(context, "مافيش مكالمات فايتة");
+                return NO_MISSED_CALLS;
             }
-            
+
             if (cursor != null) {
                 cursor.close();
             }
+            return NO_MISSED_CALLS;
         } catch (SecurityException e) {
             Log.e(TAG, "Permission denied for reading call log", e);
-            TTSManager.speak(context, "مافيش صلاحية لقراءة سجل المكالمات");
             CrashLogger.logError(context, e);
+            return "مافيش صلاحية لقراءة سجل المكالمات";
         } catch (Exception e) {
             Log.e(TAG, "Error reading call log", e);
-            TTSManager.speak(context, "حصل خطأ في قراءة سجل المكالمات");
             CrashLogger.logError(context, e);
+            return "حصل خطأ في قراءة سجل المكالمات";
         }
     }
 }

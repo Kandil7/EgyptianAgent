@@ -56,6 +56,73 @@ public class Quantum {
     }
 
     /**
+     * Classifies a command into an intent label WITHOUT executing it.
+     *
+     * <p>This mirrors the keyword strategies used by {@link #processCommand(String)}
+     * but is side-effect free, so it can be used by test harnesses and for
+     * routing decisions. Returns {@code "UNKNOWN"} when nothing matches.
+     *
+     * @param command raw (un-normalized) command text
+     * @return an intent label such as {@code CALL_PERSON}, {@code SEND_MSG}
+     */
+    public String classifyIntent(String command) {
+        if (command == null || command.trim().isEmpty()) {
+            return "UNKNOWN";
+        }
+
+        String c = EgyptianNormalizer.normalize(command);
+
+        // Emergency must win over everything else.
+        if (c.contains("نجدة") || c.contains("الحقني") || c.contains("انقذني")
+                || c.contains("اسعاف") || c.contains("خطر")) {
+            return "EMERGENCY";
+        }
+
+        // Voice note before generic messaging ("ابعت فويس" also contains "ابعت").
+        if (c.contains("فويس") || c.contains("رسالة صوتية") || c.contains("صوتيه")) {
+            return "SEND_VOICE";
+        }
+
+        if (c.contains("قرآن") || c.contains("قران") || c.contains("قرأن")) {
+            return "PLAY_QURAN";
+        }
+
+        if (c.contains("الصوت") || c.contains("علي الصوت") || c.contains("وطي")) {
+            return "VOLUME_CONTROL";
+        }
+
+        if (c.contains("اتصل") || c.contains("كلم") || c.contains("رن على")) {
+            return "CALL_PERSON";
+        }
+
+        if (c.contains("واتساب") || c.contains("رسالة") || c.contains("ابعت")) {
+            // "افتح واتساب" is an app launch, not a message.
+            if (c.contains("افتح") || c.contains("شغل")) {
+                return "OPEN_APP";
+            }
+            return "SEND_MSG";
+        }
+
+        if (c.contains("افتح") || c.contains("شغل")) {
+            return "OPEN_APP";
+        }
+
+        if (c.contains("نبهني") || c.contains("ذكرني") || c.contains("المنبه")) {
+            return "SET_ALARM";
+        }
+
+        if (c.contains("الوقت") || c.contains("الساعة")) {
+            return "READ_TIME";
+        }
+
+        if (c.contains("المكالمات") || c.contains("الفايتة")) {
+            return "READ_MISSED_CALLS";
+        }
+
+        return "UNKNOWN";
+    }
+
+    /**
      * Processes call-related commands
      * @param command The normalized command
      * @return true if command was processed, false otherwise

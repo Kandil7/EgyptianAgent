@@ -541,6 +541,17 @@ public class LlamaEngine {
         float topP,
         float repetitionPenalty
     );
+
+    /**
+     * Whether the loaded native library is the stub implementation.
+     *
+     * <p>A stub library returns canned strings and a sentinel context pointer;
+     * it performs no inference. Callers must treat {@code true} as "no model
+     * capability available" rather than proceeding with fake results.
+     *
+     * @return true if native inference is mocked
+     */
+    public static native boolean isMockNative();
     
     /**
      * Run inference and return complete response.

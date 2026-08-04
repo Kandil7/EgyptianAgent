@@ -140,6 +140,23 @@ public class AlarmExecutor {
      * @param context Context for the operation
      * @param alarmTime The time to set the alarm for
      */
+    /**
+     * Sets an alarm from a natural-language time expression.
+     *
+     * @param context android context
+     * @param timeExpression Egyptian-dialect time phrase, e.g. "بكرة الصبح"
+     * @return true if a time could be parsed and the alarm was set
+     */
+    public static boolean setAlarm(Context context, String timeExpression) {
+        Calendar alarmTime = extractTime(timeExpression);
+        if (alarmTime == null) {
+            Log.w(TAG, "Could not parse time from: " + timeExpression);
+            return false;
+        }
+        setAlarm(context, alarmTime);
+        return true;
+    }
+
     private static void setAlarm(Context context, Calendar alarmTime) {
         try {
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);

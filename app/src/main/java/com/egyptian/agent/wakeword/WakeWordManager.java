@@ -285,12 +285,4 @@ public class WakeWordManager {
     /**
      * Interface for wake word detection.
      */
-    public interface WakeWordDetectorInterface {
-        void setCallback(WakeWordCallback callback);
-        void start();
-        void stop();
-        void restart();
-        boolean isListening();
-        void destroy();
-    }
 }

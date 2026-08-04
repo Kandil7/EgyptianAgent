@@ -138,20 +138,26 @@ public class PerformanceTester {
         long startTime = System.currentTimeMillis();
         
         try {
-            WakeWordDetector wakeDetector = new WakeWordDetector(context, new WakeWordDetector.WakeWordCallback() {
+            // Holder allows the callback to reference the detector that is still
+            // being constructed on this line.
+            final WakeWordDetector[] holder = new WakeWordDetector[1];
+            holder[0] = new WakeWordDetector(context, new WakeWordDetector.WakeWordCallback() {
                 @Override
                 public void onWakeWordDetected() {
                     long endTime = System.currentTimeMillis();
                     results.wakeWordDetectionTime = endTime - startTime;
-                    
-                    Log.d(TAG, String.format("Wake word detection completed in %d ms", 
+
+                    Log.d(TAG, String.format("Wake word detection completed in %d ms",
                             results.wakeWordDetectionTime));
-                    
+
                     // Stop the detector
-                    wakeDetector.stopListening();
+                    if (holder[0] != null) {
+                        holder[0].stopListening();
+                    }
                 }
             });
-            
+            WakeWordDetector wakeDetector = holder[0];
+
             // Start listening for a short time
             wakeDetector.startListening();
             

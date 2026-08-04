@@ -27,7 +27,10 @@ endif()
 
 # Define project root for path resolution
 set(PROJECT_ROOT "${CMAKE_SOURCE_DIR}/..")
-set(EXTERNAL_DIR "${PROJECT_ROOT}/../external")
+# CMAKE_SOURCE_DIR is the app/ module, so PROJECT_ROOT is the repo root and
+# external/ sits directly beneath it. (Was "${PROJECT_ROOT}/../external",
+# which pointed one level *outside* the repo and could never resolve.)
+set(EXTERNAL_DIR "${PROJECT_ROOT}/external")
 
 # Log library from NDK
 find_library(log-lib log)
@@ -39,6 +42,11 @@ find_library(android-lib android)
 option(USE_LLAMA_CPP "Enable llama.cpp integration" OFF)
 option(USE_WHISPER "Enable whisper.cpp integration" OFF)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+
+# Mock native inference produces a build that LOOKS successful but cannot run
+# any model. It must therefore be opted into explicitly; otherwise a missing
+# submodule is a hard error rather than a warning nobody reads.
+option(ALLOW_MOCK_NATIVE "Permit falling back to stub native inference" OFF)
 
 message(STATUS "Egyptian Agent Native Build")
 message(STATUS "  Project Root: ${PROJECT_ROOT}")
@@ -108,10 +116,15 @@ if(USE_LLAMA_CPP)
             POSITION_INDEPENDENT_CODE ON
         )
         
-    else()
+    elseif(ALLOW_MOCK_NATIVE)
         message(WARNING "llama.cpp not found at ${LLAMA_CPP_DIR}")
-        message(WARNING "Falling back to MOCK implementation")
+        message(WARNING "Falling back to MOCK implementation (ALLOW_MOCK_NATIVE=ON)")
         set(USE_LLAMA_CPP OFF)
+    else()
+        message(FATAL_ERROR
+            "llama.cpp not found at ${LLAMA_CPP_DIR}.\n"
+            "Run: git submodule update --init --recursive\n"
+            "Or configure with -DALLOW_MOCK_NATIVE=ON to build a non-functional stub.")
     endif()
 endif()
 
@@ -153,10 +166,11 @@ endif()
 # Check if whisper.cpp exists
 set(WHISPER_CPP_DIR "${EXTERNAL_DIR}/whisper.cpp")
 
-if(EXISTS "${WHISPER_CPP_DIR}/CMakeLists.txt")
+# Respect USE_WHISPER: presence of the submodule must not silently opt a stub
+# build into compiling it (mirrors the llama.cpp branch above).
+if(USE_WHISPER AND EXISTS "${WHISPER_CPP_DIR}/CMakeLists.txt")
     message(STATUS "Found whisper.cpp, enabling Whisper ASR")
-    set(USE_WHISPER ON)
-    
+
     # Disable tests and examples for production build
     set(WHISPER_BUILD_TESTS OFF CACHE BOOL "" FORCE)
     set(WHISPER_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -198,10 +212,17 @@ if(EXISTS "${WHISPER_CPP_DIR}/CMakeLists.txt")
     
     message(STATUS "  whisper_native: FULL implementation with whisper.cpp")
 else()
-    message(WARNING "whisper.cpp not found at ${WHISPER_CPP_DIR}")
-    message(WARNING "Falling back to MOCK implementation")
+    # USE_WHISPER was requested but the submodule is absent -> hard failure.
+    if(USE_WHISPER AND NOT ALLOW_MOCK_NATIVE)
+        message(FATAL_ERROR
+            "whisper.cpp not found at ${WHISPER_CPP_DIR}.\n"
+            "Run: git submodule update --init --recursive\n"
+            "Or configure with -DALLOW_MOCK_NATIVE=ON to build a non-functional stub.")
+    endif()
+    message(WARNING "Building MOCK whisper_native - ASR will NOT work "
+                    "(USE_WHISPER=${USE_WHISPER}, ALLOW_MOCK_NATIVE=${ALLOW_MOCK_NATIVE})")
     set(USE_WHISPER OFF)
-    
+
     # Build mock whisper_native
     add_library(whisper_native SHARED src/main/cpp/whisper_native.cpp)
     target_link_libraries(whisper_native ${log-lib} ${android-lib})

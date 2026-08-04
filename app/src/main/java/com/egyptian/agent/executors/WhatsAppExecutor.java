@@ -144,6 +144,20 @@ public class WhatsAppExecutor {
      * @param recipient The recipient name
      * @param message The message to send
      */
+    /**
+     * Sends a WhatsApp message to an already-resolved recipient.
+     *
+     * <p>Use this when recipient and body are already known; use
+     * {@link #handleCommand(Context, String)} to parse a raw voice command.
+     *
+     * @param context android context
+     * @param recipient contact name or number
+     * @param message message body
+     */
+    public static void sendMessage(Context context, String recipient, String message) {
+        sendWhatsAppMessage(context, recipient, message);
+    }
+
     private static void sendWhatsAppMessage(Context context, String recipient, String message) {
         try {
             // First, try to get the contact's phone number from the contacts

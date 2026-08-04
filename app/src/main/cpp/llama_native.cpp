@@ -14,6 +14,18 @@
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
 
+// Reports whether this .so was built with real llama.cpp inference or is the
+// stub. Java code MUST consult this before trusting any inference result.
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_egyptian_agent_llm_LlamaEngine_isMockNative(JNIEnv *env, jclass clazz) {
+#if USE_LLAMA_CPP
+    return JNI_FALSE;
+#else
+    return JNI_TRUE;
+#endif
+}
+
 // Conditional compilation for llama.cpp integration
 #if USE_LLAMA_CPP
 #include "llama.h"

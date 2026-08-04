@@ -1,5 +1,0 @@
-# ninja log v5
-10	1766	7952393228427365	CMakeFiles/whisper_native.dir/src/main/cpp/whisper_native.cpp.o	cf6a7f96ab1df937
-1	1844	7952393229492479	CMakeFiles/llama_native.dir/src/main/cpp/llama_native.cpp.o	ae105964f4030bf5
-1845	2220	7952393233263359	../../../../build/intermediates/cxx/Debug/6m5w4y21/obj/arm64-v8a/libllama_native.so	601cfb09aa741a92
-1773	2232	7952393233421594	../../../../build/intermediates/cxx/Debug/6m5w4y21/obj/arm64-v8a/libwhisper_native.so	be265165c17eeff1

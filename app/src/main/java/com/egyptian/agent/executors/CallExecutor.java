@@ -150,6 +150,19 @@ public class CallExecutor {
      * @param context Context for the operation
      * @param phoneNumber The phone number to call
      */
+    /**
+     * Places a call to an already-resolved phone number.
+     *
+     * <p>Use this when the caller has already resolved the contact; use
+     * {@link #handleCommand(Context, String)} to parse a raw voice command.
+     *
+     * @param context android context
+     * @param phoneNumber number to dial
+     */
+    public static void placeCall(Context context, String phoneNumber) {
+        makeCall(context, phoneNumber);
+    }
+
     private static void makeCall(Context context, String phoneNumber) {
         try {
             Intent callIntent = new Intent(Intent.ACTION_CALL);

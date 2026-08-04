@@ -24,8 +24,16 @@ android {
                 arguments "-DANDROID_STL=c++_shared",
                           "-DANDROID_ARM_NEON=TRUE",
                           "-DANDROID_TOOLCHAIN=clang",
-                          "-DUSE_LLAMA_CPP=OFF",
-                          "-DUSE_WHISPER=OFF"
+                          // Native inference mode. Pass -PnativeInference=full
+                          // (or set it in gradle.properties) to compile the
+                          // llama.cpp / whisper.cpp submodules for real.
+                          // Release builds MUST use 'full'; see PRODUCTION_CHECKLIST.md.
+                          "-DUSE_LLAMA_CPP=${rootProject.ext.nativeFull ? 'ON' : 'OFF'}",
+                          "-DUSE_WHISPER=${rootProject.ext.nativeFull ? 'ON' : 'OFF'}",
+                          // When not building full native, the stub fallback must
+                          // be opted into explicitly so it can never be mistaken
+                          // for working inference.
+                          "-DALLOW_MOCK_NATIVE=${rootProject.ext.nativeFull ? 'OFF' : 'ON'}"
             }
         }
 
@@ -110,55 +118,10 @@ android {
         main {
             jniLibs.srcDirs = ['src/main/jniLibs']
             java.srcDirs += ['src/main/cpp']
-            // Exclude problematic packages
-            java.exclude '**/test/**'
-            java.exclude '**/testing/**'
-            java.exclude '**/com/saiy/**'
-            // Exclude packages with heavy dependencies
-            java.exclude '**/hybrid/**'
-            java.exclude '**/stt/**'
-            java.exclude '**/wakeword/**'
-            java.exclude '**/nlu/**'
-            java.exclude '**/ai/**'
-            java.exclude '**/llm/**'
-            java.exclude '**/vision/**'
-            // java.exclude '**/service/**'  // Include service package
-            java.exclude '**/executor/**'
-            java.exclude '**/executors/**'
-            java.exclude '**/receivers/**'
-            java.exclude '**/backup/**'
-            java.exclude '**/performance/**'
-            // Exclude specific files in service package
-            java.exclude '**/service/EgyptianAgentSession.java'
-            java.exclude '**/service/EgyptianAgentSessionService.java'
-            java.exclude '**/service/SystemController.java'
-            java.exclude '**/service/**/SelfAwareService.java'
-            java.exclude '**/core/PerformanceTester.java'
-            java.exclude '**/core/VoiceService.java'
-            java.exclude '**/core/PocketSphinxWakeWordDetector.java'
-            java.exclude '**/core/WhisperASREngine.java'
-            java.exclude '**/core/Quantum.java'
-            java.exclude '**/core/WakeWordDetector.java'
-            java.exclude '**/core/CacheManager.java'
-            java.exclude '**/core/MainApplication.java'
-            java.exclude '**/core/BackgroundTaskManager.java'
-            java.exclude '**/core/Gemma2NLUProcessor.java'
-            java.exclude '**/core/NNAPIDelegator.java'
-            java.exclude '**/core/PiperTTSEngine.java'
-            java.exclude '**/core/OpenPhoneModel.java'
-            java.exclude '**/core/OfflineGrammarProcessor.java'
-            java.exclude '**/core/IntentRouter.java'
-            // Exclude files with specific issues
-            java.exclude '**/nlp/IntentRouter.java'
-            java.exclude '**/utils/SpeechConfirmation.java'
-            java.exclude '**/feedback/**'
-            java.exclude '**/utils/ErrorHandler.java'
-            java.exclude '**/accessibility/FallDetectionService.java'
-            java.exclude '**/accessibility/FallDetector.java'
-            java.exclude '**/accessibility/MedicationScheduler.java'
-            java.exclude '**/accessibility/MedicationReceiver.java'
-            java.exclude '**/accessibility/SeniorModeManager.java'
-            java.exclude '**/asr/**'
+            // NOTE: no source excludes. Every file under src/main/java compiles.
+            // If something here does not build, fix it or delete it — do not
+            // hide it from the build (that is how 11 manifest components came
+            // to be missing from shipped APKs).
         }
         test {
             java.srcDirs += ['src/test/cpp']

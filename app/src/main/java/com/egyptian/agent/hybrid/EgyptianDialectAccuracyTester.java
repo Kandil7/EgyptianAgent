@@ -144,12 +144,6 @@ public class EgyptianDialectAccuracyTester {
                     resultHolder[0].setConfidence(0.0f);
                     latch.countDown();
                 }
-
-                @Override
-                public void onResult(IntentResult result) {
-                    resultHolder[0] = result;
-                    latch.countDown();
-                }
             });
 
             // Wait for the result with a timeout
