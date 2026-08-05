@@ -4,6 +4,9 @@ import android.content.Context;
 import androidx.test.core.app.ApplicationProvider;
 import org.junit.Test;
 import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 import static org.junit.Assert.*;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -16,6 +19,8 @@ import com.egyptian.agent.feedback.UserFeedbackSystem;
 /**
  * Automated testing suite for production components
  */
+@RunWith(RobolectricTestRunner.class)
+@Config(sdk = 34)
 public class ProductionComponentsTest {
 
     @Mock
@@ -97,31 +102,29 @@ public class ProductionComponentsTest {
     @Test
     public void testPerformanceMonitorStatus() {
         // Initially not monitoring
-        assertFalse("Performance monitor should not be active initially", performanceMonitor.isMonitoringActive());
+        assertFalse("Performance monitor should not be active initially", performanceMonitor.isMonitoring());
         
         // Start monitoring
         performanceMonitor.startMonitoring();
         
         // Should be active now
-        assertTrue("Performance monitor should be active after starting", performanceMonitor.isMonitoringActive());
+        assertTrue("Performance monitor should be active after starting", performanceMonitor.isMonitoring());
         
         // Stop monitoring
         performanceMonitor.stopMonitoring();
         
         // Should not be active anymore
-        assertFalse("Performance monitor should not be active after stopping", performanceMonitor.isMonitoringActive());
+        assertFalse("Performance monitor should not be active after stopping", performanceMonitor.isMonitoring());
     }
 
     @Test
-    public void testPerformanceMonitorMemoryStats() {
-        PerformanceMonitor.MemoryStats stats = performanceMonitor.getMemoryStats();
-        
-        // Verify stats are properly populated
-        assertTrue("Total memory should be positive", stats.totalMemory > 0);
-        assertTrue("Available memory should be positive", stats.availableMemory >= 0);
-        assertTrue("Used memory should be positive", stats.usedMemory >= 0);
-        assertTrue("Usage percentage should be between 0 and 100", 
-                  stats.usagePercentage >= 0.0 && stats.usagePercentage <= 100.0);
+    public void testPerformanceMonitorCleanup() {
+        // Start and stop monitoring, then clean up (should not throw)
+        performanceMonitor.startMonitoring();
+        performanceMonitor.stopMonitoring();
+        performanceMonitor.cleanup();
+
+        assertFalse("Performance monitor should not be monitoring after cleanup", performanceMonitor.isMonitoring());
     }
 
     @Test
