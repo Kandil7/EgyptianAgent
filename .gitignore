@@ -1,5 +1,5 @@
 # EgyptianAgent Project .gitignore
-# Last updated: 2026-03-03
+# Last updated: 2026-08-04
 
 #===============================================================================
 # Build Outputs
@@ -13,6 +13,15 @@ build/
 *.ap_
 *.dex
 *.class
+
+# Android / CMake native build caches
+**/.cxx/
+.cxx/
+.kotlin/
+.externalNativeBuild/
+captures/
+*.hprof
+*.hprof.gz
 
 # Auto-generated files (should not be committed)
 **/BuildConfig.java
@@ -110,8 +119,9 @@ temp/
 # !models/.gitkeep
 
 # Dataset files (keep structure, not large data)
-# datasets/*/large_*.json
-datasets/*/*.parquet
+# ml/finetune/data/*/large_*.json
+ml/finetune/data/**/*.parquet
+ml/finetune/data/**/*.arrow
 
 #===============================================================================
 # Python
