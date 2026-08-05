@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # =============================================================================
 # Egyptian Agent - FunctionGemma Model Setup Script
 # =============================================================================
@@ -8,11 +8,11 @@
 #   Downloads or copies the model and places it in the correct location.
 #
 # USAGE:
-#   ./scripts/model/setup_functiongemma_model.sh [OPTIONS]
+#   ./ml/finetune/scripts/setup_functiongemma_model.sh [OPTIONS]
 #
 # OPTIONS:
 #   --source PATH       Source model path or URL (default: download from HuggingFace)
-#   --output DIR        Output directory (default: app/src/main/assets/models/)
+#   --output DIR        Output directory (default: android/src/main/assets/models/)
 #   --quantization TYPE Quantization type (default: Q4_K_M)
 #   --deploy            Also deploy to connected device
 #   --device SERIAL     Target device serial for deployment
@@ -21,9 +21,9 @@
 #   -h, --help          Show this help message
 #
 # EXAMPLES:
-#   ./scripts/model/setup_functiongemma_model.sh
-#   ./scripts/model/setup_functiongemma_model.sh --source /path/to/model.gguf
-#   ./scripts/model/setup_functiongemma_model.sh --deploy
+#   ./ml/finetune/scripts/setup_functiongemma_model.sh
+#   ./ml/finetune/scripts/setup_functiongemma_model.sh --source /path/to/model.gguf
+#   ./ml/finetune/scripts/setup_functiongemma_model.sh --deploy
 #
 # RETURN CODES:
 #   0   Success
@@ -45,7 +45,7 @@ readonly PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 readonly LOG_DIR="$PROJECT_DIR/build/logs"
 
 SOURCE_PATH=""
-OUTPUT_DIR="$PROJECT_DIR/app/src/main/assets/models"
+OUTPUT_DIR="$PROJECT_DIR/android/src/main/assets/models"
 QUANTIZATION="Q4_K_M"
 DEPLOY_TO_DEVICE=false
 DEVICE_SERIAL=""
@@ -173,7 +173,7 @@ USAGE:
 OPTIONS:
     --source PATH       Source model path (local file)
                         If not specified, downloads from HuggingFace
-    --output DIR        Output directory (default: app/src/main/assets/models/)
+    --output DIR        Output directory (default: android/src/main/assets/models/)
     --quantization TYPE Quantization type (default: Q4_K_M)
     --deploy            Deploy to connected device
     --device SERIAL     Target device serial for deployment
@@ -236,7 +236,7 @@ main() {
     
     print_header "Setup Complete"
     log_success "Model ready: $model_file"
-    log_info "Next: ./scripts/build/build_functiongemma.sh"
+    log_info "Next: ./deploy/build/scripts/build_functiongemma.sh"
 }
 
 trap 'log_error "Interrupted"; exit 1' INT TERM
