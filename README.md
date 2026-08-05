@@ -11,7 +11,7 @@
 [![Egyptian Dialect](https://img.shields.io/badge/Dialect-Egyptian-blue.svg)](#)
 [![Privacy First](https://img.shields.io/badge/Privacy-100%25_Local-lightblue.svg)](#)
 [![FunctionGemma](https://img.shields.io/badge/AI-FunctionGemma--270M-purple.svg)](#)
-[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](#)
+[![Build Status](https://img.shields.io/badge/Build-Status_Pending-yellow.svg)](#)
 
 </div>
 
@@ -346,16 +346,16 @@ git clone https://github.com/Kandil7/EgyptianAgent.git
 cd EgyptianAgent
 
 # 2. Initialize submodules
-./scripts/deploy/initialize_submodules.sh
+./deploy/scripts-deploy/initialize_submodules.sh
 
 # 3. Download FunctionGemma model
-./scripts/model/download_functiongemma_model.sh
+./ml/finetune/scripts/download_functiongemma_model.sh
 
 # 4. Build the application
-./scripts/build/build_functiongemma.sh --release
+./deploy/build/scripts/build_functiongemma.sh --release
 
 # 5. Deploy to device
-./scripts/deploy/deploy_functiongemma.sh
+./deploy/scripts-deploy/deploy_functiongemma.sh
 ```
 
 ### Verify Installation
@@ -527,19 +527,19 @@ fastboot reboot
 # Clone and setup
 git clone https://github.com/Kandil7/EgyptianAgent.git
 cd EgyptianAgent
-./scripts/deploy/initialize_submodules.sh
+./deploy/scripts-deploy/initialize_submodules.sh
 
 # Download model
-./scripts/model/download_functiongemma_model.sh
+./ml/finetune/scripts/download_functiongemma_model.sh
 
 # Build release APK
-./scripts/build/build_functiongemma.sh --release
+./deploy/build/scripts/build_functiongemma.sh --release
 ```
 
 #### 4. Install as System App
 ```bash
 # Push APK
-adb push app/build/outputs/apk/release/*.apk /sdcard/EgyptianAgent.apk
+adb push android/build/outputs/apk/release/*.apk /sdcard/EgyptianAgent.apk
 
 # Install to system partition
 adb shell su -c "mkdir -p /system/priv-app/EgyptianAgent"
