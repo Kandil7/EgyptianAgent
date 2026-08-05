@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # =============================================================================
 # Egyptian Agent - Git Submodules Initialization Script
 # =============================================================================
@@ -9,7 +9,7 @@
 #   Ensures all native library dependencies are properly configured.
 #
 # USAGE:
-#   ./scripts/deploy/initialize_submodules.sh [OPTIONS]
+#   ./deploy/scripts-deploy/initialize_submodules.sh [OPTIONS]
 #
 # OPTIONS:
 #   --force             Force re-initialization of existing submodules
@@ -22,10 +22,10 @@
 #   -h, --help          Show this help message
 #
 # EXAMPLES:
-#   ./scripts/deploy/initialize_submodules.sh
-#   ./scripts/deploy/initialize_submodules.sh --force --update
-#   ./scripts/deploy/initialize_submodules.sh --recursive --depth 10
-#   ./scripts/deploy/initialize_submodules.sh --ci --log-file init.log
+#   ./deploy/scripts-deploy/initialize_submodules.sh
+#   ./deploy/scripts-deploy/initialize_submodules.sh --force --update
+#   ./deploy/scripts-deploy/initialize_submodules.sh --recursive --depth 10
+#   ./deploy/scripts-deploy/initialize_submodules.sh --ci --log-file init.log
 #
 # SUBMODULES:
 #   - llama.cpp    - LLM inference engine (https://github.com/ggerganov/llama.cpp)
@@ -558,9 +558,9 @@ main() {
         echo "  ✓ whisper.cpp - $EXTERNAL_DIR/whisper.cpp"
         echo ""
         log_info "Next steps:"
-        echo "  1. Build native libraries: ./scripts/build/build_native_libs.sh"
-        echo "  2. Download AI models:     ./scripts/model/download_functiongemma_model.sh"
-        echo "  3. Build application:      ./scripts/build/build.sh --native"
+        echo "  1. Build native libraries: ./deploy/build/scripts/build_native_libs.sh"
+        echo "  2. Download AI models:     ./ml/finetune/scripts/download_functiongemma_model.sh"
+        echo "  3. Build application:      ./deploy/build/scripts/build.sh --native"
         echo ""
         return 0
     else
