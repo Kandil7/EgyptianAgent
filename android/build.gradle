@@ -66,15 +66,15 @@ android {
     // Signing configurations
     signingConfigs {
         debug {
-            storeFile file('../keystore/debug.keystore')
+            storeFile file('keystore/debug.keystore')
             storePassword 'android'
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
         release {
             // For production, use environment variables or secure storage
-            // Example: storeFile file(System.getenv("KEYSTORE_PATH") ?: "../keystore/release.keystore")
-            storeFile file('../keystore/release.keystore')
+            // Example: storeFile file(System.getenv("KEYSTORE_PATH") ?: "keystore/release.keystore")
+            storeFile file('keystore/release.keystore')
             storePassword System.getenv("KEYSTORE_PASSWORD") ?: ""
             keyAlias System.getenv("KEY_ALIAS") ?: "egyptian_agent"
             keyPassword System.getenv("KEY_PASSWORD") ?: ""
@@ -514,6 +514,7 @@ dependencies {
     
     // --- Mockito for Mocking ---
     testImplementation 'org.mockito:mockito-core:5.14.2'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.14.2'
     testImplementation 'org.mockito.kotlin:mockito-kotlin:5.4.0'
     testImplementation 'org.mockito:mockito-inline:5.2.0'  // For final class mocking
     
@@ -526,6 +527,8 @@ dependencies {
     testImplementation 'app.cash.turbine:turbine:1.2.0'  // Flow testing
     
     // --- AndroidX Test Libraries ---
+    testImplementation 'androidx.test:core:1.6.1'
+    testImplementation 'androidx.test:monitor:1.7.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.ext:junit-ktx:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
@@ -564,11 +567,11 @@ dependencies {
 // Task to create debug keystore if it doesn't exist
 tasks.register('createDebugKeystore') {
     doLast {
-        def keystoreDir = file('../keystore')
+        def keystoreDir = file('keystore')
         if (!keystoreDir.exists()) {
             keystoreDir.mkdirs()
         }
-        def keystoreFile = file('../keystore/debug.keystore')
+        def keystoreFile = file('keystore/debug.keystore')
         if (!keystoreFile.exists()) {
             println "Creating debug keystore..."
             exec {
