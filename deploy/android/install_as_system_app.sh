@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # =============================================================================
 # Egyptian Agent - System App Installer
 # =============================================================================
@@ -8,7 +8,7 @@
 #   for enhanced permissions and background operation.
 #
 # USAGE:
-#   ./scripts/utils/install_as_system_app.sh [OPTIONS]
+#   ./deploy/android/install_as_system_app.sh [OPTIONS]
 #
 # OPTIONS:
 #   --apk PATH          Path to APK file (required)
