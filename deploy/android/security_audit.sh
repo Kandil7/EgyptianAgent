@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # =============================================================================
 # Egyptian Agent - Security Audit Script
 # =============================================================================
@@ -8,7 +8,7 @@
 #   including network access, permissions, and security configurations.
 #
 # USAGE:
-#   ./scripts/utils/security_audit.sh [OPTIONS]
+#   ./deploy/android/security_audit.sh [OPTIONS]
 #
 # OPTIONS:
 #   --full              Full audit including dependency scanning
@@ -42,7 +42,7 @@ set -euo pipefail
 readonly SCRIPT_NAME="$(basename "$0")"
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
-readonly APP_SRC="$PROJECT_DIR/app/src/main"
+readonly APP_SRC="$PROJECT_DIR/android/src/main"
 
 FULL_AUDIT=false
 QUICK_AUDIT=false
