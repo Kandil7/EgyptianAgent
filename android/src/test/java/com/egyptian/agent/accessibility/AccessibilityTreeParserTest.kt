@@ -692,7 +692,7 @@ class AccessibilityTreeParserTest {
 
     private fun createMockNode(
         className: String,
-        text: String?,
+        text: String? = null,
         contentDescription: String? = null,
         isClickable: Boolean,
         isFocusable: Boolean = false,
@@ -708,7 +708,11 @@ class AccessibilityTreeParserTest {
         `when`(node.isEnabled).thenReturn(isEnabled)
         `when`(node.isEditable).thenReturn(isEditable)
         `when`(node.childCount).thenReturn(0)
-        `when`(node.bounds).thenReturn(Rect(0, 0, 100, 50))
+        org.mockito.Mockito.doAnswer { invocation ->
+            val rect = invocation.arguments[0] as Rect
+            rect.set(0, 0, 100, 50)
+            null
+        }.`when`(node).getBoundsInScreen(org.mockito.ArgumentMatchers.any())
         return node
     }
 }
