@@ -1,4 +1,4 @@
-# EgyptianAgent Release Pipeline
+﻿# EgyptianAgent Release Pipeline
 # Creates production releases with signing and publishing
 
 name: Release
@@ -112,14 +112,14 @@ jobs:
 
       - name: Verify APK signatures
         run: |
-          for apk in app/build/outputs/apk/release/*.apk; do
+          for apk in android/build/outputs/apk/release/*.apk; do
             echo "Verifying: $apk"
             apksigner verify --verbose "$apk" || exit 1
           done
 
       - name: Calculate APK checksums
         run: |
-          cd app/build/outputs/apk/release
+          cd android/build/outputs/apk/release
           sha256sum *.apk > checksums.sha256
           cat checksums.sha256
 
@@ -128,8 +128,8 @@ jobs:
         with:
           name: release-apks-${{ steps.version.outputs.version }}
           path: |
-            app/build/outputs/apk/release/*.apk
-            app/build/outputs/apk/release/checksums.sha256
+            android/build/outputs/apk/release/*.apk
+            android/build/outputs/apk/release/checksums.sha256
           retention-days: 90
 
       - name: Generate build metadata
