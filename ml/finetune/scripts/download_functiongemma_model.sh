@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # =============================================================================
 # Egyptian Agent - FunctionGemma Model Download Script
 # =============================================================================
@@ -9,11 +9,11 @@
 #   quantization options.
 #
 # USAGE:
-#   ./scripts/model/download_functiongemma_model.sh [OPTIONS]
+#   ./ml/finetune/scripts/download_functiongemma_model.sh [OPTIONS]
 #
 # OPTIONS:
 #   --local PATH        Use local model file instead of downloading
-#   --output DIR        Output directory (default: app/src/main/assets/models/)
+#   --output DIR        Output directory (default: android/src/main/assets/models/)
 #   --quantization TYPE Quantization type: Q4_K_M, Q5_K_M, Q8_0 (default: Q4_K_M)
 #   --source SOURCE     Download source: huggingface, modelscope (default: huggingface)
 #   --resume            Resume interrupted download
@@ -24,11 +24,11 @@
 #   -h, --help          Show this help message
 #
 # EXAMPLES:
-#   ./scripts/model/download_functiongemma_model.sh
-#   ./scripts/model/download_functiongemma_model.sh --local /path/to/model.gguf
-#   ./scripts/model/download_functiongemma_model.sh --quantization Q8_0
-#   ./scripts/model/download_functiongemma_model.sh --verify model.gguf
-#   ./scripts/model/download_functiongemma_model.sh --info
+#   ./ml/finetune/scripts/download_functiongemma_model.sh
+#   ./ml/finetune/scripts/download_functiongemma_model.sh --local /path/to/model.gguf
+#   ./ml/finetune/scripts/download_functiongemma_model.sh --quantization Q8_0
+#   ./ml/finetune/scripts/download_functiongemma_model.sh --verify model.gguf
+#   ./ml/finetune/scripts/download_functiongemma_model.sh --info
 #
 # MODEL INFO:
 #   Name:       google/functiongemma-270m-it
@@ -64,7 +64,7 @@ readonly DOWNLOAD_TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
 
 # Default configuration
 LOCAL_MODEL=""
-OUTPUT_DIR="$PROJECT_DIR/app/src/main/assets/models"
+OUTPUT_DIR="$PROJECT_DIR/android/src/main/assets/models"
 QUANTIZATION="Q4_K_M"
 DOWNLOAD_SOURCE="huggingface"
 RESUME_DOWNLOAD=false
@@ -425,7 +425,7 @@ USAGE:
 
 OPTIONS:
     --local PATH        Use local model file instead of downloading
-    --output DIR        Output directory (default: app/src/main/assets/models/)
+    --output DIR        Output directory (default: android/src/main/assets/models/)
     --quantization TYPE Quantization type: Q4_K_M, Q5_K_M, Q8_0
                         (default: Q4_K_M)
     --source SOURCE     Download source: huggingface, modelscope
@@ -706,8 +706,8 @@ main() {
     echo ""
     
     log_info "Next steps:"
-    echo "  1. Build app: ./scripts/build/build_functiongemma.sh"
-    echo "  2. Deploy model: ./scripts/deploy/deploy_functiongemma.sh"
+    echo "  1. Build app: ./deploy/build/scripts/build_functiongemma.sh"
+    echo "  2. Deploy model: ./deploy/scripts-deploy/deploy_functiongemma.sh"
     echo "  3. Test function calling on device"
     echo ""
     
