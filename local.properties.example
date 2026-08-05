@@ -1,0 +1,13 @@
+# EgyptianAgent - local.properties template
+# Copy this file to `local.properties` and adjust the paths for your machine.
+# `local.properties` is gitignored — never commit real machine-specific paths.
+#
+# The Android SDK location. On Windows with Android Studio defaults this is:
+#   C:/Users/<USER>/AppData/Local/Android/Sdk
+# (forward slashes work fine on Windows).
+sdk.dir=C:/Users/<USER>/AppData/Local/Android/Sdk
+
+# Optional: NDK override. The project pins NDK version 27.0.12077973 in
+# build.gradle; if you need a different installed NDK, uncomment and point
+# at its absolute path (it must match the pinned version to be used).
+# ndk.dir=C:/Users/<USER>/AppData/Local/Android/Sdk/ndk/27.0.12077973
