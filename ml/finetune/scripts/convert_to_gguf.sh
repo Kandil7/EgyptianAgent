@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # =============================================================================
 # Egyptian Agent - GGUF Conversion Script
 # =============================================================================
@@ -8,7 +8,7 @@
 #   for mobile deployment. Supports FunctionGemma and other compatible models.
 #
 # USAGE:
-#   ./scripts/model/convert_to_gguf.sh [OPTIONS]
+#   ./ml/finetune/scripts/convert_to_gguf.sh [OPTIONS]
 #
 # OPTIONS:
 #   --input DIR         Input model directory (required)
