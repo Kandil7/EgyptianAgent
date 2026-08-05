@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # =============================================================================
 # Egyptian Agent - Production Deployment Script
 # =============================================================================
@@ -9,7 +9,7 @@
 #   mounting, APK installation, permission granting, and rollback support.
 #
 # USAGE:
-#   ./scripts/deploy/deploy_production.sh [OPTIONS]
+#   ./deploy/scripts-deploy/deploy_production.sh [OPTIONS]
 #
 # OPTIONS:
 #   --apk PATH          Path to APK file (default: dist/production/*.apk)
@@ -24,11 +24,11 @@
 #   -h, --help          Show this help message
 #
 # EXAMPLES:
-#   ./scripts/deploy/deploy_production.sh
-#   ./scripts/deploy/deploy_production.sh --apk /path/to/app.apk
-#   ./scripts/deploy/deploy_production.sh --device ABC123 --no-reboot
-#   ./scripts/deploy/deploy_production.sh --rollback
-#   ./scripts/deploy/deploy_production.sh --verify-only
+#   ./deploy/scripts-deploy/deploy_production.sh
+#   ./deploy/scripts-deploy/deploy_production.sh --apk /path/to/app.apk
+#   ./deploy/scripts-deploy/deploy_production.sh --device ABC123 --no-reboot
+#   ./deploy/scripts-deploy/deploy_production.sh --rollback
+#   ./deploy/scripts-deploy/deploy_production.sh --verify-only
 #
 # REQUIREMENTS:
 #   - Rooted Android device with Magisk
@@ -814,7 +814,7 @@ main() {
         
         if [[ -z "$APK_PATH" || ! -f "$APK_PATH" ]]; then
             # Try build output
-            APK_PATH="$PROJECT_DIR/app/build/outputs/apk/release/app-release.apk"
+            APK_PATH="$PROJECT_DIR/android/build/outputs/apk/release/app-release.apk"
         fi
     fi
     
