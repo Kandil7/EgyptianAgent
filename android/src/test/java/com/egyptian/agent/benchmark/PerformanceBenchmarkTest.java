@@ -13,9 +13,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.egyptian.agent.nlu.EgyptianNormalizer;
 import com.egyptian.agent.nlu.IntentResult;
 import com.egyptian.agent.nlu.NLUManager;
-import com.egyptian.agent.executor.EmergencyHandler;
+import com.egyptian.agent.executors.EmergencyHandler;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Performance Benchmark Test Suite
