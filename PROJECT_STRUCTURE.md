@@ -1,7 +1,7 @@
 # EgyptianAgent - Project Structure
 
-**Last Updated:** 2026-03-03  
-**Version:** 2.0 (Reorganized)  
+**Last Updated:** 2026-08-04  
+**Version:** 1.1.0 (Reorganized)
 
 ---
 
@@ -10,16 +10,19 @@
 ```
 EgyptianAgent/
 ├── 📄 README.md                    # Main project documentation
+├── 📄 INDEX.md                     # Quick navigation hub
 ├── 📄 CONTRIBUTING.md              # Contribution guidelines
 ├── 📄 SECURITY.md                  # Security policy
+├── 📄 AGENTS.md                    # Agent/LLM workflow instructions
 ├── 📄 LICENSE                      # Project license
 ├── 📄 build.gradle                 # Root build configuration
-├── 📄 settings.gradle              # Project settings
+├── 📄 settings.gradle              # Project settings (module: android)
 ├── 📄 gradle.properties            # Gradle properties
+├── 📄 gradlew / gradlew.bat        # Gradle wrapper (repo root)
+├── 📄 local.properties.example     # SDK path template (copy → local.properties)
 ├── 📄 CMakeLists.txt               # Native build configuration
-├── 📄 requirements_functiongemma.txt  # Python dependencies
 │
-├── 📦 app/                         # Android application module
+├── 📱 android/                     # Android application module
 │   ├── src/
 │   │   ├── main/
 │   │   │   ├── java/com/egyptian/agent/
@@ -32,135 +35,100 @@ EgyptianAgent/
 │   │   │   │   ├── core/          # Core services
 │   │   │   │   ├── service/       # Android services
 │   │   │   │   ├── executor/      # Command executors
+│   │   │   │   ├── executors/     # Legacy executors (see AGENTS.md)
 │   │   │   │   ├── emergency/     # Emergency handling
 │   │   │   │   ├── accessibility/ # Accessibility features
+│   │   │   │   ├── hybrid/        # Hybrid orchestrator (fast/slow path)
+│   │   │   │   ├── navigation/    # UI navigation engine (slow path)
+│   │   │   │   ├── workflow/      # YAML workflow engine
+│   │   │   │   ├── vision/        # Vision fallback
+│   │   │   │   ├── security/      # Security & privacy
+│   │   │   │   ├── analytics/     # Privacy-compliant analytics
+│   │   │   │   ├── backup/        # Backup/restore
+│   │   │   │   ├── feedback/      # User feedback
+│   │   │   │   ├── performance/   # Performance monitoring
+│   │   │   │   ├── updates/       # OTA updates
+│   │   │   │   ├── contacts/      # Arabic contact matching
+│   │   │   │   ├── system/        # System privilege management
+│   │   │   │   ├── wakeword/      # Wake word detection
+│   │   │   │   ├── receivers/     # Broadcast receivers
+│   │   │   │   ├── ui/            # Activities & UI
 │   │   │   │   └── utils/         # Utilities
 │   │   │   ├── cpp/               # Native C++ code
-│   │   │   ├── assets/            # App assets
+│   │   │   ├── assets/            # App assets (models, workflows, grammars)
 │   │   │   └── AndroidManifest.xml
-│   │   ├── test/                  # Unit tests
+│   │   ├── test/                  # Unit tests (JUnit 5 + Robolectric)
 │   │   └── androidTest/           # Instrumented tests
-│   └── build.gradle
+│   ├── build.gradle
+│   └── keystore/                  # Signing keys (debug only, gitignored)
+│
+├── 🚀 deploy/                      # Build, deploy & device tooling
+│   ├── README.md
+│   ├── build/                     # Build scripts & Gradle wrapper helpers
+│   │   ├── scripts/               # build.sh, build_functiongemma.sh, ...
+│   │   ├── install_gradle.ps1
+│   │   └── install_jdk17.ps1
+│   ├── android/                   # SDK/device setup (Windows PS + bash)
+│   │   ├── windows_setup.ps1
+│   │   ├── install_android_sdk.ps1
+│   │   └── verify_implementation.sh
+│   ├── scripts-deploy/            # Deployment scripts
+│   │   ├── deploy_production.sh
+│   │   ├── deploy_functiongemma.sh
+│   │   ├── initialize_submodules.sh
+│   │   └── verify_deployment.sh/.ps1
+│   ├── hf/                        # HuggingFace dataset upload tools
+│   │   ├── upload_to_hf.py
+│   │   └── merge_and_push.py
+│   └── device/                    # Device-side utilities
+│
+├── 🧠 ml/                          # ML pipeline
+│   ├── requirements.txt           # Python dependencies
+│   ├── prompts/                   # Generation/system prompts
+│   │   ├── system_prompt.txt
+│   │   ├── intent_generation_prompt.md
+│   │   └── negative_examples.md
+│   └── finetune/
+│       ├── scripts/               # Fine-tuning, eval, data-gen scripts
+│       │   ├── finetune_functiongemma_egyptian.py
+│       │   ├── evaluate_egyptian_accuracy.py
+│       │   ├── generate_synthetic_data.py
+│       │   └── download_functiongemma_model.sh
+│       ├── configs/               # Fine-tuning configuration
+│       ├── data/                  # Datasets
+│       │   ├── voice_commands/    # train/eval/test.jsonl (messages format)
+│       │   ├── ui_navigation/     # train/test.jsonl
+│       │   └── egyptian_commands/ # Schema + seed samples
+│       ├── checkpoints/           # LoRA adapters (committed)
+│       ├── evaluation/            # Evaluation reports
+│       └── docs/                  # ML planning docs
 │
 ├── 📚 docs/                        # All documentation
 │   ├── README.md                   # Documentation index
 │   ├── FUNCTIONGEMMA_QUICKSTART.md # Quick start guide
-│   │
 │   ├── architecture/               # Architecture docs
-│   │   ├── README.md
-│   │   ├── ARCHITECTURE.md
-│   │   ├── PRODUCTION_ARCHITECTURE.md
-│   │   └── FUNCTIONGEMMA_ARCHITECTURE.md
-│   │
 │   ├── deployment/                 # Deployment guides
-│   │   ├── README.md
-│   │   ├── DEPLOYMENT_GUIDE.md
-│   │   ├── FUNCTIONGEMMA_DEPLOYMENT_GUIDE.md
-│   │   └── production_deployment_guide.md
-│   │
 │   ├── api/                        # API references
-│   │   ├── README.md
-│   │   ├── API_REFERENCE.md
-│   │   └── FUNCTIONGEMMA_API_REFERENCE.md
-│   │
 │   ├── guides/                     # User & developer guides
-│   │   ├── README.md
-│   │   ├── TROUBLESHOOTING.md
-│   │   ├── user_manual.md
-│   │   ├── user_manual_ar.md
-│   │   ├── RELEASE_NOTES.md
-│   │   ├── FUNCTIONGEMMA_FINETUNING_GUIDE.md
-│   │   └── FUNCTIONGEMMA_MIGRATION_GUIDE.md
-│   │
 │   ├── testing/                    # Testing documentation
-│   │   ├── README.md
-│   │   ├── FUNCTIONGEMMA_TEST_PLAN.md
-│   │   └── TEST_SUITE.md
-│   │
 │   ├── performance/                # Performance benchmarks
-│   │   ├── README.md
-│   │   └── FUNCTIONGEMMA_PERFORMANCE_BENCHMARKS.md
-│   │
 │   ├── integration/                # Integration guides
-│   │   ├── README.md
-│   │   ├── FUNCTIONGEMMA_INTEGRATION.md
-│   │   └── saiyy_ps_integration.md
-│   │
-│   └── archive/                    # Archived documents
-│       ├── README.md
-│       ├── reports/               # Old reports
-│       ├── summaries/             # Old summaries
-│       ├── plans/                 # Old plans
-│       └── validation/            # Old validation docs
+│   └── archive/                    # Archived documents & old reports
 │
-├── 🛠️ scripts/                     # All scripts
-│   ├── README.md                   # Scripts index
-│   ├── build/                     # Build scripts
-│   │   ├── build.sh
-│   │   ├── build_production.sh
-│   │   ├── build_functiongemma.sh
-│   │   └── build_native_libs.sh
-│   │
-│   ├── deploy/                    # Deployment scripts
-│   │   ├── deploy_production.sh
-│   │   ├── deploy_functiongemma.sh
-│   │   └── initialize_submodules.sh
-│   │
-│   ├── model/                     # Model management
-│   │   ├── download_functiongemma_model.sh
-│   │   ├── download_whisper_model.sh
-│   │   ├── convert_to_gguf.sh
-│   │   ├── convert_llama_model.sh
-│   │   ├── setup_llama_model.sh
-│   │   └── setup_functiongemma_model.sh
-│   │
-│   ├── test/                      # Test scripts
-│   │   ├── run_functiongemma_tests.sh
-│   │   └── test_integration.sh
-│   │
-│   ├── finetune/                  # Fine-tuning scripts
-│   │   ├── finetune_functiongemma_egyptian.py
-│   │   └── evaluate_egyptian_accuracy.py
-│   │
-│   └── utils/                     # Utility scripts
-│       ├── verify_implementation.sh
-│       ├── fetch_models.sh
-│       ├── security_audit.sh
-│       ├── honor_battery_fix.sh
-│       ├── install_as_system_app.sh
-│       └── complete_build.sh
-│
-├── 📊 datasets/                    # Training datasets
-│   ├── README.md
-│   └── egyptian_voice_commands/
-│       ├── train.jsonl            # 500+ training examples
-│       ├── eval.jsonl             # 50 validation examples
-│       └── test.jsonl             # 100 test examples
-│
-├── ⚙️ configs/                     # Configuration files
-│   ├── README.md
-│   └── finetune_config.yaml       # Fine-tuning configuration
-│
-├── 🤖 agents/                      # Agent definitions
+├── 🤖 agents/                      # Agent/persona definitions
 │   ├── index.md
-│   ├── Technical_Lead_Agent.md
-│   ├── Product_Manager_Agent.md
-│   ├── Senior_Android_Engineer_System_Agent.md
-│   └── ... (15 agent definitions)
+│   ├── OPENCODE_INTEGRATION.md
+│   └── *.md                        # 16 persona definitions
 │
-├── 🔧 external/                    # External dependencies
-│   ├── llama.cpp/                 # Llama.cpp submodule
-│   ├── whisper.cpp/               # Whisper.cpp submodule
-│   └── faster-whisper/            # Faster Whisper
+├── 🔧 external/                    # External dependencies (git submodules)
+│   ├── llama.cpp/                  # Llama.cpp submodule
+│   └── whisper.cpp/                # Whisper.cpp submodule
 │
-├── 🧪 vllm_config/                 # vLLM configuration
+├── ⚙️ .github/                     # GitHub configuration
+│   └── workflows/                  # ci.yml, test-suite.yml, release.yml
 │
-├── 🔒 .github/                     # GitHub configuration
-│   ├── ISSUE_TEMPLATE/
-│   ├── workflows/
-│   └── ...
-│
-└── 🗄️ _migration_backup_*/         # Migration backup (safe to delete)
+├── 🛠️ tools/                       # Local SDK/adb tooling (gitignored)
+└── 📊 ml/finetune/data/            # Datasets live under ml/ (see above)
 ```
 
 ---
@@ -169,13 +137,16 @@ EgyptianAgent/
 
 | Category | Count | Location |
 |----------|-------|----------|
-| **Root Files** | 12 | `/` |
+| **Root Files** | 16 | `/` |
 | **Documentation** | 25+ | `/docs/` |
-| **Scripts** | 21 | `/scripts/` |
-| **Test Files** | 50+ | `/app/src/test/` |
-| **Java Source** | 100+ | `/app/src/main/java/` |
-| **Dataset Files** | 3 | `/datasets/` |
-| **Config Files** | 2 | `/configs/` |
+| **Build Scripts** | 6 | `/deploy/build/scripts/` |
+| **Deploy Scripts** | 5 | `/deploy/scripts-deploy/` |
+| **Device/SDK Scripts** | 25 | `/deploy/android/` |
+| **ML Scripts** | 18 | `/ml/finetune/scripts/` |
+| **Test Files** | 35+ | `/android/src/test/` |
+| **Java/Kotlin Source** | 250+ | `/android/src/main/java/` |
+| **Dataset Files** | 8 | `/ml/finetune/data/` |
+| **Config Files** | 4 | `/ml/finetune/configs/` |
 | **Agent Definitions** | 16 | `/agents/` |
 
 ---
@@ -193,23 +164,27 @@ All project documentation organized by category:
 - **integration/** - Integration guides
 - **archive/** - Historical documents (old reports, summaries)
 
-### `/scripts/` - Automation Scripts
+### `/deploy/` - Build, Deploy & Device Tooling
 All executable scripts organized by function:
-- **build/** - Build automation
-- **deploy/** - Deployment automation
-- **model/** - Model download and conversion
-- **test/** - Test execution
-- **finetune/** - Model fine-tuning
-- **utils/** - Utility scripts
+- **build/** - Build automation + Gradle helper tooling
+- **scripts-deploy/** - Deployment automation
+- **android/** - SDK/device setup (Windows PowerShell + bash)
+- **hf/** - HuggingFace dataset upload tools
+- **device/** - Device-side utilities
 
-### `/datasets/` - Training Data
-Egyptian Arabic voice command datasets:
-- **egyptian_voice_commands/** - 650+ examples for fine-tuning
+### `/ml/` - ML Pipeline
+Egyptian Arabic voice command ML pipeline:
+- **finetune/scripts/** - Fine-tuning, evaluation, and synthetic-data scripts
+- **finetune/data/** - voice_commands (train/eval/test), ui_navigation, egyptian_commands (schema + seeds)
+- **finetune/configs/** - Fine-tuning configuration
+- **finetune/checkpoints/** - LoRA adapters (committed)
+- **prompts/** - System and generation prompts
 
-### `/app/` - Android Application
+### `/android/` - Android Application
 Main application code:
-- **src/main/java/** - Java source code
+- **src/main/java/** - Java/Kotlin source code
 - **src/main/cpp/** - Native C++ code
+- **src/main/assets/** - Assets (models, YAML workflows, grammars)
 - **src/test/** - Unit tests
 - **src/androidTest/** - Instrumented tests
 
@@ -220,47 +195,47 @@ Main application code:
 ### Build the Project
 ```bash
 # Standard build
-./scripts/build/build.sh
+./deploy/build/scripts/build.sh
 
 # Production build
-./scripts/build/build_production.sh
+./deploy/build/scripts/build_production.sh
 
 # FunctionGemma variant
-./scripts/build/build_functiongemma.sh
+./deploy/build/scripts/build_functiongemma.sh
 ```
 
 ### Deploy to Device
 ```bash
 # Deploy production version
-./scripts/deploy/deploy_production.sh
+./deploy/scripts-deploy/deploy_production.sh
 
 # Deploy FunctionGemma model
-./scripts/deploy/deploy_functiongemma.sh
+./deploy/scripts-deploy/deploy_functiongemma.sh
 ```
 
 ### Run Tests
 ```bash
 # Run all FunctionGemma tests
-./scripts/test/run_functiongemma_tests.sh --all
+./ml/finetune/scripts/run_functiongemma_tests.sh --all
 
 # Run unit tests only
-./scripts/test/run_functiongemma_tests.sh --unit
+./ml/finetune/scripts/run_functiongemma_tests.sh --unit
 
 # Run with coverage
-./scripts/test/run_functiongemma_tests.sh --coverage
+./ml/finetune/scripts/run_functiongemma_tests.sh --coverage
 ```
 
 ### Fine-tune Model
 ```bash
 # Install dependencies
-pip install -r requirements_functiongemma.txt
+pip install -r ml/requirements.txt
 
 # Fine-tune FunctionGemma
-python scripts/finetune/finetune_functiongemma_egyptian.py \
-  --config configs/finetune_config.yaml
+python ml/finetune/scripts/finetune_functiongemma_egyptian.py \
+  --config ml/finetune/configs/finetune_config.yaml
 
 # Evaluate accuracy
-python scripts/finetune/evaluate_egyptian_accuracy.py
+python ml/finetune/scripts/evaluate_egyptian_accuracy.py
 ```
 
 ---
@@ -293,24 +268,29 @@ python scripts/finetune/evaluate_egyptian_accuracy.py
 
 ## 🔄 Migration History
 
-**2026-03-03 - Major Reorganization (v2.0)**
-- Consolidated all documentation into `/docs/`
-- Organized all scripts into `/scripts/`
-- Archived 26+ old reports and summaries
-- Removed duplicate files
-- Created comprehensive README files for each directory
+**2026-08-04 - Repository Reorganization (v1.1.0)**
+- Moved Android module: `app/` → `android/`
+- Reorganized scripts: `scripts/` → `deploy/` (build, android, scripts-deploy, hf, device)
+- Moved ML pipeline: `datasets/`, `configs/`, `models/`, `vllm_config/` → `ml/`
+- Restored Gradle wrapper to repo root (`gradlew`, `gradlew.bat`, `gradle/wrapper/`)
+- Moved test harness classes from `src/main/java` to `src/test/java`
+- Updated `.gitignore`, `.gitattributes`, added `local.properties.example`
+- Updated root docs (README, INDEX, PROJECT_STRUCTURE, CONTRIBUTING)
+- Old reports archived to `docs/archive/reports/`
 
-**Before:** 47 files in root directory  
-**After:** 12 files in root directory
+**2026-03-03 - Earlier Reorganization (v2.0)**
+- Consolidated all documentation into `/docs/`
+- Archived old reports and summaries
+- Removed duplicate files
 
 ---
 
 ## 📌 Important Notes
 
-1. **Backup**: Migration backup available in `_migration_backup_*/`
+1. **Backup**: Old reports archived in `docs/archive/reports/`
 2. **Git History**: File history preserved via `git mv`
-3. **References**: Update any external references to old paths
-4. **CI/CD**: Update build pipelines to use new script paths
+3. **References**: Update any external references to old paths (`app/`, `scripts/`, `datasets/`)
+4. **CI/CD**: `.github/workflows/` references `:android:` module tasks
 5. **Documentation**: All active docs in `/docs/`, archive in `/docs/archive/`
 
 ---
@@ -318,15 +298,14 @@ python scripts/finetune/evaluate_egyptian_accuracy.py
 ## ✅ Post-Migration Checklist
 
 - [x] All files moved to new structure
-- [x] Backup created
-- [x] README files created for all directories
 - [x] Root directory cleaned
 - [x] Scripts organized by function
 - [x] Documentation organized by category
 - [x] Test files organized by component
 - [x] Obsolete files archived/deleted
-- [ ] Update CI/CD pipelines (if applicable)
-- [ ] Update external documentation links (if applicable)
+- [x] Root docs updated (README, INDEX, PROJECT_STRUCTURE, CONTRIBUTING)
+- [x] `.gitignore` / `.gitattributes` updated for new layout
+- [x] `local.properties.example` added
 - [ ] Commit changes to version control
 
 ---
