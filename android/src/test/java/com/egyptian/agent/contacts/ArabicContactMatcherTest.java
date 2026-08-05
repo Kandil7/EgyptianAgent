@@ -7,6 +7,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.List;
+import java.util.Map;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -152,7 +155,7 @@ public class ArabicContactMatcherTest {
         String spokenName = "أحمد";
         
         // When
-        var matches = matcher.findContacts(spokenName);
+        List<ArabicContactMatcher.ContactEntry> matches = matcher.findContacts(spokenName);
         
         // Then - should return up to 5 matches
         assertNotNull("Should return list", matches);
@@ -161,7 +164,7 @@ public class ArabicContactMatcherTest {
     @Test
     public void testGetFamilyAliases() {
         // When
-        var aliases = ArabicContactMatcher.getFamilyAliases();
+        Map<String, String> aliases = ArabicContactMatcher.getFamilyAliases();
         
         // Then
         assertNotNull("Should return aliases map", aliases);
@@ -178,7 +181,7 @@ public class ArabicContactMatcherTest {
         
         // These would normally be tested through the matcher
         // but we verify the family aliases cover common variations
-        var aliases = ArabicContactMatcher.getFamilyAliases();
+        Map<String, String> aliases = ArabicContactMatcher.getFamilyAliases();
         
         // Test all variations of mother
         assertTrue(aliases.containsKey("ماما"));
