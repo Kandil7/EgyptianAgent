@@ -18,7 +18,7 @@ ext {
     minSdkVersion = 28
     targetSdkVersion = 34
     compileSdkVersion = 35  // Updated for androidx.core 1.15.0 compatibility
-    ndkVersion = '25.2.9519653'
+    ndkVersion = '27.0.12077973'
 
     // Dependencies versions - Updated for compatibility
     kotlinVersion = '2.1.0'
@@ -39,6 +39,12 @@ ext {
     fragmentKtxVersion = '1.8.5'
     activityKtxVersion = '1.9.3'
     coroutinesVersion = '1.9.0'
+
+    // Native inference mode.
+    //   -PnativeInference=full  -> compile external/llama.cpp + external/whisper.cpp
+    //   (default)               -> stub natives, explicitly flagged as MOCK
+    // A stub build cannot run any model; release builds must use 'full'.
+    nativeFull = (project.findProperty('nativeInference') ?: 'stub') == 'full'
 
     // Native library versions - using local builds
     llamaCppVersion = 'unspecified'  // Local build, not from Maven
