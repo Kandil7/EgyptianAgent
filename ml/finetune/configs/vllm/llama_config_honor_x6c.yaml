@@ -1,4 +1,4 @@
-# Llama 3.2 3B Configuration for Honor X6c
+﻿# Llama 3.2 3B Configuration for Honor X6c
 # Target Device: Honor X6c (MediaTek Helio G81 Ultra, 6GB RAM)
 # Model: llama-3.2-3b-Q4_K_M.gguf (~1.64GB)
 
@@ -226,7 +226,7 @@ error_responses = {
 # BUILD CONFIGURATION (Gradle)
 # =============================================================================
 
-# app/build.gradle
+# android/build.gradle
 android {
     defaultConfig {
         externalNativeBuild {
