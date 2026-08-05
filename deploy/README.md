@@ -1,4 +1,4 @@
-# EgyptianAgent Scripts
+﻿# EgyptianAgent Scripts
 
 This directory contains all project scripts organized by function.
 
@@ -69,19 +69,19 @@ This directory contains all project scripts organized by function.
 
 ```bash
 # Build the project
-./scripts/build/build.sh
+./deploy/build/scripts/build.sh
 
 # Deploy to production
-./scripts/deploy/deploy_production.sh
+./deploy/scripts-deploy/deploy_production.sh
 
 # Run tests
 ./scripts/test/run_functiongemma_tests.sh
 
 # Download models
-./scripts/model/download_functiongemma_model.sh
+./ml/finetune/scripts/download_functiongemma_model.sh
 
 # Run verification
-./scripts/deploy/verify_deployment.sh
+./deploy/scripts-deploy/verify_deployment.sh
 ```
 
 ## Making Scripts Executable
