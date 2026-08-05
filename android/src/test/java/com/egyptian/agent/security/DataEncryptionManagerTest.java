@@ -1,12 +1,13 @@
 package com.egyptian.agent.security;
 
+import androidx.test.core.app.ApplicationProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.robolectric.annotation.Config;
+import org.robolectric.junit5.RobolectricExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,21 +19,18 @@ import static org.junit.jupiter.api.Assertions.*;
  * 
  * Coverage Target: 90%
  */
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(RobolectricExtension.class)
+@Config(sdk = 34)
 @DisplayName("DataEncryptionManager Tests")
 class DataEncryptionManagerTest {
 
-    @Mock
-    private android.content.Context mockContext;
-
-    @Mock
-    private android.content.Context mockApplicationContext;
+    private android.content.Context appContext;
 
     private DataEncryptionManager encryptionManager;
 
     @BeforeEach
     void setUp() {
-        when(mockContext.getApplicationContext()).thenReturn(mockApplicationContext);
+        appContext = ApplicationProvider.getApplicationContext();
     }
 
     @Nested
@@ -42,8 +40,8 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("getInstance creates singleton instance")
         void testGetInstanceCreatesSingleton() {
-            DataEncryptionManager instance1 = DataEncryptionManager.getInstance(mockContext);
-            DataEncryptionManager instance2 = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager instance1 = DataEncryptionManager.getInstance(appContext);
+            DataEncryptionManager instance2 = DataEncryptionManager.getInstance(appContext);
             
             assertSame(instance1, instance2, "Should return same singleton instance");
         }
@@ -51,15 +49,14 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("instance is not null")
         void testInstanceNotNull() {
-            DataEncryptionManager instance = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager instance = DataEncryptionManager.getInstance(appContext);
             assertNotNull(instance);
         }
 
         @Test
         @DisplayName("constructor uses application context")
         void testConstructorUsesApplicationContext() {
-            when(mockContext.getApplicationContext()).thenReturn(mockApplicationContext);
-            DataEncryptionManager instance = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager instance = DataEncryptionManager.getInstance(appContext);
             assertNotNull(instance);
         }
     }
@@ -71,7 +68,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("isEncryptionReady returns boolean")
         void testIsEncryptionReadyReturnsBoolean() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             boolean ready = manager.isEncryptionReady();
             
             // Result depends on actual encryption setup
@@ -81,7 +78,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("encryption state is consistent")
         void testEncryptionStateConsistent() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             boolean state1 = manager.isEncryptionReady();
             boolean state2 = manager.isEncryptionReady();
             
@@ -96,7 +93,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("storeSensitiveData accepts key-value pair")
         void testStoreSensitiveDataAcceptsKeyValue() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 manager.storeSensitiveData("test_key", "test_value");
@@ -106,7 +103,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("storeSensitiveData handles null key")
         void testStoreSensitiveDataNullKey() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 manager.storeSensitiveData(null, "test_value");
@@ -116,7 +113,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("storeSensitiveData handles null value")
         void testStoreSensitiveDataNullValue() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 manager.storeSensitiveData("test_key", null);
@@ -126,7 +123,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("storeSensitiveData handles empty key")
         void testStoreSensitiveDataEmptyKey() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 manager.storeSensitiveData("", "test_value");
@@ -136,7 +133,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("storeSensitiveData handles empty value")
         void testStoreSensitiveDataEmptyValue() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 manager.storeSensitiveData("test_key", "");
@@ -146,7 +143,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("storeSensitiveData handles Arabic text")
         void testStoreSensitiveDataArabicText() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 manager.storeSensitiveData("اسم", "قيمة عربية");
@@ -156,7 +153,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("storeSensitiveData handles special characters")
         void testStoreSensitiveDataSpecialCharacters() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 manager.storeSensitiveData("key!@#", "value$%^");
@@ -166,7 +163,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("storeSensitiveData handles long values")
         void testStoreSensitiveDataLongValues() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             StringBuilder longValue = new StringBuilder();
             for (int i = 0; i < 1000; i++) {
@@ -186,7 +183,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("retrieveSensitiveData returns value")
         void testRetrieveSensitiveDataReturnsValue() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             manager.storeSensitiveData("test_key", "test_value");
             String retrieved = manager.retrieveSensitiveData("test_key");
@@ -198,7 +195,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("retrieveSensitiveData returns null for non-existent key")
         void testRetrieveSensitiveDataNonExistentKey() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             String retrieved = manager.retrieveSensitiveData("non_existent_key");
             
@@ -209,7 +206,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("retrieveSensitiveData handles null key")
         void testRetrieveSensitiveDataNullKey() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 manager.retrieveSensitiveData(null);
@@ -219,7 +216,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("retrieveSensitiveData handles empty key")
         void testRetrieveSensitiveDataEmptyKey() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 manager.retrieveSensitiveData("");
@@ -229,7 +226,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("stored and retrieved values match")
         void testStoredAndRetrievedValuesMatch() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             manager.storeSensitiveData("match_key", "match_value");
             String retrieved = manager.retrieveSensitiveData("match_key");
@@ -248,7 +245,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("storeEmergencyContact accepts name and number")
         void testStoreEmergencyContactAcceptsNameAndNumber() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 manager.storeEmergencyContact("أحمد محمد", "0123456789");
@@ -258,7 +255,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("storeEmergencyContact handles null name")
         void testStoreEmergencyContactNullName() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 manager.storeEmergencyContact(null, "0123456789");
@@ -268,7 +265,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("storeEmergencyContact handles null number")
         void testStoreEmergencyContactNullNumber() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 manager.storeEmergencyContact("أحمد محمد", null);
@@ -278,7 +275,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("storeEmergencyContact handles empty values")
         void testStoreEmergencyContactEmptyValues() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 manager.storeEmergencyContact("", "");
@@ -288,7 +285,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("retrieveEmergencyContact returns array")
         void testRetrieveEmergencyContactReturnsArray() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             manager.storeEmergencyContact("أحمد محمد", "0123456789");
             String[] contact = manager.retrieveEmergencyContact();
@@ -300,7 +297,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("retrieveEmergencyContact handles non-existent contact")
         void testRetrieveEmergencyContactNonExistent() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             String[] contact = manager.retrieveEmergencyContact();
             
@@ -311,7 +308,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("store and retrieve emergency contact match")
         void testStoreAndRetrieveEmergencyContactMatch() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             String name = "أحمد محمد";
             String number = "0123456789";
@@ -328,7 +325,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("update emergency contact")
         void testUpdateEmergencyContact() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             manager.storeEmergencyContact("أحمد محمد", "0123456789");
             manager.storeEmergencyContact("ماما", "0109876543");
@@ -348,7 +345,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("storeGuardianInfo accepts name and number")
         void testStoreGuardianInfoAcceptsNameAndNumber() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 manager.storeGuardianInfo("دكتور أحمد", "0123456789");
@@ -358,7 +355,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("storeGuardianInfo handles null values")
         void testStoreGuardianInfoNullValues() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 manager.storeGuardianInfo(null, null);
@@ -368,7 +365,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("storeGuardianInfo handles empty values")
         void testStoreGuardianInfoEmptyValues() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 manager.storeGuardianInfo("", "");
@@ -378,7 +375,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("retrieveGuardianInfo returns array")
         void testRetrieveGuardianInfoReturnsArray() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             manager.storeGuardianInfo("دكتور أحمد", "0123456789");
             String[] guardian = manager.retrieveGuardianInfo();
@@ -390,7 +387,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("store and retrieve guardian info match")
         void testStoreAndRetrieveGuardianInfoMatch() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             String name = "دكتور أحمد";
             String number = "0123456789";
@@ -412,7 +409,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("clearAllEncryptedData executes without error")
         void testClearAllEncryptedDataExecutes() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 manager.clearAllEncryptedData();
@@ -422,7 +419,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("clearAllEncryptedData multiple times is safe")
         void testClearAllEncryptedDataMultipleTimes() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 manager.clearAllEncryptedData();
@@ -434,7 +431,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("data is cleared after clearAllEncryptedData")
         void testDataClearedAfterClearAll() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             manager.storeSensitiveData("test_key", "test_value");
             manager.clearAllEncryptedData();
@@ -449,7 +446,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("emergency contact cleared after clearAllEncryptedData")
         void testEmergencyContactClearedAfterClearAll() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             manager.storeEmergencyContact("أحمد", "0123456789");
             manager.clearAllEncryptedData();
@@ -464,7 +461,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("guardian info cleared after clearAllEncryptedData")
         void testGuardianInfoClearedAfterClearAll() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             manager.storeGuardianInfo("دكتور أحمد", "0123456789");
             manager.clearAllEncryptedData();
@@ -484,9 +481,9 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("multiple instances return same singleton")
         void testMultipleInstancesReturnSameSingleton() {
-            DataEncryptionManager instance1 = DataEncryptionManager.getInstance(mockContext);
-            DataEncryptionManager instance2 = DataEncryptionManager.getInstance(mockContext);
-            DataEncryptionManager instance3 = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager instance1 = DataEncryptionManager.getInstance(appContext);
+            DataEncryptionManager instance2 = DataEncryptionManager.getInstance(appContext);
+            DataEncryptionManager instance3 = DataEncryptionManager.getInstance(appContext);
             
             assertSame(instance1, instance2);
             assertSame(instance2, instance3);
@@ -495,7 +492,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("concurrent store operations handled")
         void testConcurrentStoreOperations() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 Thread t1 = new Thread(() -> manager.storeSensitiveData("key1", "value1"));
@@ -515,7 +512,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("concurrent retrieve operations handled")
         void testConcurrentRetrieveOperations() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             manager.storeSensitiveData("key1", "value1");
             manager.storeSensitiveData("key2", "value2");
@@ -539,7 +536,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("large number of keys handled")
         void testLargeNumberOfKeys() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 for (int i = 0; i < 100; i++) {
@@ -551,7 +548,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("very long key handled")
         void testVeryLongKey() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             StringBuilder longKey = new StringBuilder();
             for (int i = 0; i < 1000; i++) {
@@ -566,7 +563,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("unicode characters in key handled")
         void testUnicodeCharactersInKey() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 manager.storeSensitiveData("مفتاح_🔑_key", "قيمة");
@@ -576,7 +573,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("unicode characters in value handled")
         void testUnicodeCharactersInValue() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             assertDoesNotThrow(() -> {
                 manager.storeSensitiveData("key", "قيمة_🔒_encrypted");
@@ -591,7 +588,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("rapid store operations")
         void testRapidStoreOperations() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             long startTime = System.currentTimeMillis();
             for (int i = 0; i < 100; i++) {
@@ -605,7 +602,7 @@ class DataEncryptionManagerTest {
         @Test
         @DisplayName("rapid retrieve operations")
         void testRapidRetrieveOperations() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             // First store some data
             for (int i = 0; i < 100; i++) {
@@ -625,7 +622,7 @@ class DataEncryptionManagerTest {
         @DisplayName("encryption initialization time")
         void testEncryptionInitializationTime() {
             long startTime = System.currentTimeMillis();
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             long duration = System.currentTimeMillis() - startTime;
             
             assertTrue(duration < 10000, "Initialization should complete in under 10 seconds");
@@ -641,7 +638,7 @@ class DataEncryptionManagerTest {
         void testEncryptionManagerUsesAES256() {
             // Verify the implementation uses AES-256
             // This is a structural test based on the source code
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             assertNotNull(manager);
         }
 
@@ -649,7 +646,7 @@ class DataEncryptionManagerTest {
         @DisplayName("encryption manager uses GCM mode")
         void testEncryptionManagerUsesGCMMode() {
             // Verify the implementation uses GCM mode
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             assertNotNull(manager);
         }
 
@@ -657,14 +654,14 @@ class DataEncryptionManagerTest {
         @DisplayName("encryption manager uses Android Keystore")
         void testEncryptionManagerUsesAndroidKeystore() {
             // Verify the implementation uses Android Keystore
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             assertNotNull(manager);
         }
 
         @Test
         @DisplayName("sensitive data is encrypted before storage")
         void testSensitiveDataEncryptedBeforeStorage() {
-            DataEncryptionManager manager = DataEncryptionManager.getInstance(mockContext);
+            DataEncryptionManager manager = DataEncryptionManager.getInstance(appContext);
             
             manager.storeSensitiveData("sensitive_key", "sensitive_value");
             
