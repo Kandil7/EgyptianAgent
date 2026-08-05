@@ -35,8 +35,7 @@ class WorkflowEngineTest {
     @Mock
     private lateinit var mockUINavigationEngine: UINavigationEngine
 
-    @Mock
-    private lateinit var mockFilesDir: File
+    private val mockFilesDir = File("/tmp/test/files")
 
     private lateinit var workflowEngine: WorkflowEngine
     private lateinit var workflowsDir: File
@@ -45,12 +44,10 @@ class WorkflowEngineTest {
     fun setup() {
         MockitoAnnotations.openMocks(this)
         `when`(mockContext.filesDir).thenReturn(mockFilesDir)
-        `when`(mockFilesDir.absolutePath).thenReturn("/tmp/test/files")
         
         // Create temp workflows directory
-        workflowsDir = File("/tmp/test/files/workflows")
+        workflowsDir = File(mockFilesDir, "workflows")
         workflowsDir.mkdirs()
-        `when`(mockFilesDir.resolve("workflows")).thenReturn(workflowsDir)
         
         workflowEngine = WorkflowEngine(mockContext, mockUINavigationEngine)
     }
@@ -349,7 +346,7 @@ class WorkflowEngineTest {
         val file = workflowEngine.saveWorkflow(workflow)
 
         // Then
-        assertThat(file).exists()
+        assertThat(file.exists()).isTrue()
         assertThat(file.name).isEqualTo("saved_workflow.yaml")
     }
 
