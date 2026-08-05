@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # =============================================================================
 # Egyptian Agent - Model Fetch Script
 # =============================================================================
@@ -8,7 +8,7 @@
 #   FunctionGemma, Whisper, and optional Llama models.
 #
 # USAGE:
-#   ./scripts/utils/fetch_models.sh [OPTIONS]
+#   ./deploy/android/fetch_models.sh [OPTIONS]
 #
 # OPTIONS:
 #   --all               Fetch all models (default)
@@ -16,7 +16,7 @@
 #   --whisper           Fetch Whisper model only
 #   --llama             Fetch Llama model only
 #   --vosk              Fetch Vosk Arabic model only
-#   --output DIR        Output directory (default: app/src/main/assets/models/)
+#   --output DIR        Output directory (default: android/src/main/assets/models/)
 #   --skip-large        Skip large models (>500MB)
 #   --log-file PATH     Write fetch log to specified file
 #   --ci                CI/CD mode
@@ -50,7 +50,7 @@ FETCH_FUNCTIONGEMMA=false
 FETCH_WHISPER=false
 FETCH_LLAMA=false
 FETCH_VOSK=false
-OUTPUT_DIR="$PROJECT_DIR/app/src/main/assets/models"
+OUTPUT_DIR="$PROJECT_DIR/android/src/main/assets/models"
 SKIP_LARGE=false
 LOG_FILE=""
 CI_MODE=false
@@ -121,7 +121,7 @@ fetch_llama() {
     log_warn "This may take a while..."
     
     # Llama model would be downloaded via convert script
-    log_info "Use ./scripts/model/setup_llama_model.sh for Llama model"
+    log_info "Use ./ml/finetune/scripts/setup_llama_model.sh for Llama model"
 }
 
 show_help() {
