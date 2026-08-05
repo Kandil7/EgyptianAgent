@@ -48,7 +48,7 @@ class UINavigationEngineTest {
     @Test
     fun `executeAction Tap with elementId returns success`() = runTest {
         // Test action execution
-        val action = Tap(elementId = "test_button", description = "Test tap")
+        val action = Tap(elementId = "test_button", descriptionText = "Test tap")
         val result = navigationEngine.executeAction(action)
         
         // Result should be created (may fail due to mock, but structure is valid)
