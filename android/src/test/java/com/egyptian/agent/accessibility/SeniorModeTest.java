@@ -73,7 +73,7 @@ class SeniorModeTest {
         @DisplayName("senior emergency requests recognized")
         void testSeniorEmergencyRequests() {
             String command = "يا ابني أنا تعبان";
-            boolean isEmergency = com.egyptian.agent.executor.EmergencyHandler.isEmergency(command);
+            boolean isEmergency = com.egyptian.agent.executors.EmergencyHandler.isEmergency(command);
             // May or may not be detected as emergency depending on keywords
             assertNotNull(isEmergency);
         }
