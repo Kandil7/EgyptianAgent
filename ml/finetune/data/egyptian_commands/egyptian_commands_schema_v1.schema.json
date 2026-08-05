@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kandil7.github.io/schemas/egyptian_commands_schema_v1.json",
+  "title": "Egyptian Commands Schema v1",
+  "description": "Schema for Egyptian Arabic voice commands dataset used for intent parsing and execution.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique command identifier"
+    },
+    "transcript": {
+      "type": "string",
+      "description": "Original spoken utterance in Egyptian Arabic"
+    },
+    "normalized_text": {
+      "type": "string",
+      "description": "Normalized text form used by parser"
+    },
+    "dialect": {
+      "type": "string",
+      "enum": [
+        "egyptian_arabic"
+      ],
+      "description": "Dialect label"
+    },
+    "intent": {
+      "type": "string",
+      "description": "Intent label (e.g., open_app, toggle_wifi, none)"
+    },
+    "slots": {
+      "type": "object",
+      "description": "Slot values extracted from utterance. Slot types are intentionally loose here; per-intent slot typing rules are enforced by the semantic validation layer (see scripts).",
+      "additionalProperties": {
+        "type": [
+          "string",
+          "number",
+          "boolean"
+        ]
+      }
+    },
+    "execution": {
+      "type": "object",
+      "description": "Suggested execution tool and arguments for this command. For negative_example=true samples this object may be empty {} (no tool/args required).",
+      "properties": {
+        "tool": {
+          "type": "string",
+          "description": "Tool name to execute (e.g., launch_app, toggle_wifi)"
+        },
+        "args": {
+          "type": "object",
+          "description": "Arguments passed to tool",
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "boolean"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "safety_level": {
+      "type": "string",
+      "description": "Safety level of the command",
+      "enum": [
+        "safe",
+        "reversible",
+        "user_confirm",
+        "high_risk"
+      ]
+    },
+    "confirmation_policy": {
+      "type": "string",
+      "description": "Confirmation policy for this command",
+      "enum": [
+        "auto",
+        "preview_then_confirm",
+        "voice_confirm",
+        "never_auto"
+      ]
+    },
+    "code_switch": {
+      "type": "boolean",
+      "description": "Whether the utterance includes code-switching"
+    },
+    "negative_example": {
+      "type": "boolean",
+      "description": "Marks this sample as negative (intent none / unsupported command)"
+    },
+    "requires_ui_navigation": {
+      "type": "boolean",
+      "description": "Optional hint for hybrid routing: true means the command needs the Slow Path (accessibility-tree UI navigation / YAML workflow), false means it can go through the Fast Path (intent + function call). Absent = unknown / either.",
+      "default": false
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Optional context about the sample. Kept separate from core fields so it can grow without breaking strict consumers of the main fields.",
+      "properties": {
+        "input_modality": {
+          "type": "string",
+          "enum": [
+            "voice",
+            "text"
+          ],
+          "description": "How the utterance reached the assistant"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "standard",
+            "senior"
+          ],
+          "description": "Interaction mode (senior mode implies larger fonts, slower TTS, extra confirmations)"
+        },
+        "device_profile": {
+          "type": "string",
+          "enum": [
+            "low",
+            "mid",
+            "high"
+          ],
+          "description": "Target device class (affects model/quantization choice)"
+        },
+        "preferred_path": {
+          "type": "string",
+          "enum": [
+            "fast",
+            "slow",
+            "either"
+          ],
+          "description": "Routing hint used for training/eval of the HybridOrchestrator fast-vs-slow decision"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "synthetic",
+            "real",
+            "edited"
+          ],
+          "description": "Provenance of the sample"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "id",
+    "transcript",
+    "normalized_text",
+    "dialect",
+    "intent",
+    "slots",
+    "execution",
+    "safety_level",
+    "confirmation_policy",
+    "code_switch",
+    "negative_example"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "description": "Negative examples are allowed to carry an empty execution object; positive samples must always have a concrete tool and args.",
+      "if": {
+        "properties": {
+          "negative_example": {
+            "const": true
+          }
+        },
+        "required": [
+          "negative_example"
+        ]
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "type": "object",
+            "properties": {
+              "tool": {
+                "type": "string"
+              },
+              "args": {
+                "type": "object"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "execution": {
+            "required": [
+              "tool",
+              "args"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
