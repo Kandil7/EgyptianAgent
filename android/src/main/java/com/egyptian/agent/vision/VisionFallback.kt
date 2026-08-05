@@ -1,4 +1,4 @@
-package com.egyptian.agent.vision
+﻿package com.egyptian.agent.vision
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -304,7 +304,7 @@ data class TextRegion(
  * 3. Download or train UI element detection model:
  *    - Use COCO dataset or custom UI dataset
  *    - Export as TensorFlow Lite model
- *    - Place in app/src/main/assets/vision_model.tflite
+ *    - Place in android/src/main/assets/vision_model.tflite
  *
  * 4. Implement InterpreterWrapper class:
  *    - Load TFLite model
