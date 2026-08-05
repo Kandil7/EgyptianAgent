@@ -77,33 +77,33 @@ cd EgyptianAgent
 git submodule update --init --recursive
 
 # Or use our script
-./scripts/deploy/initialize_submodules.sh
+./deploy/scripts-deploy/initialize_submodules.sh
 ```
 
 ### Build the Project
 
 ```bash
 # Debug build
-./gradlew assembleDebug
+./gradlew :android:assembleDebug
 
 # Release build
-./gradlew assembleRelease
+./gradlew :android:assembleRelease
 
 # FunctionGemma build (recommended)
-./scripts/build/build_functiongemma.sh --release --native
+./deploy/build/scripts/build_functiongemma.sh --release --native
 ```
 
 ### Verify Setup
 
 ```bash
 # Run verification script
-./scripts/utils/verify_implementation.sh
+./deploy/android/verify_implementation.sh
 
 # Run unit tests
-./gradlew test
+./gradlew :android:testDebugUnitTest
 
 # Run all tests
-./scripts/test/run_functiongemma_tests.sh --all
+./ml/finetune/scripts/run_functiongemma_tests.sh --all
 ```
 
 ---
@@ -134,7 +134,7 @@ git submodule update --init --recursive
 
 ```
 EgyptianAgent/
-├── app/
+├── android/                       # Android application module
 │   └── src/
 │       ├── main/
 │       │   ├── java/com/egyptian/agent/
@@ -144,15 +144,15 @@ EgyptianAgent/
 │       │   │   ├── executor/      # Command execution
 │       │   │   ├── service/       # Android services
 │       │   │   ├── accessibility/ # Senior features
+│       │   │   ├── hybrid/        # Hybrid orchestrator (fast/slow path)
 │       │   │   └── utils/         # Utilities
 │       │   ├── cpp/               # Native C++ code
 │       │   └── res/               # Resources
 │       ├── test/                  # Unit tests
 │       └── androidTest/           # Instrumented tests
 ├── docs/                          # Documentation
-├── scripts/                       # Build & automation scripts
-├── datasets/                      # Training datasets
-├── configs/                       # Configuration files
+├── deploy/                        # Build, deploy & device tooling
+├── ml/                            # ML pipeline (fine-tune, data, prompts)
 └── agents/                        # Agent definitions
 ```
 
@@ -210,19 +210,19 @@ git checkout -b bugfix/issue-description
 
 ```bash
 # Run unit tests
-./gradlew test
+./gradlew :android:testDebugUnitTest
 
 # Run Android tests
-./gradlew connectedAndroidTest
+./gradlew :android:connectedAndroidTest
 
 # Run specific test class
-./gradlew test --tests="com.egyptian.agent.nlu.*"
+./gradlew :android:testDebugUnitTest --tests="com.egyptian.agent.nlu.*"
 
 # Run FunctionGemma tests
-./scripts/test/run_functiongemma_tests.sh --all
+./ml/finetune/scripts/run_functiongemma_tests.sh --all
 
 # Generate coverage report
-./gradlew jacocoTestReport
+./gradlew :android:jacocoTestReport
 ```
 
 ---
@@ -233,11 +233,11 @@ git checkout -b bugfix/issue-description
 
 | Category | Location | Tools | Coverage Target |
 |----------|----------|-------|-----------------|
-| **Unit Tests** | `app/src/test/` | JUnit, Mockito | 90%+ |
-| **Integration Tests** | `app/src/androidTest/` | Espresso | 95%+ |
-| **Egyptian Dialect Tests** | `datasets/` | Custom suite | 100% commands |
-| **Performance Tests** | `scripts/test/` | Android Profiler | Response time |
-| **Battery Tests** | `scripts/test/` | Battery Historian | Drain rate |
+| **Unit Tests** | `android/src/test/` | JUnit, Mockito | 90%+ |
+| **Integration Tests** | `android/src/androidTest/` | Espresso | 95%+ |
+| **Egyptian Dialect Tests** | `ml/finetune/data/` | Custom suite | 100% commands |
+| **Performance Tests** | `android/src/test/benchmark/` | Android Profiler | Response time |
+| **Battery Tests** | `deploy/android/` | Battery Historian | Drain rate |
 
 ### Writing Unit Tests
 
