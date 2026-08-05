@@ -1,0 +1,19 @@
+# Schema – Egyptian Commands Dataset
+
+Each sample is a JSON object with the following fields:
+
+- `id` (string): Unique command identifier.
+- `transcript` (string): Original spoken utterance in Egyptian Arabic.
+- `normalized_text` (string): Normalized text used by the parser.
+- `dialect` (string): Dialect label (currently `egyptian_arabic`).
+- `intent` (string): Intent label (e.g., `open_app`, `toggle_wifi`, `call_contact`, `none`).
+- `slots` (object): Slot values extracted from the utterance.
+- `execution` (object): Suggested execution tool and arguments.
+  - `tool` (string): Tool name, e.g. `launch_app`, `toggle_wifi`, `send_message`.
+  - `args` (object): Arguments passed to the tool (string/number/boolean).
+- `safety_level` (string): One of `safe`, `reversible`, `user_confirm`, `high_risk`.
+- `confirmation_policy` (string): One of `auto`, `preview_then_confirm`, `voice_confirm`, `never_auto`.
+- `code_switch` (boolean): True if the utterance contains code-switching.
+- `negative_example` (boolean): True if this is a negative example (unsupported command / intent `none`).
+
+The formal JSON Schema is stored in `data/egyptian_commands_schema_v1.schema.json`.
