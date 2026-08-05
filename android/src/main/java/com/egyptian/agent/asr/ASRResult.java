@@ -68,6 +68,22 @@ public class ASRResult {
     public void setDurationMs(long durationMs) {
         this.durationMs = durationMs;
     }
+
+    /**
+     * Get the processing time in milliseconds.
+     * Alias for {@link #getDurationMs()}.
+     */
+    public long getProcessingTimeMs() {
+        return durationMs;
+    }
+
+    /**
+     * Set the processing time in milliseconds.
+     * Alias for {@link #setDurationMs(long)}.
+     */
+    public void setProcessingTimeMs(long processingTimeMs) {
+        this.durationMs = processingTimeMs;
+    }
     
     public boolean isFinal() {
         return isFinal;
@@ -90,6 +106,13 @@ public class ASRResult {
      */
     public boolean isEmpty() {
         return text == null || text.trim().isEmpty();
+    }
+
+    /**
+     * Check if the result is valid: non-blank text with confidence at or above 0.5.
+     */
+    public boolean isValid() {
+        return !isEmpty() && confidence >= 0.5f;
     }
     
     @Override
