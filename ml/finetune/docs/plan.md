@@ -1,4 +1,4 @@
-الترتيب المنطقي:  الترتيب المنطقي: اللينكين اللي بعتّهم هم بالظبط الـ reference الرسمي للي أنت عامله في EgyptianAgent:  
+﻿الترتيب المنطقي:  الترتيب المنطقي: اللينكين اللي بعتّهم هم بالظبط الـ reference الرسمي للي أنت عامله في EgyptianAgent:  
 - `functiongemma-270m-ft-mobile-actions` = نسخة جاهزة للـ Mobile Actions فوق FunctionGemma. [ollama](https://ollama.com/prakasharyan/qwen-arabic)
 - الـ Colab = pipeline الرسمي لـ fine-tuning + export لـ Google Tensor / LiteRT-LM. [ollama](https://ollama.com/prakasharyan/qwen-arabic)
 
@@ -440,7 +440,7 @@ dependencies {
 
 #### 3.2 تحميل الموديل `.litertlm` من assets أو storage
 
-انسخ `functiongemma_egyptian_mobile.litertlm` إلى `app/src/main/assets/models/`.
+انسخ `functiongemma_egyptian_mobile.litertlm` إلى `android/src/main/assets/models/`.
 
 ثم في Kotlin:
 
@@ -663,7 +663,7 @@ dependencies {
 
 #### 3.2 تحميل الموديل `.litertlm` من assets أو storage
 
-انسخ `functiongemma_egyptian_mobile.litertlm` إلى `app/src/main/assets/models/`.
+انسخ `functiongemma_egyptian_mobile.litertlm` إلى `android/src/main/assets/models/`.
 
 ثم في Kotlin:
 
