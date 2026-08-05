@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # =============================================================================
 # Egyptian Agent - Complete Build Verification Script
 # =============================================================================
@@ -9,7 +9,7 @@
 #   release verification.
 #
 # USAGE:
-#   ./scripts/utils/complete_build.sh [OPTIONS]
+#   ./deploy/android/complete_build.sh [OPTIONS]
 #
 # OPTIONS:
 #   --build-type TYPE   Build type: debug, release (default: release)
@@ -128,7 +128,7 @@ build_application() {
 }
 
 find_apk() {
-    local apk_dir="$PROJECT_DIR/app/build/outputs/apk"
+    local apk_dir="$PROJECT_DIR/android/build/outputs/apk"
     local apk_path="$apk_dir/$BUILD_TYPE"
     
     [[ ! -d "$apk_path" ]] && { log_error "APK directory not found"; return 3; }
