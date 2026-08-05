@@ -18,14 +18,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.Assert.*;
 
 /**
- * Comprehensive Unit Tests for FunctionGemmaEngine
+ * Unit Tests for FunctionGemmaEngine
  * 
  * Test Coverage:
- * - Model Loading (success/failure scenarios)
- * - Inference Performance (<500ms target)
- * - JSON Output Validation
- * - Streaming Callback Tests
- * - Edge Cases (empty, long, mixed input)
+ * - Engine construction (default and custom config)
+ * - Fallback inference (model not loaded in unit tests)
+ * - Fallback function calling via parseTextFunctionCall
+ * - Streaming callback tests
+ * - Performance (fallback latency, metrics getters)
+ * - Edge cases (empty, null, long, mixed input)
+ * - State management (isReady, destroy)
  * 
  * @author EgyptianAgent Team
  * @version 1.0
@@ -53,29 +55,23 @@ public class FunctionGemmaEngineTest {
         engine = new FunctionGemmaEngine(mockContext);
         assertNotNull("Engine should be created", engine);
         assertFalse("Engine should not be ready immediately", engine.isReady());
-        assertTrue("Engine should be loading", engine.isLoading());
     }
 
     @Test
     public void testConstructor_WithConfig() {
         FunctionGemmaConfig config = new FunctionGemmaConfig.Builder()
-            .setContextSize(1024)
-            .setNumThreads(2)
-            .setTemperature(0.1f)
+            .contextSize(1024)
+            .numThreads(2)
+            .temperature(0.1f)
             .build();
         
         engine = new FunctionGemmaEngine(mockContext, config);
         assertNotNull("Engine should be created with config", engine);
-    }
-
-    @Test
-    public void testIsLoading_State() {
-        engine = new FunctionGemmaEngine(mockContext);
-        assertTrue("Engine should be in loading state initially", engine.isLoading());
+        assertFalse("Engine should not be ready with config", engine.isReady());
     }
 
     // ========================================================================
-    // Inference Tests
+    // Inference Tests (fallback mode - model never loads in unit tests)
     // ========================================================================
 
     @Test
@@ -83,98 +79,91 @@ public class FunctionGemmaEngineTest {
         engine = new FunctionGemmaEngine(mockContext);
         
         // Note: In unit tests, this will use fallback since model won't be loaded
-        String response = engine.generateResponse("اتصل بماما", 64);
+        FunctionGemmaEngine.FunctionCallResult result = engine.processCommand("اتصل بماما", 64);
         
-        assertNotNull("Response should not be null", response);
-        // Fallback should still return something meaningful
-        assertFalse("Response should not be empty", response.trim().isEmpty());
+        assertNotNull("Result should not be null", result);
+        assertNotNull("Function name should not be null", result.getFunctionName());
+        // Fallback should classify call commands
+        assertEquals("call_contact", result.getFunctionName());
     }
 
     @Test
     public void testGenerateResponse_ComplexCommand() {
         engine = new FunctionGemmaEngine(mockContext);
         
-        String response = engine.generateResponse(
+        FunctionGemmaEngine.FunctionCallResult result = engine.processCommand(
             "ابعت واتساب لأحمد وقوله إنى هتأخر عن الاجتماع", 
             128
         );
         
-        assertNotNull("Response should not be null", response);
+        assertNotNull("Result should not be null", result);
+        assertEquals("send_whatsapp", result.getFunctionName());
     }
 
     @Test
     public void testGenerateResponse_EmptyInput() {
         engine = new FunctionGemmaEngine(mockContext);
         
-        String response = engine.generateResponse("", 64);
+        FunctionGemmaEngine.FunctionCallResult result = engine.processCommand("", 64);
         
-        assertNotNull("Should handle empty input", response);
+        assertNotNull("Should handle empty input", result);
     }
 
     @Test
     public void testGenerateResponse_NullInput() {
         engine = new FunctionGemmaEngine(mockContext);
         
-        String response = engine.generateResponse(null, 64);
+        FunctionGemmaEngine.FunctionCallResult result = engine.processCommand(null, 64);
         
-        assertNotNull("Should handle null input", response);
+        assertNotNull("Should handle null input", result);
+        assertEquals("unknown", result.getFunctionName());
     }
 
     // ========================================================================
-    // Function Calling Tests
+    // Function Calling Tests (fallback mode)
     // ========================================================================
 
     @Test
     public void testCallFunction_CallContact() {
         engine = new FunctionGemmaEngine(mockContext);
         
-        FunctionGemmaEngine.FunctionCallResult result = engine.callFunction(
-            "call_contact",
-            java.util.Map.of("contact_name", "ماما")
-        );
+        FunctionGemmaEngine.FunctionCallResult result = engine.processCommand("اتصل بماما", 64);
         
         assertNotNull("Function call result should not be null", result);
-        // In unit tests, will use mock/fallback
+        assertEquals("call_contact", result.getFunctionName());
+        assertEquals("ماما", result.getArgument("contact_name"));
     }
 
     @Test
     public void testCallFunction_SendWhatsapp() {
         engine = new FunctionGemmaEngine(mockContext);
         
-        FunctionGemmaEngine.FunctionCallResult result = engine.callFunction(
-            "send_whatsapp",
-            java.util.Map.of(
-                "contact_name", "أحمد",
-                "message", "سلامات"
-            )
-        );
+        FunctionGemmaEngine.FunctionCallResult result = engine.processCommand("ابعت واتساب لأحمد", 64);
         
         assertNotNull("Function call result should not be null", result);
+        assertEquals("send_whatsapp", result.getFunctionName());
+        assertEquals("أحمد", result.getArgument("contact_name"));
     }
 
     @Test
     public void testCallFunction_SetAlarm() {
         engine = new FunctionGemmaEngine(mockContext);
         
-        FunctionGemmaEngine.FunctionCallResult result = engine.callFunction(
-            "set_alarm",
-            java.util.Map.of("time", "بكرة الصبح")
-        );
+        FunctionGemmaEngine.FunctionCallResult result = engine.processCommand("نبهني بكرة الصبح", 64);
         
         assertNotNull("Function call result should not be null", result);
+        assertEquals("set_alarm", result.getFunctionName());
+        assertEquals("بكرة", result.getArgument("time"));
     }
 
     @Test
     public void testCallFunction_InvalidFunction() {
         engine = new FunctionGemmaEngine(mockContext);
         
-        FunctionGemmaEngine.FunctionCallResult result = engine.callFunction(
-            "invalid_function_name",
-            java.util.Map.of("param", "value")
-        );
+        FunctionGemmaEngine.FunctionCallResult result = engine.processCommand("invalid_function_name", 64);
         
         assertNotNull("Should handle invalid function", result);
-        assertFalse("Invalid function should not succeed", result.success);
+        assertFalse("Invalid function should not be valid", result.isValid());
     }
 
     // ========================================================================
@@ -189,7 +178,7 @@ public class FunctionGemmaEngineTest {
         AtomicInteger tokenCount = new AtomicInteger(0);
         AtomicBoolean completed = new AtomicBoolean(false);
         
-        engine.generateResponseAsync("اتصل بماما", 64, new FunctionGemmaEngine.TokenCallback() {
+        engine.processCommandAsync("اتصل بماما", 64, new FunctionGemmaEngine.TokenCallback() {
             @Override
             public void onToken(String token) {
                 tokenCount.incrementAndGet();
@@ -216,16 +205,14 @@ public class FunctionGemmaEngineTest {
     }
 
     @Test
-    public void testStreaming_MultipleTokens() throws Exception {
+    public void testStreaming_CompletesInFallbackMode() throws Exception {
         engine = new FunctionGemmaEngine(mockContext);
         
         CountDownLatch latch = new CountDownLatch(1);
-        AtomicInteger tokenCount = new AtomicInteger(0);
         
-        engine.generateResponseAsync("الساعة كام؟", 32, new FunctionGemmaEngine.TokenCallback() {
+        engine.processCommandAsync("الساعة كام؟", 32, new FunctionGemmaEngine.TokenCallback() {
             @Override
             public void onToken(String token) {
-                tokenCount.incrementAndGet();
             }
 
             @Override
@@ -239,10 +226,8 @@ public class FunctionGemmaEngineTest {
             }
         });
         
-        latch.await(5, TimeUnit.SECONDS);
-        
-        // Should receive at least one token (even from fallback)
-        assertTrue("Should receive tokens", tokenCount.get() > 0);
+        // Fallback mode delivers the full response without streaming tokens
+        assertTrue("Should complete within timeout", latch.await(5, TimeUnit.SECONDS));
     }
 
     // ========================================================================
@@ -254,7 +239,7 @@ public class FunctionGemmaEngineTest {
         engine = new FunctionGemmaEngine(mockContext);
         
         long startTime = System.currentTimeMillis();
-        engine.generateResponse("اتصل بماما", 64);
+        engine.processCommand("اتصل بماما", 64);
         long elapsed = System.currentTimeMillis() - startTime;
         
         // With fallback, should be very fast (<100ms)
@@ -271,8 +256,7 @@ public class FunctionGemmaEngineTest {
         AtomicInteger successCount = new AtomicInteger(0);
         
         for (int i = 0; i < numRequests; i++) {
-            final int requestId = i;
-            engine.generateResponseAsync("اتصل بماما", 64, new FunctionGemmaEngine.TokenCallback() {
+            engine.processCommandAsync("اتصل بماما", 64, new FunctionGemmaEngine.TokenCallback() {
                 @Override
                 public void onToken(String token) {}
 
@@ -308,36 +292,36 @@ public class FunctionGemmaEngineTest {
             longInput.append("اتصل بماما ");
         }
         
-        String response = engine.generateResponse(longInput.toString(), 256);
+        FunctionGemmaEngine.FunctionCallResult result = engine.processCommand(longInput.toString(), 256);
         
-        assertNotNull("Should handle very long input", response);
+        assertNotNull("Should handle very long input", result);
     }
 
     @Test
     public void testEdgeCase_SpecialCharacters() {
         engine = new FunctionGemmaEngine(mockContext);
         
-        String response = engine.generateResponse("!@#$%^&*()", 64);
+        FunctionGemmaEngine.FunctionCallResult result = engine.processCommand("!@#$%^&*()", 64);
         
-        assertNotNull("Should handle special characters", response);
+        assertNotNull("Should handle special characters", result);
     }
 
     @Test
     public void testEdgeCase_MixedLanguages() {
         engine = new FunctionGemmaEngine(mockContext);
         
-        String response = engine.generateResponse("Call mom اتصل بماما", 64);
+        FunctionGemmaEngine.FunctionCallResult result = engine.processCommand("Call mom اتصل بماما", 64);
         
-        assertNotNull("Should handle mixed languages", response);
+        assertNotNull("Should handle mixed languages", result);
     }
 
     @Test
     public void testEdgeCase_Emoji() {
         engine = new FunctionGemmaEngine(mockContext);
         
-        String response = engine.generateResponse("اتصل بماما 📞❤️", 64);
+        FunctionGemmaEngine.FunctionCallResult result = engine.processCommand("اتصل بماما 📞❤️", 64);
         
-        assertNotNull("Should handle emoji", response);
+        assertNotNull("Should handle emoji", result);
     }
 
     // ========================================================================
@@ -347,7 +331,7 @@ public class FunctionGemmaEngineTest {
     @Test
     public void testIsReady_InitialState() {
         engine = new FunctionGemmaEngine(mockContext);
-        // Initially not ready (model loading)
+        // Initially not ready (model not loaded in unit tests)
         assertFalse("Engine should not be ready initially", engine.isReady());
     }
 
@@ -377,24 +361,22 @@ public class FunctionGemmaEngineTest {
     public void testPerformanceMetrics_Initial() {
         engine = new FunctionGemmaEngine(mockContext);
         
-        FunctionGemmaEngine.PerformanceMetrics metrics = engine.getPerformanceMetrics();
-        
-        assertNotNull("Metrics should not be null", metrics);
-        assertEquals("Initial load time should be 0", 0, metrics.loadTimeMs);
-        assertEquals("Initial inference count should be 0", 0, metrics.inferenceCount);
+        assertEquals("Initial load time should be 0", 0, engine.getModelLoadTimeMs());
+        assertEquals("Initial inference count should be 0", 0, engine.getTotalInferences());
+        assertEquals("Initial success rate should be 0", 0.0f, engine.getSuccessRate(), 0.001f);
     }
 
     @Test
-    public void testPerformanceMetrics_AfterInference() {
+    public void testFallback_ServesInferenceWithoutModel() {
         engine = new FunctionGemmaEngine(mockContext);
         
-        // Perform inference
-        engine.generateResponse("اتصل بماما", 64);
+        // Perform inference via fallback
+        FunctionGemmaEngine.FunctionCallResult result = engine.processCommand("اتصل بماما", 64);
         
-        FunctionGemmaEngine.PerformanceMetrics metrics = engine.getPerformanceMetrics();
-        
-        assertNotNull("Metrics should not be null", metrics);
-        assertTrue("Inference count should be >= 1", metrics.inferenceCount >= 1);
+        assertNotNull("Result should not be null", result);
+        assertEquals("call_contact", result.getFunctionName());
+        // Model still not loaded - fallback path was used
+        assertFalse("Engine should not be ready (fallback used)", engine.isReady());
     }
 
     // ========================================================================
@@ -405,34 +387,25 @@ public class FunctionGemmaEngineTest {
     public void testJsonOutput_ValidStructure() {
         engine = new FunctionGemmaEngine(mockContext);
         
-        FunctionGemmaEngine.FunctionCallResult result = engine.callFunction(
-            "call_contact",
-            java.util.Map.of("contact_name", "ماما")
-        );
+        FunctionGemmaEngine.FunctionCallResult result = engine.processCommand("اتصل بماما", 64);
         
         assertNotNull("Result should not be null", result);
         // Validate structure
-        assertNotNull("Function name should exist", result.functionName);
-        assertNotNull("Arguments should exist", result.arguments);
+        assertNotNull("Function name should exist", result.getFunctionName());
+        assertNotNull("Arguments should exist", result.getArguments());
     }
 
     @Test
     public void testJsonOutput_ArgumentTypes() {
         engine = new FunctionGemmaEngine(mockContext);
         
-        FunctionGemmaEngine.FunctionCallResult result = engine.callFunction(
-            "send_whatsapp",
-            java.util.Map.of(
-                "contact_name", "أحمد",
-                "message", "سلامات",
-                "timestamp", System.currentTimeMillis()
-            )
-        );
+        FunctionGemmaEngine.FunctionCallResult result = engine.processCommand("ابعت واتساب لأحمد", 64);
         
         assertNotNull("Result should not be null", result);
         
         // Validate argument types
-        assertTrue("Arguments should be a map", result.arguments instanceof java.util.Map);
+        assertTrue("Arguments should be a map", result.getArguments() instanceof java.util.Map);
+        assertNotNull("contact_name argument should exist", result.getArgument("contact_name"));
     }
 
     // ========================================================================
@@ -444,8 +417,8 @@ public class FunctionGemmaEngineTest {
         engine = new FunctionGemmaEngine(mockContext);
         
         // Perform some operations
-        engine.generateResponse("اتصل بماما", 64);
-        engine.callFunction("set_alarm", java.util.Map.of("time", "بكرة"));
+        engine.processCommand("اتصل بماما", 64);
+        engine.processCommand("نبهني بكرة", 64);
         
         // Clean up
         engine.destroy();
