@@ -100,4 +100,16 @@ public class ContactCache {
     public static String findContact(Context context, String contactName) {
         return get(context, contactName);
     }
+
+    /**
+     * Add a contact to the cache
+     * @param context Application context
+     * @param contactName Name of the contact
+     * @param number Phone number to cache
+     * @return true if the contact was cached
+     */
+    public static boolean addContact(Context context, String contactName, String number) {
+        put(context, contactName, number);
+        return true;
+    }
 }
