@@ -23,8 +23,8 @@ public class SystemPrivilegeManagerTest {
         // Test that initialization works without throwing exceptions
         SystemPrivilegeManager.initialize(mockContext);
         
-        // Verify that the context was used appropriately
-        verifyZeroInteractions(mockContext);
+        // initialize() resolves the application context
+        verify(mockContext).getApplicationContext();
     }
 
     @Test
@@ -39,7 +39,8 @@ public class SystemPrivilegeManagerTest {
         // Test that requesting privileges works without throwing exceptions
         SystemPrivilegeManager.requestSystemPrivileges(mockContext);
         
-        verifyZeroInteractions(mockContext);
+        // requestSystemPrivileges does not interact with the context
+        verifyNoInteractions(mockContext);
     }
 
     @Test
