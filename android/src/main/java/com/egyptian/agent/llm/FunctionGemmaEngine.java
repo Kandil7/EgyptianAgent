@@ -590,6 +590,9 @@ public class FunctionGemmaEngine {
      */
     private FunctionCallResult parseTextFunctionCall(String response, String originalInput) {
         String lowerResponse = response.toLowerCase();
+        if (originalInput == null) {
+            originalInput = "";
+        }
         String lowerInput = originalInput.toLowerCase();
         Map<String, String> arguments = new HashMap<>();
 
