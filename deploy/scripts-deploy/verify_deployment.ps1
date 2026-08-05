@@ -1,4 +1,4 @@
-# =============================================================================
+﻿# =============================================================================
 # EgyptianAgent - Hybrid Architecture Deployment Verification Script (PowerShell)
 # =============================================================================
 #
@@ -343,8 +343,8 @@ function Check-Prerequisites {
 function Check-BuildVerification {
     Write-SubHeader "Check 1: Build Verification"
     
-    $releaseApkPath = Join-Path $ProjectRoot "app\build\outputs\apk\release\app-release.apk"
-    $debugApkPath = Join-Path $ProjectRoot "app\build\outputs\apk\debug\app-debug.apk"
+    $releaseApkPath = Join-Path $ProjectRoot "android\build\outputs\apk\release\app-release.apk"
+    $debugApkPath = Join-Path $ProjectRoot "android\build\outputs\apk\debug\app-debug.apk"
     
     # Check release APK first
     if (Test-Path $releaseApkPath) {
@@ -420,7 +420,7 @@ function Check-AppInstallation {
     if (!$isInstalled) {
         $CheckResults["app_install"] = "FAIL"
         $Failures += "$AppName is not installed"
-        $Recommendations += "Install app: adb install -r app\build\outputs\apk\debug\app-debug.apk"
+        $Recommendations += "Install app: adb install -r android\build\outputs\apk\debug\app-debug.apk"
         return $false
     }
     
