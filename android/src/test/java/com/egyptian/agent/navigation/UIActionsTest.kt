@@ -29,7 +29,7 @@ class UIActionsTest {
         val elementId = "send_button"
 
         // When
-        val action = Tap(elementId = elementId, description = "Tap send button")
+        val action = Tap(elementId = elementId, descriptionText = "Tap send button")
 
         // Then
         assertThat(action.name).isEqualTo("tap")
@@ -46,7 +46,7 @@ class UIActionsTest {
         val y = 300
 
         // When
-        val action = Tap(x = x, y = y, description = "Tap at coordinates")
+        val action = Tap(x = x, y = y, descriptionText = "Tap at coordinates")
 
         // Then
         assertThat(action.name).isEqualTo("tap")
@@ -57,7 +57,7 @@ class UIActionsTest {
     @Test(expected = IllegalArgumentException::class)
     fun `Tap action throws exception when no elementId or coordinates provided`() {
         // When
-        Tap(description = "Invalid tap")
+        Tap(descriptionText = "Invalid tap")
     }
 
     @Test
@@ -762,7 +762,7 @@ class UIActionsTest {
     @Test
     fun `ScrollDirection enum has all four directions`() {
         // When
-        val directions = ScrollDirection.values()
+        val directions = ScrollDirection.values().toList()
 
         // Then
         assertThat(directions).hasSize(4)
