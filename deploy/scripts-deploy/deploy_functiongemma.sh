@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # =============================================================================
 # Egyptian Agent - FunctionGemma Model Deployment Script
 # =============================================================================
@@ -9,10 +9,10 @@
 #   and rollback on failure.
 #
 # USAGE:
-#   ./scripts/deploy/deploy_functiongemma.sh [OPTIONS]
+#   ./deploy/scripts-deploy/deploy_functiongemma.sh [OPTIONS]
 #
 # OPTIONS:
-#   --model PATH        Path to model file (default: app/src/main/assets/models/)
+#   --model PATH        Path to model file (default: android/src/main/assets/models/)
 #   --device SERIAL     Target device serial (for multiple devices)
 #   --output PATH       Remote output path (default: /data/local/llm/)
 #   --clean             Remove existing model before deployment
@@ -23,11 +23,11 @@
 #   -h, --help          Show this help message
 #
 # EXAMPLES:
-#   ./scripts/deploy/deploy_functiongemma.sh
-#   ./scripts/deploy/deploy_functiongemma.sh --model /path/to/model.gguf
-#   ./scripts/deploy/deploy_functiongemma.sh --device ABC123 --clean
-#   ./scripts/deploy/deploy_functiongemma.sh --verify-only
-#   ./scripts/deploy/deploy_functiongemma.sh --info
+#   ./deploy/scripts-deploy/deploy_functiongemma.sh
+#   ./deploy/scripts-deploy/deploy_functiongemma.sh --model /path/to/model.gguf
+#   ./deploy/scripts-deploy/deploy_functiongemma.sh --device ABC123 --clean
+#   ./deploy/scripts-deploy/deploy_functiongemma.sh --verify-only
+#   ./deploy/scripts-deploy/deploy_functiongemma.sh --info
 #
 # REQUIREMENTS:
 #   - Android device with USB debugging enabled
@@ -293,7 +293,7 @@ find_model() {
     
     # Check default locations
     local search_paths=(
-        "$PROJECT_DIR/app/src/main/assets/models/$MODEL_NAME"
+        "$PROJECT_DIR/android/src/main/assets/models/$MODEL_NAME"
         "$PROJECT_DIR/dist/functiongemma/$MODEL_NAME"
         "$PROJECT_DIR/models/$MODEL_NAME"
         "$HOME/.cache/egyptian_agent/$MODEL_NAME"
@@ -554,7 +554,7 @@ USAGE:
 
 OPTIONS:
     --model PATH        Path to model file
-                        (default: app/src/main/assets/models/)
+                        (default: android/src/main/assets/models/)
     --device SERIAL     Target device serial (for multiple devices)
     --output PATH       Remote output path (default: /data/local/llm/)
     --clean             Remove existing model before deployment
@@ -733,7 +733,7 @@ main() {
         log_error "Model file not found"
         echo ""
         log_error "Solutions:"
-        echo "  1. Download model: ./scripts/model/download_functiongemma_model.sh"
+        echo "  1. Download model: ./ml/finetune/scripts/download_functiongemma_model.sh"
         echo "  2. Specify path: $SCRIPT_NAME --model /path/to/model.gguf"
         return 3
     }
@@ -781,7 +781,7 @@ main() {
     echo ""
     
     log_info "Next steps:"
-    echo "  1. Install/update app: adb install -r app/build/outputs/apk/debug/app-debug.apk"
+    echo "  1. Install/update app: adb install -r android/build/outputs/apk/debug/app-debug.apk"
     echo "  2. Launch app and test function calling"
     echo "  3. Monitor logs: adb logcat | grep FunctionGemma"
     echo ""
