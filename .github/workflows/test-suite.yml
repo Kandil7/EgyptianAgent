@@ -1,4 +1,4 @@
-name: EgyptianAgent Test Suite
+﻿name: EgyptianAgent Test Suite
 
 on:
   push:
@@ -55,8 +55,8 @@ jobs:
         with:
           name: unit-test-results
           path: |
-            app/build/test-results/**/*.xml
-            app/build/reports/tests/**/*.html
+            android/build/test-results/**/*.xml
+            android/build/reports/tests/**/*.html
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
@@ -64,21 +64,21 @@ jobs:
         with:
           name: coverage-report
           path: |
-            app/build/reports/jacoco/test/html/**
-            app/build/reports/jacoco/test/jacocoTestReport.xml
+            android/build/reports/jacoco/test/html/**
+            android/build/reports/jacoco/test/jacocoTestReport.xml
 
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
-          junit_files: app/build/test-results/**/*.xml
+          junit_files: android/build/test-results/**/*.xml
           check_name: Unit Test Results
           fail_on: nothing
 
       - name: Check Coverage Threshold
         run: |
           # Parse coverage report and check threshold
-          COVERAGE=$(grep -oP 'total.*?covered.*?="([0-9.]+)"' app/build/reports/jacoco/test/jacocoTestReport.xml | head -1 | grep -oP '[0-9.]+' || echo "0")
+          COVERAGE=$(grep -oP 'total.*?covered.*?="([0-9.]+)"' android/build/reports/jacoco/test/jacocoTestReport.xml | head -1 | grep -oP '[0-9.]+' || echo "0")
           echo "Coverage: $COVERAGE%"
           if (( $(echo "$COVERAGE < 80" | bc -l) )); then
             echo "Coverage below 80% threshold!"
@@ -118,7 +118,7 @@ jobs:
         if: always()
         with:
           name: dialect-test-results
-          path: app/build/test-results/**/*.xml
+          path: android/build/test-results/**/*.xml
 
   # ===========================================
   # Integration Tests Job
@@ -159,7 +159,7 @@ jobs:
         if: always()
         with:
           name: integration-test-results
-          path: app/build/test-results/**/*.xml
+          path: android/build/test-results/**/*.xml
 
   # ===========================================
   # Performance Benchmarks Job
@@ -194,7 +194,7 @@ jobs:
         if: always()
         with:
           name: benchmark-results
-          path: app/build/test-results/**/*.xml
+          path: android/build/test-results/**/*.xml
 
       - name: Parse and Report Benchmarks
         run: |
@@ -241,7 +241,7 @@ jobs:
         if: always()
         with:
           name: security-test-results
-          path: app/build/test-results/**/*.xml
+          path: android/build/test-results/**/*.xml
 
   # ===========================================
   # Accessibility Tests Job
@@ -276,7 +276,7 @@ jobs:
         if: always()
         with:
           name: accessibility-test-results
-          path: app/build/test-results/**/*.xml
+          path: android/build/test-results/**/*.xml
 
   # ===========================================
   # Build Verification Job
@@ -311,7 +311,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
-          path: app/build/outputs/apk/debug/*.apk
+          path: android/build/outputs/apk/debug/*.apk
 
       - name: Run Lint
         run: ./gradlew lint --stacktrace
@@ -321,7 +321,7 @@ jobs:
         if: always()
         with:
           name: lint-results
-          path: app/build/reports/lint-results-debug.html
+          path: android/build/reports/lint-results-debug.html
 
   # ===========================================
   # Test Summary Job
