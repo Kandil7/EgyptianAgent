@@ -1,6 +1,6 @@
 # EgyptianAgent Project - Git Attributes
 # Controls line endings, diff drivers, and export settings
-# Last updated: 2026-03-03
+# Last updated: 2026-08-04
 
 #===============================================================================
 # Line Ending Handling (Cross-Platform)
@@ -22,11 +22,10 @@
 *.md text eol=lf
 *.txt text eol=lf
 *.sh text eol=lf
-*.bat text eol=crlf
-*.cmd text eol=crlf
+*.py text eol=lf
 
 # Shell scripts should always use LF
-*.sh text eol=lf working-tree- LF
+*.sh text eol=lf
 
 # Windows batch files should use CRLF
 *.bat text eol=crlf
@@ -62,8 +61,10 @@
 *.tflite binary
 *.h5 binary
 *.pb binary
-*.tflite binary
 *.model binary
+*.safetensors binary
+*.jar binary
+*.aar binary
 
 # Archives
 *.zip binary
@@ -80,6 +81,10 @@
 *.o binary
 *.a binary
 *.lib binary
+
+# Keystores and secrets
+*.keystore binary
+*.jks binary
 
 # Android resources
 *.arsc binary
@@ -115,6 +120,9 @@
 # Shell scripts
 *.sh diff=bash
 
+# Python files
+*.py diff=python
+
 # C/C++ files
 *.c diff=c
 *.cpp diff=c
@@ -140,11 +148,11 @@
 .gitignore export-ignore
 .gitattributes export-ignore
 .gitmodules export-ignore
-*.md export-ignore
 docs/ export-ignore
-scripts/ export-ignore
-datasets/ export-ignore
+deploy/ export-ignore
+ml/ export-ignore
 external/ export-ignore
+*.md export-ignore
 
 #===============================================================================
 # Submodule Handling
@@ -152,7 +160,6 @@ external/ export-ignore
 # Submodule paths
 external/llama.cpp/ .gitmodules
 external/whisper.cpp/ .gitmodules
-external/faster-whisper/ .gitmodules
 
 #===============================================================================
 # Language-specific Settings
