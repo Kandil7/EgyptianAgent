@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # =============================================================================
 # Egyptian Agent - Honor Battery Optimization Fix
 # =============================================================================
@@ -8,7 +8,7 @@
 #   Honor/Huawei devices to ensure background services work properly.
 #
 # USAGE:
-#   ./scripts/utils/honor_battery_fix.sh [OPTIONS]
+#   ./deploy/android/honor_battery_fix.sh [OPTIONS]
 #
 # OPTIONS:
 #   --apply             Apply battery fixes
