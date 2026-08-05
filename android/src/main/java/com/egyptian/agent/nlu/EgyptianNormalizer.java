@@ -611,4 +611,33 @@ public class EgyptianNormalizer {
         // Stub implementation
         return null;
     }
+
+    /**
+     * Extract time expression from a command.
+     * Searches for known Egyptian Arabic time expressions inside the command.
+     * @param command The command to extract time from
+     * @return The extracted time expression, or empty string if none found
+     */
+    public static String extractTimeExpression(String command) {
+        if (command == null || command.isEmpty()) {
+            return "";
+        }
+
+        // Relative time expressions (longest first to prefer specific matches)
+        String[] relativeExpressions = {
+            "نص ساعة", "ربع ساعة", "بكرة الصبح", "بعد ساعة", "بعد شوية",
+            "بعد قليل", "الساعة", "الصبح", "الضهر", "العصر", "المغرب", "العشاء", "العشا", "الليل",
+            "بعد دقيقة", "بعد دقائق", "بعد يوم", "بعد يومين", "بعد أسبوع", "بعد شهر",
+            "دلوقتي", "النهاردة", "بكرة", "الليلة"
+        };
+
+        for (String expression : relativeExpressions) {
+            int index = command.indexOf(expression);
+            if (index >= 0) {
+                return command.substring(index);
+            }
+        }
+
+        return "";
+    }
 }
