@@ -99,13 +99,13 @@
 
 ```bash
 # Standard build
-./scripts/build/build.sh
+./deploy/build/scripts/build.sh
 
 # Production build
-./scripts/build/build_production.sh
+./deploy/build/scripts/build_production.sh
 
 # FunctionGemma variant (recommended)
-./scripts/build/build_functiongemma.sh --release --native
+./deploy/build/scripts/build_functiongemma.sh --release --native
 ```
 
 | Script | Purpose | Output |
@@ -119,13 +119,13 @@
 
 ```bash
 # Deploy app
-./scripts/deploy/deploy_production.sh
+./deploy/scripts-deploy/deploy_production.sh
 
 # Deploy FunctionGemma model
-./scripts/deploy/deploy_functiongemma.sh
+./deploy/scripts-deploy/deploy_functiongemma.sh
 
 # Initialize submodules (first time)
-./scripts/deploy/initialize_submodules.sh
+./deploy/scripts-deploy/initialize_submodules.sh
 ```
 
 | Script | Purpose | Time |
@@ -138,13 +138,13 @@
 
 ```bash
 # All tests
-./scripts/test/run_functiongemma_tests.sh --all
+./ml/finetune/scripts/run_functiongemma_tests.sh --all
 
 # Unit tests only
-./scripts/test/run_functiongemma_tests.sh --unit
+./ml/finetune/scripts/run_functiongemma_tests.sh --unit
 
 # With coverage
-./scripts/test/run_functiongemma_tests.sh --coverage
+./ml/finetune/scripts/run_functiongemma_tests.sh --coverage
 ```
 
 | Flag | Description | Coverage Target |
@@ -158,14 +158,14 @@
 
 ```bash
 # Install dependencies
-pip install -r requirements_functiongemma.txt
+pip install -r ml/requirements.txt
 
 # Fine-tune FunctionGemma
-python scripts/finetune/finetune_functiongemma_egyptian.py \
-  --config configs/finetune_config.yaml
+python ml/finetune/scripts/finetune_functiongemma_egyptian.py \
+  --config ml/finetune/configs/finetune_config.yaml
 
 # Evaluate accuracy
-python scripts/finetune/evaluate_egyptian_accuracy.py
+python ml/finetune/scripts/evaluate_egyptian_accuracy.py
 ```
 
 | Script | Purpose | Time |
@@ -177,13 +177,13 @@ python scripts/finetune/evaluate_egyptian_accuracy.py
 
 ```bash
 # Download FunctionGemma model
-./scripts/model/download_functiongemma_model.sh
+./ml/finetune/scripts/download_functiongemma_model.sh
 
 # Download Whisper model
-./scripts/model/download_whisper_model.sh
+./ml/finetune/scripts/download_whisper_model.sh
 
 # Convert to GGUF format
-./scripts/model/convert_to_gguf.sh
+./ml/finetune/scripts/convert_to_gguf.sh
 ```
 
 | Script | Model | Size | Time |
@@ -213,24 +213,27 @@ EgyptianAgent/
 │   ├── integration/          ← Integration guides
 │   └── archive/              ← Historical docs
 │
-├── 🛠️ scripts/               ← All automation scripts
-│   ├── build/                ← Build scripts
-│   ├── deploy/               ← Deployment scripts
-│   ├── model/                ← Model management
-│   ├── test/                 ← Test scripts
-│   ├── finetune/             ← Fine-tuning scripts
-│   └── utils/                ← Utility scripts
-│
-├── 📦 app/                   ← Android application
+├── 📱 android/               ← Android application module
 │   ├── src/main/java/        ← Source code
 │   ├── src/main/cpp/         ← Native code
+│   ├── src/main/assets/      ← Assets & YAML workflows
 │   ├── src/test/             ← Unit tests
 │   └── src/androidTest/      ← Instrumented tests
 │
-├── 📊 datasets/              ← Training datasets
-├── ⚙️ configs/               ← Configuration files
+├── 🚀 deploy/                ← Build, deploy & device tooling
+│   ├── build/                ← Build scripts & Gradle helper
+│   ├── android/              ← SDK/device setup (Windows PS + bash)
+│   ├── scripts-deploy/       ← Deployment scripts
+│   ├── hf/                   ← HuggingFace dataset upload tools
+│   └── device/               ← Device-side utilities
+│
+├── 🧠 ml/                    ← ML pipeline (fine-tuning, data, prompts)
+│   ├── requirements.txt      ← Python dependencies
+│   ├── prompts/              ← Generation/system prompts
+│   └── finetune/             ← Fine-tuning scripts, configs, datasets
+│
 ├── 🤖 agents/                ← Agent definitions
-└── 🔧 external/              ← External dependencies
+└── 🔧 external/              ← External dependencies (submodules)
 ```
 
 ---
@@ -327,7 +330,7 @@ EgyptianAgent/
 | 1 | [Architecture Overview](docs/architecture/ARCHITECTURE.md) | 15 min |
 | 2 | [API Reference](docs/api/API_REFERENCE.md) | 30 min |
 | 3 | [FunctionGemma Integration](docs/integration/FUNCTIONGEMMA_INTEGRATION.md) | 30 min |
-| 4 | [Run Tests](scripts/test/) | 1 hour |
+| 4 | [Run Tests](ml/finetune/scripts/) | 1 hour |
 | 5 | Start contributing! | - |
 
 ### For End Users
@@ -411,17 +414,17 @@ EgyptianAgent/
 - [ ] Install Android Studio
 - [ ] Install Python 3.8+
 - [ ] Clone repository
-- [ ] Initialize submodules: `./scripts/deploy/initialize_submodules.sh`
-- [ ] Download models: `./scripts/model/download_functiongemma_model.sh`
-- [ ] Build project: `./scripts/build/build_functiongemma.sh`
-- [ ] Deploy to device: `./scripts/deploy/deploy_functiongemma.sh`
+- [ ] Initialize submodules: `./deploy/scripts-deploy/initialize_submodules.sh`
+- [ ] Download models: `./ml/finetune/scripts/download_functiongemma_model.sh`
+- [ ] Build project: `./deploy/build/scripts/build_functiongemma.sh`
+- [ ] Deploy to device: `./deploy/scripts-deploy/deploy_functiongemma.sh`
 
 ### Daily Development
 
 - [ ] Pull latest changes
-- [ ] Run tests: `./scripts/test/run_functiongemma_tests.sh --unit`
-- [ ] Build: `./scripts/build/build.sh`
-- [ ] Deploy: `adb install -r app/build/outputs/apk/debug/*.apk`
+- [ ] Run tests: `./ml/finetune/scripts/run_functiongemma_tests.sh --unit`
+- [ ] Build: `./deploy/build/scripts/build.sh`
+- [ ] Deploy: `adb install -r android/build/outputs/apk/debug/*.apk`
 
 ### Before Commit
 
@@ -447,7 +450,7 @@ EgyptianAgent/
 | Need | Document | Location |
 |------|----------|----------|
 | **What is this?** | README.md | Root |
-| **How to build?** | scripts/README.md | scripts/ |
+| **How to build?** | deploy/build/scripts/README.md | deploy/build/scripts/ |
 | **How to deploy?** | docs/deployment/DEPLOYMENT_GUIDE.md | docs/deployment/ |
 | **Architecture?** | docs/architecture/ARCHITECTURE.md | docs/architecture/ |
 | **API docs?** | docs/api/API_REFERENCE.md | docs/api/ |
