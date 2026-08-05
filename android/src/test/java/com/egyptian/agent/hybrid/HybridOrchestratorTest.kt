@@ -4,13 +4,12 @@ import android.content.Context
 import com.egyptian.agent.accessibility.ui.AccessibilityTree
 import com.egyptian.agent.accessibility.ui.UIElement
 import com.egyptian.agent.navigation.ActionResult
-import com.egyptian.agent.navigation.NavigationStep
 import com.egyptian.agent.navigation.Scroll
 import com.egyptian.agent.navigation.ScrollDirection
 import com.egyptian.agent.navigation.Tap
 import com.egyptian.agent.navigation.UIAction
-import com.egyptian.agent.nlu.IntentResult
-import com.egyptian.agent.nlu.IntentType
+import com.egyptian.agent.nlp.IntentResult
+import com.egyptian.agent.nlp.IntentType
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -59,12 +58,11 @@ class HybridOrchestratorTest {
     @Test
     fun `RoutingDecision for FAST_PATH with high confidence`() {
         // Given
-        val intentResult = IntentResult(
-            intentType = IntentType.CALL_CONTACT,
-            confidence = 0.95f,
-            entities = mapOf("contact" to "ماما"),
-            rawText = "اتصل بماما"
-        )
+        val intentResult = IntentResult().apply {
+            setIntentType(IntentType.CALL_CONTACT)
+            setConfidence(0.95f)
+            setEntity("contact", "ماما")
+        }
 
         // When - Test routing decision logic
         val decision = createRoutingDecision(intentResult, "اتصل بماما")
@@ -78,12 +76,10 @@ class HybridOrchestratorTest {
     @Test
     fun `RoutingDecision for SLOW_PATH with low confidence`() {
         // Given
-        val intentResult = IntentResult(
-            intentType = IntentType.UNKNOWN,
-            confidence = 0.50f,
-            entities = emptyMap(),
-            rawText = "افتح الفيسبوك وشوف الأخبار"
-        )
+        val intentResult = IntentResult().apply {
+            setIntentType(IntentType.UNKNOWN)
+            setConfidence(0.50f)
+        }
 
         // When
         val decision = createRoutingDecision(intentResult, "افتح الفيسبوك وشوف الأخبار")
@@ -97,12 +93,11 @@ class HybridOrchestratorTest {
     @Test
     fun `RoutingDecision for SLOW_PATH with UI keywords`() {
         // Given
-        val intentResult = IntentResult(
-            intentType = IntentType.OPEN_APP,
-            confidence = 0.80f,
-            entities = mapOf("app" to "facebook"),
-            rawText = "افتح فيسبوك وشوف الأخبار"
-        )
+        val intentResult = IntentResult().apply {
+            setIntentType(IntentType.OPEN_APP)
+            setConfidence(0.80f)
+            setEntity("app", "facebook")
+        }
 
         // When
         val decision = createRoutingDecision(intentResult, "افتح فيسبوك وشوف الأخبار")
@@ -126,12 +121,10 @@ class HybridOrchestratorTest {
 
         for (intentType in fastPathIntents) {
             // Given
-            val intentResult = IntentResult(
-                intentType = intentType,
-                confidence = 0.90f,
-                entities = emptyMap(),
-                rawText = "Test command"
-            )
+            val intentResult = IntentResult().apply {
+                setIntentType(intentType)
+                setConfidence(0.90f)
+            }
 
             // When
             val decision = createRoutingDecision(intentResult, "Test command")
@@ -146,17 +139,15 @@ class HybridOrchestratorTest {
     // ========================================================================
 
     @Test
-    fun `Routing uses FAST_PATH when confidence >= 0.85`() {
+    fun `Routing uses FAST_PATH when confidence high`() {
         val confidences = listOf(0.85f, 0.90f, 0.95f, 1.0f)
 
         for (confidence in confidences) {
             // Given
-            val intentResult = IntentResult(
-                intentType = IntentType.CALL_CONTACT,
-                confidence = confidence,
-                entities = emptyMap(),
-                rawText = "اتصل بماما"
-            )
+            val intentResult = IntentResult().apply {
+                setIntentType(IntentType.CALL_CONTACT)
+                setConfidence(confidence)
+            }
 
             // When
             val decision = createRoutingDecision(intentResult, "اتصل بماما")
@@ -168,17 +159,15 @@ class HybridOrchestratorTest {
     }
 
     @Test
-    fun `Routing uses SLOW_PATH when confidence < 0.70`() {
+    fun `Routing uses SLOW_PATH when confidence low`() {
         val confidences = listOf(0.0f, 0.30f, 0.50f, 0.69f)
 
         for (confidence in confidences) {
             // Given
-            val intentResult = IntentResult(
-                intentType = IntentType.UNKNOWN,
-                confidence = confidence,
-                entities = emptyMap(),
-                rawText = "Complex command"
-            )
+            val intentResult = IntentResult().apply {
+                setIntentType(IntentType.UNKNOWN)
+                setConfidence(confidence)
+            }
 
             // When
             val decision = createRoutingDecision(intentResult, "Complex command")
@@ -202,12 +191,10 @@ class HybridOrchestratorTest {
 
         for (command in commands) {
             // Given
-            val intentResult = IntentResult(
-                intentType = IntentType.UNKNOWN,
-                confidence = 0.75f,
-                entities = emptyMap(),
-                rawText = command
-            )
+            val intentResult = IntentResult().apply {
+                setIntentType(IntentType.UNKNOWN)
+                setConfidence(0.75f)
+            }
 
             // When
             val decision = createRoutingDecision(intentResult, command)
@@ -227,12 +214,10 @@ class HybridOrchestratorTest {
 
         for (command in commands) {
             // Given
-            val intentResult = IntentResult(
-                intentType = IntentType.OPEN_APP,
-                confidence = 0.80f,
-                entities = emptyMap(),
-                rawText = command
-            )
+            val intentResult = IntentResult().apply {
+                setIntentType(IntentType.OPEN_APP)
+                setConfidence(0.80f)
+            }
 
             // When
             val decision = createRoutingDecision(intentResult, command)
@@ -251,12 +236,10 @@ class HybridOrchestratorTest {
 
         for (command in commands) {
             // Given
-            val intentResult = IntentResult(
-                intentType = IntentType.UNKNOWN,
-                confidence = 0.70f,
-                entities = emptyMap(),
-                rawText = command
-            )
+            val intentResult = IntentResult().apply {
+                setIntentType(IntentType.UNKNOWN)
+                setConfidence(0.70f)
+            }
 
             // When
             val decision = createRoutingDecision(intentResult, command)
