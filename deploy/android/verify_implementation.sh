@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # =============================================================================
 # Egyptian Agent - Implementation Verification Script
 # =============================================================================
@@ -8,7 +8,7 @@
 #   model assets, build configuration, and deployment readiness.
 #
 # USAGE:
-#   ./scripts/utils/verify_implementation.sh [OPTIONS]
+#   ./deploy/android/verify_implementation.sh [OPTIONS]
 #
 # OPTIONS:
 #   --quick             Quick verification (skip model checks)
@@ -74,10 +74,10 @@ check_dir() {
 check_project_structure() {
     log_step "Checking project structure..."
     
-    check_dir "$PROJECT_DIR/app" "app directory"
-    check_dir "$PROJECT_DIR/app/src/main/java" "Java source directory"
-    check_dir "$PROJECT_DIR/app/src/main/cpp" "Native source directory"
-    check_dir "$PROJECT_DIR/app/src/main/assets" "Assets directory"
+    check_dir "$PROJECT_DIR/android" "app directory"
+    check_dir "$PROJECT_DIR/android/src/main/java" "Java source directory"
+    check_dir "$PROJECT_DIR/android/src/main/cpp" "Native source directory"
+    check_dir "$PROJECT_DIR/android/src/main/assets" "Assets directory"
     check_dir "$PROJECT_DIR/scripts" "Scripts directory"
 }
 
@@ -85,20 +85,20 @@ check_source_files() {
     log_step "Checking source files..."
     
     # Core Java files
-    check_file "$PROJECT_DIR/app/src/main/java/com/egyptian/agent/core/VoiceService.java" "VoiceService.java"
-    check_file "$PROJECT_DIR/app/src/main/java/com/egyptian/agent/ai/LlamaIntentEngine.java" "LlamaIntentEngine.java"
-    check_file "$PROJECT_DIR/app/src/main/java/com/egyptian/agent/hybrid/HybridOrchestrator.java" "HybridOrchestrator.java"
+    check_file "$PROJECT_DIR/android/src/main/java/com/egyptian/agent/core/VoiceService.java" "VoiceService.java"
+    check_file "$PROJECT_DIR/android/src/main/java/com/egyptian/agent/ai/LlamaIntentEngine.java" "LlamaIntentEngine.java"
+    check_file "$PROJECT_DIR/android/src/main/java/com/egyptian/agent/hybrid/HybridOrchestrator.java" "HybridOrchestrator.java"
     
     # Native files
-    check_file "$PROJECT_DIR/app/src/main/cpp/llama_native.cpp" "llama_native.cpp"
-    check_file "$PROJECT_DIR/app/CMakeLists.txt" "CMakeLists.txt"
+    check_file "$PROJECT_DIR/android/src/main/cpp/llama_native.cpp" "llama_native.cpp"
+    check_file "$PROJECT_DIR/android/CMakeLists.txt" "CMakeLists.txt"
 }
 
 check_build_config() {
     log_step "Checking build configuration..."
     
     check_file "$PROJECT_DIR/build.gradle" "Root build.gradle"
-    check_file "$PROJECT_DIR/app/build.gradle" "App build.gradle"
+    check_file "$PROJECT_DIR/android/build.gradle" "App build.gradle"
     check_file "$PROJECT_DIR/settings.gradle" "settings.gradle"
     check_file "$PROJECT_DIR/gradlew" "Gradle wrapper"
 }
@@ -106,7 +106,7 @@ check_build_config() {
 check_manifest() {
     log_step "Checking AndroidManifest.xml..."
     
-    local manifest="$PROJECT_DIR/app/src/main/AndroidManifest.xml"
+    local manifest="$PROJECT_DIR/android/src/main/AndroidManifest.xml"
     if [[ -f "$manifest" ]]; then
         check_pass "AndroidManifest.xml exists"
         
@@ -124,10 +124,10 @@ check_models() {
     log_step "Checking model assets..."
     
     # Check for model directories
-    check_dir "$PROJECT_DIR/app/src/main/assets/models" "Models directory"
+    check_dir "$PROJECT_DIR/android/src/main/assets/models" "Models directory"
     
     # Check for model files (warn if missing, don't fail)
-    if [[ -f "$PROJECT_DIR/app/src/main/assets/models/functiongemma-270m-it-Q4_K_M.gguf" ]]; then
+    if [[ -f "$PROJECT_DIR/android/src/main/assets/models/functiongemma-270m-it-Q4_K_M.gguf" ]]; then
         check_pass "FunctionGemma model"
     else
         check_warn "FunctionGemma model not found (download with download_functiongemma_model.sh)"
@@ -137,9 +137,9 @@ check_models() {
 check_scripts() {
     log_step "Checking scripts..."
     
-    check_file "$PROJECT_DIR/scripts/build/build.sh" "build.sh"
-    check_file "$PROJECT_DIR/scripts/deploy/deploy_production.sh" "deploy_production.sh"
-    check_file "$PROJECT_DIR/scripts/model/download_functiongemma_model.sh" "download_functiongemma_model.sh"
+    check_file "$PROJECT_DIR/deploy/build/scripts/build.sh" "build.sh"
+    check_file "$PROJECT_DIR/deploy/scripts-deploy/deploy_production.sh" "deploy_production.sh"
+    check_file "$PROJECT_DIR/ml/finetune/scripts/download_functiongemma_model.sh" "download_functiongemma_model.sh"
 }
 
 generate_report() {
@@ -165,9 +165,9 @@ generate_report() {
         log_error "$CHECKS_FAILED critical check(s) failed"
         echo ""
         log_info "Run the following to fix issues:"
-        echo "  1. ./scripts/deploy/initialize_submodules.sh"
-        echo "  2. ./scripts/model/download_functiongemma_model.sh"
-        echo "  3. ./scripts/build/build.sh --release"
+        echo "  1. ./deploy/scripts-deploy/initialize_submodules.sh"
+        echo "  2. ./ml/finetune/scripts/download_functiongemma_model.sh"
+        echo "  3. ./deploy/build/scripts/build.sh --release"
         return 2
     fi
 }
