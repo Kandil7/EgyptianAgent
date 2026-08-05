@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # =============================================================================
 # Egyptian Agent - Whisper Model Download Script
 # =============================================================================
@@ -8,11 +8,11 @@
 #   Supports multiple model sizes and sources with integrity verification.
 #
 # USAGE:
-#   ./scripts/model/download_whisper_model.sh [OPTIONS]
+#   ./ml/finetune/scripts/download_whisper_model.sh [OPTIONS]
 #
 # OPTIONS:
 #   --size SIZE         Model size: tiny, base, small, medium, large (default: base)
-#   --output DIR        Output directory (default: app/src/main/assets/models/)
+#   --output DIR        Output directory (default: android/src/main/assets/models/)
 #   --source SOURCE     Download source: huggingface, original (default: huggingface)
 #   --resume            Resume interrupted download
 #   --verify PATH       Verify an existing model file
@@ -22,10 +22,10 @@
 #   -h, --help          Show this help message
 #
 # EXAMPLES:
-#   ./scripts/model/download_whisper_model.sh
-#   ./scripts/model/download_whisper_model.sh --size small
-#   ./scripts/model/download_whisper_model.sh --verify ggml-base.bin
-#   ./scripts/model/download_whisper_model.sh --info
+#   ./ml/finetune/scripts/download_whisper_model.sh
+#   ./ml/finetune/scripts/download_whisper_model.sh --size small
+#   ./ml/finetune/scripts/download_whisper_model.sh --verify ggml-base.bin
+#   ./ml/finetune/scripts/download_whisper_model.sh --info
 #
 # MODEL SIZES:
 #   tiny   - ~75MB, fastest, lowest accuracy
@@ -57,7 +57,7 @@ readonly LOG_DIR="$PROJECT_DIR/build/logs"
 
 # Defaults
 MODEL_SIZE="base"
-OUTPUT_DIR="$PROJECT_DIR/app/src/main/assets/models"
+OUTPUT_DIR="$PROJECT_DIR/android/src/main/assets/models"
 DOWNLOAD_SOURCE="huggingface"
 RESUME_DOWNLOAD=false
 VERIFY_MODEL=""
@@ -193,7 +193,7 @@ USAGE:
 
 OPTIONS:
     --size SIZE         Model size: tiny, base, small, medium, large (default: base)
-    --output DIR        Output directory (default: app/src/main/assets/models/)
+    --output DIR        Output directory (default: android/src/main/assets/models/)
     --source SOURCE     Download source: huggingface, original (default: huggingface)
     --resume            Resume interrupted download
     --verify PATH       Verify an existing model file
