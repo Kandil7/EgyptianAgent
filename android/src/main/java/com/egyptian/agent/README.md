@@ -1,4 +1,4 @@
-# Egyptian Agent - Main Package
+﻿# Egyptian Agent - Main Package
 
 ## Overview
 
@@ -93,7 +93,7 @@ agent.executeIntent(result);
 
 ## Testing
 
-Tests are located in `app/src/test/java/com/egyptian/agent/` with parallel package structure.
+Tests are located in `android/src/test/java/com/egyptian/agent/` with parallel package structure.
 
 ## Related Documentation
 
