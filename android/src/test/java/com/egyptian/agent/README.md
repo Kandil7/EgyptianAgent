@@ -1,4 +1,4 @@
-# Test Package - Overview
+﻿# Test Package - Overview
 
 ## Overview
 
@@ -7,7 +7,7 @@ This package contains **unit tests** for the Egyptian Agent application. Tests a
 ## Directory Structure
 
 ```
-app/src/test/java/com/egyptian/agent/
+android/src/test/java/com/egyptian/agent/
 │
 ├── ai/           → AI engine tests
 ├── asr/          → ASR tests
