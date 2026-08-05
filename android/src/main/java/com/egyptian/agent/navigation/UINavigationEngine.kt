@@ -48,7 +48,8 @@ class UINavigationEngine(
     }
 
     private val treeParser = AccessibilityTreeParser(accessibilityService)
-    private val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    private val clipboardManager: ClipboardManager?
+        get() = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
     private var actionHistory = mutableListOf<Pair<UIAction, ActionResult>>()
     private var lastTreeHash: Int = 0
 
@@ -268,7 +269,7 @@ class UINavigationEngine(
 
     private suspend fun executePaste(action: Paste): ActionResult = withContext(Dispatchers.Main) {
         try {
-            val clipboardText = clipboardManager.primaryClip?.getItemAt(0)?.text?.toString()
+            val clipboardText = clipboardManager?.primaryClip?.getItemAt(0)?.text?.toString()
             if (clipboardText.isNullOrBlank()) {
                 return@withContext ActionResult.failure("Clipboard is empty")
             }
@@ -432,7 +433,7 @@ class UINavigationEngine(
 
     private suspend fun executeClipboardGet(action: ClipboardGet): ActionResult {
         try {
-            val text = clipboardManager.primaryClip?.getItemAt(0)?.text?.toString()
+            val text = clipboardManager?.primaryClip?.getItemAt(0)?.text?.toString()
             return if (text != null) {
                 ActionResult.success("Clipboard content retrieved", data = mapOf("text" to text))
             } else {
@@ -446,7 +447,11 @@ class UINavigationEngine(
     private suspend fun executeClipboardSet(action: ClipboardSet): ActionResult {
         try {
             val clip = ClipData.newPlainText("EgyptianAgent", action.text)
-            clipboardManager.setPrimaryClip(clip)
+            val manager = clipboardManager
+            if (manager == null) {
+                return ActionResult.failure("Clipboard service not available")
+            }
+            manager.setPrimaryClip(clip)
             return ActionResult.success("Text copied to clipboard")
         } catch (e: Exception) {
             return ActionResult.failure("Clipboard set failed: ${e.message}", e)
