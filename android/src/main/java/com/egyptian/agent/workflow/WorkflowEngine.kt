@@ -8,7 +8,6 @@ import kotlinx.coroutines.withContext
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.constructor.Constructor
 import java.io.File
-import java.io.FileReader
 
 /**
  * Workflow Engine for EgyptianAgent.
@@ -47,23 +46,38 @@ class WorkflowEngine(
 
     /**
      * Load workflow from YAML string.
+     *
+     * Supports two formats:
+     *  1) Two-document: header map (appId/name/description) + `---` separator
+     *     + steps list (format used by the shipped asset workflows and saveWorkflow)
+     *  2) Single-document map with an embedded `steps` list
      */
     fun loadWorkflow(yamlContent: String): Workflow {
         try {
-            val workflowMap = yaml.load<Map<String, Any>>(yamlContent)
-            
-            val appId = workflowMap["appId"] as? String
-            val name = workflowMap["name"] as? String ?: "Unnamed Workflow"
-            val description = workflowMap["description"] as? String
-            val stepsRaw = workflowMap["steps"] as? List<Any>
-            
-            val steps = stepsRaw?.map { step -> parseStep(step) } ?: emptyList()
-            
+            val documents = yaml.loadAll(yamlContent).toList()
+            val headerMap = documents.firstOrNull() as? Map<*, *> ?: emptyMap<String, Any>()
+            val stepsDoc = documents.drop(1).firstOrNull()
+            val stepsRaw: List<*> = when {
+                stepsDoc is List<*> -> stepsDoc
+                headerMap["steps"] is List<*> -> headerMap["steps"] as List<*>
+                else -> emptyList<Any>()
+            }
+
+            val appId = headerMap["appId"] as? String
+            val name = headerMap["name"] as? String ?: "Unnamed Workflow"
+            val nameAr = headerMap["nameAr"] as? String
+            val description = headerMap["description"] as? String
+            val descriptionAr = headerMap["descriptionAr"] as? String
+
+            val steps = stepsRaw.filterNotNull().map { step -> parseStep(step) }
+
             return Workflow(
                 id = generateWorkflowId(name),
                 appId = appId,
                 name = name,
+                nameAr = nameAr,
                 description = description,
+                descriptionAr = descriptionAr,
                 steps = steps,
                 isPrebuilt = false
             )
@@ -81,8 +95,8 @@ class WorkflowEngine(
         if (!file.exists()) {
             throw WorkflowException("Workflow file not found: $filename")
         }
-        
-        val yamlContent = FileReader(file).readText()
+        // File.readText() closes the reader (FileReader.readText() would leak the handle)
+        val yamlContent = file.readText()
         return loadWorkflow(yamlContent)
     }
 

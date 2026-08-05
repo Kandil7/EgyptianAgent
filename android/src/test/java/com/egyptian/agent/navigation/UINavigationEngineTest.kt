@@ -3,14 +3,20 @@ package com.egyptian.agent.navigation
 import android.accessibilityservice.AccessibilityService
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Rect
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
@@ -45,8 +51,26 @@ class UINavigationEngineTest {
         navigationEngine = UINavigationEngine(mockAccessibilityService, mockContext)
     }
 
+    /**
+     * Runs a test with Dispatchers.Main routed to the runTest scheduler.
+     * Required because production executeAction dispatches to Dispatchers.Main,
+     * which under Robolectric's paused looper would deadlock inside runTest.
+     */
+    private fun <T> runEngineTest(block: suspend kotlinx.coroutines.test.TestScope.() -> T): T {
+        var result: T? = null
+        runTest {
+            Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+            try {
+                result = block()
+            } finally {
+                Dispatchers.resetMain()
+            }
+        }
+        return result as T
+    }
+
     @Test
-    fun `executeAction Tap with elementId returns success`() = runTest {
+    fun `executeAction Tap with elementId returns success`() = runEngineTest {
         // Test action execution
         val action = Tap(elementId = "test_button", descriptionText = "Test tap")
         val result = navigationEngine.executeAction(action)
@@ -57,7 +81,7 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `executeAction Home returns key event result`() = runTest {
+    fun `executeAction Home returns key event result`() = runEngineTest {
         val action = Home()
         val result = navigationEngine.executeAction(action)
         
@@ -66,7 +90,7 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `executeAction Back returns key event result`() = runTest {
+    fun `executeAction Back returns key event result`() = runEngineTest {
         val action = Back()
         val result = navigationEngine.executeAction(action)
         
@@ -75,11 +99,13 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `executeAction Launch with valid package returns success`() = runTest {
+    fun `executeAction Launch with valid package returns success`() = runEngineTest {
         // Given
         val packageName = "com.whatsapp"
         val intent = Intent()
-        `when`(mockContext.packageManager.getLaunchIntentForPackage(packageName)).thenReturn(intent)
+        val mockPackageManager = mock(PackageManager::class.java)
+        `when`(mockContext.packageManager).thenReturn(mockPackageManager)
+        `when`(mockPackageManager.getLaunchIntentForPackage(packageName)).thenReturn(intent)
         
         val action = Launch(packageName = packageName)
         val result = navigationEngine.executeAction(action)
@@ -90,7 +116,7 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `executeAction OpenUrl returns valid result`() = runTest {
+    fun `executeAction OpenUrl returns valid result`() = runEngineTest {
         val action = OpenUrl(url = "https://www.google.com")
         val result = navigationEngine.executeAction(action)
         
@@ -99,7 +125,7 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `executeAction Scroll with all directions`() = runTest {
+    fun `executeAction Scroll with all directions`() = runEngineTest {
         for (direction in ScrollDirection.values()) {
             val action = Scroll(direction = direction)
             val result = navigationEngine.executeAction(action)
@@ -110,7 +136,7 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `executeAction ClipboardSet returns success`() = runTest {
+    fun `executeAction ClipboardSet returns success`() = runEngineTest {
         val action = ClipboardSet(text = "Test clipboard content")
         val result = navigationEngine.executeAction(action)
         
@@ -119,7 +145,7 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `executeAction Wait returns success`() = runTest {
+    fun `executeAction Wait returns success`() = runEngineTest {
         val action = Wait(durationMs = 100L)
         val result = navigationEngine.executeAction(action)
         
@@ -128,7 +154,7 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `executeAction Done with success message returns valid result`() = runTest {
+    fun `executeAction Done with success message returns valid result`() = runEngineTest {
         val action = Done(message = "Task completed", success = true)
         val result = navigationEngine.executeAction(action)
         
@@ -138,7 +164,7 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `executeAction FindAndTap returns valid result`() = runTest {
+    fun `executeAction FindAndTap returns valid result`() = runEngineTest {
         val action = FindAndTap(searchText = "Submit")
         val result = navigationEngine.executeAction(action)
         
@@ -147,7 +173,7 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `executeAction WaitForContent returns valid result`() = runTest {
+    fun `executeAction WaitForContent returns valid result`() = runEngineTest {
         val action = WaitForContent(searchText = "Loading complete", timeoutMs = 1000L)
         val result = navigationEngine.executeAction(action)
         
@@ -156,7 +182,7 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `executeAction ReadScreen returns valid result`() = runTest {
+    fun `executeAction ReadScreen returns valid result`() = runEngineTest {
         val action = ReadScreen(maxScrolls = 2)
         val result = navigationEngine.executeAction(action)
         
@@ -165,7 +191,7 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `executeAction SubmitMessage returns valid result`() = runTest {
+    fun `executeAction SubmitMessage returns valid result`() = runEngineTest {
         val action = SubmitMessage(message = "Hello, World!")
         val result = navigationEngine.executeAction(action)
         
@@ -174,7 +200,7 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `executeAction ComposeEmail returns valid result`() = runTest {
+    fun `executeAction ComposeEmail returns valid result`() = runEngineTest {
         val action = ComposeEmail(to = "test@example.com", subject = "Test", body = "Body")
         val result = navigationEngine.executeAction(action)
         
@@ -183,7 +209,7 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `executeAction Screenshot returns valid result`() = runTest {
+    fun `executeAction Screenshot returns valid result`() = runEngineTest {
         val action = Screenshot()
         val result = navigationEngine.executeAction(action)
         
@@ -192,7 +218,7 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `executeAction Shell returns valid result`() = runTest {
+    fun `executeAction Shell returns valid result`() = runEngineTest {
         val action = Shell(command = "ls -la")
         val result = navigationEngine.executeAction(action)
         
@@ -201,7 +227,7 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `executeAction KeyEvent returns valid result`() = runTest {
+    fun `executeAction KeyEvent returns valid result`() = runEngineTest {
         val action = KeyEvent(keyCode = UIActions.KeyCodes.KEYCODE_HOME)
         val result = navigationEngine.executeAction(action)
         
@@ -210,7 +236,7 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `executeAction Notifications returns valid result`() = runTest {
+    fun `executeAction Notifications returns valid result`() = runEngineTest {
         val action = Notifications()
         val result = navigationEngine.executeAction(action)
         
@@ -219,7 +245,7 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `executeAction OpenSettings returns valid result`() = runTest {
+    fun `executeAction OpenSettings returns valid result`() = runEngineTest {
         val action = OpenSettings()
         val result = navigationEngine.executeAction(action)
         
@@ -228,7 +254,7 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `executeAction SwitchApp returns valid result`() = runTest {
+    fun `executeAction SwitchApp returns valid result`() = runEngineTest {
         val action = SwitchApp(packageName = "com.facebook.katana")
         val result = navigationEngine.executeAction(action)
         
@@ -237,7 +263,7 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `executeAction handles error gracefully`() = runTest {
+    fun `executeAction handles error gracefully`() = runEngineTest {
         // Given - service will throw due to mock
         val action = Tap(elementId = "nonexistent")
         
@@ -249,7 +275,7 @@ class UINavigationEngineTest {
     }
 
     @Test
-    fun `action history is recorded`() = runTest {
+    fun `action history is recorded`() = runEngineTest {
         // Execute multiple actions
         navigationEngine.executeAction(Home())
         navigationEngine.executeAction(Back())

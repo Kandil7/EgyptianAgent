@@ -8,8 +8,12 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito
+import org.mockito.Mockito.RETURNS_DEFAULTS
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
+import org.mockito.stubbing.Answer
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
@@ -32,7 +36,6 @@ class WorkflowEngineTest {
     @Mock
     private lateinit var mockContext: Context
 
-    @Mock
     private lateinit var mockUINavigationEngine: UINavigationEngine
 
     private val mockFilesDir = File("/tmp/test/files")
@@ -44,10 +47,31 @@ class WorkflowEngineTest {
     fun setup() {
         MockitoAnnotations.openMocks(this)
         `when`(mockContext.filesDir).thenReturn(mockFilesDir)
-        
+
+        // Default answer: every UIAction succeeds. We deliberately avoid
+        // any() matchers on the suspend executeAction(action: UIAction):
+        // Mockito's any() returns null and Kotlin's call-site null check on
+        // the non-null suspend parameter throws "any(...) must not be null".
+        mockUINavigationEngine = Mockito.mock(
+            UINavigationEngine::class.java,
+            Answer { invocation ->
+                // Note: Kotlin suspend functions compile to JVM methods with
+                // return type Object, so also match on the method name.
+                if (invocation.method.name == "executeAction" ||
+                    invocation.method.returnType == ActionResult::class.java
+                ) {
+                    ActionResult.success("Success")
+                } else {
+                    RETURNS_DEFAULTS.answer(invocation)
+                }
+            }
+        )
+
         // Create temp workflows directory
         workflowsDir = File(mockFilesDir, "workflows")
         workflowsDir.mkdirs()
+        // Isolate tests: remove leftovers from previous tests/runs
+        workflowsDir.listFiles()?.forEach { it.delete() }
         
         workflowEngine = WorkflowEngine(mockContext, mockUINavigationEngine)
     }
@@ -152,9 +176,6 @@ class WorkflowEngineTest {
             isPrebuilt = false
         )
 
-        `when`(mockUINavigationEngine.executeAction(org.mockito.ArgumentMatchers.any()))
-            .thenReturn(ActionResult.success("Success"))
-
         // When
         val result = workflowEngine.executeWorkflow(workflow)
 
@@ -177,9 +198,6 @@ class WorkflowEngineTest {
             isPrebuilt = false
         )
 
-        `when`(mockUINavigationEngine.executeAction(org.mockito.ArgumentMatchers.any()))
-            .thenReturn(ActionResult.success("Success"))
-
         // When
         val result = workflowEngine.executeWorkflow(workflow)
 
@@ -201,7 +219,7 @@ class WorkflowEngineTest {
             isPrebuilt = false
         )
 
-        `when`(mockUINavigationEngine.executeAction(org.mockito.ArgumentMatchers.any()))
+        `when`(mockUINavigationEngine.executeAction(Tap(elementId = "button", descriptionText = "Tap button")))
             .thenReturn(ActionResult.failure("Failed"))
 
         // When
@@ -225,7 +243,7 @@ class WorkflowEngineTest {
             isPrebuilt = false
         )
 
-        `when`(mockUINavigationEngine.executeAction(org.mockito.ArgumentMatchers.any()))
+        `when`(mockUINavigationEngine.executeAction(Wait(100L)))
             .thenReturn(ActionResult.failure("Failed"))
 
         // When
@@ -312,9 +330,6 @@ class WorkflowEngineTest {
         )
 
         val variables = mapOf("message" to "Hello, World!")
-
-        `when`(mockUINavigationEngine.executeAction(org.mockito.ArgumentMatchers.any()))
-            .thenReturn(ActionResult.success("Success"))
 
         // When
         val result = workflowEngine.executeWorkflow(workflow, variables)
