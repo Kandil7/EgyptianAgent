@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # =============================================================================
 # Egyptian Agent - Llama Model Setup Script
 # =============================================================================
@@ -8,12 +8,12 @@
 #   Egyptian Agent application. Automates the complete model pipeline.
 #
 # USAGE:
-#   ./scripts/model/setup_llama_model.sh [OPTIONS]
+#   ./ml/finetune/scripts/setup_llama_model.sh [OPTIONS]
 #
 # OPTIONS:
 #   --model NAME        Model name (default: Llama-3.2-3B-Instruct)
 #   --quantization TYPE Quantization type (default: Q4_K_M)
-#   --output DIR        Output directory (default: app/src/main/assets/model/)
+#   --output DIR        Output directory (default: android/src/main/assets/model/)
 #   --hf-token TOKEN    HuggingFace token for gated models
 #   --skip-download     Skip download if model exists
 #   --clean             Remove intermediate files
@@ -47,7 +47,7 @@ readonly LOG_DIR="$PROJECT_DIR/build/logs"
 
 MODEL_NAME="Llama-3.2-3B-Instruct"
 QUANTIZATION="Q4_K_M"
-OUTPUT_DIR="$PROJECT_DIR/app/src/main/assets/model"
+OUTPUT_DIR="$PROJECT_DIR/android/src/main/assets/model"
 HF_TOKEN=""
 SKIP_DOWNLOAD=false
 CLEAN_AFTER=false
@@ -195,7 +195,7 @@ USAGE:
 OPTIONS:
     --model NAME        Model name (default: Llama-3.2-3B-Instruct)
     --quantization TYPE Quantization type (default: Q4_K_M)
-    --output DIR        Output directory (default: app/src/main/assets/model/)
+    --output DIR        Output directory (default: android/src/main/assets/model/)
     --hf-token TOKEN    HuggingFace token for gated models
     --skip-download     Skip download if model exists
     --clean             Remove intermediate files
