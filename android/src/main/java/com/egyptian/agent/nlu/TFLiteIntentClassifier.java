@@ -77,22 +77,24 @@ public class TFLiteIntentClassifier {
      * @param context Application context
      */
     public TFLiteIntentClassifier(Context context) {
-        this.context = context.getApplicationContext();
+        this.context = context != null ? context.getApplicationContext() : null;
         this.vocabulary = buildVocabulary();
         
         Interpreter tempInterpreter = null;
         boolean loaded = false;
         
         try {
-            MappedByteBuffer modelBuffer = loadModelFile(context, MODEL_FILE);
-            if (modelBuffer != null) {
-                Interpreter.Options options = new Interpreter.Options();
-                options.setNumThreads(4);
-                options.setUseNNAPI(true);  // Use Android NN API for acceleration
-                
-                tempInterpreter = new Interpreter(modelBuffer, options);
-                loaded = true;
-                Log.i(TAG, "TFLite model loaded successfully");
+            if (context != null) {
+                MappedByteBuffer modelBuffer = loadModelFile(context, MODEL_FILE);
+                if (modelBuffer != null) {
+                    Interpreter.Options options = new Interpreter.Options();
+                    options.setNumThreads(4);
+                    options.setUseNNAPI(true);  // Use Android NN API for acceleration
+                    
+                    tempInterpreter = new Interpreter(modelBuffer, options);
+                    loaded = true;
+                    Log.i(TAG, "TFLite model loaded successfully");
+                }
             }
         } catch (IOException e) {
             Log.w(TAG, "TFLite model not found, using fallback: " + e.getMessage());

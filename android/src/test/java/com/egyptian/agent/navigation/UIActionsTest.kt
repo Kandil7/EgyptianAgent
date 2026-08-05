@@ -8,7 +8,7 @@ import org.robolectric.annotation.Config
 import com.google.common.truth.Truth.assertThat
 
 /**
- * Comprehensive unit tests for UIActions (28 actions).
+ * Comprehensive unit tests for UIActions (30 actions).
  * 
  * Target: >85% code coverage
  * 
@@ -700,12 +700,12 @@ class UIActionsTest {
     // ========================================================================
 
     @Test
-    fun `UIActions ALL_ACTIONS contains all 28 actions`() {
+    fun `UIActions ALL_ACTIONS contains all 30 actions`() {
         // When
         val allActions = UIActions.ALL_ACTIONS
 
         // Then
-        assertThat(allActions).hasSize(28)
+        assertThat(allActions).hasSize(30)
 
         // Basic Interactions (8)
         assertThat(allActions).contains("tap")
@@ -738,7 +738,7 @@ class UIActionsTest {
         assertThat(allActions).contains("findAndTap")
         assertThat(allActions).contains("composeEmail")
 
-        // System (5)
+        // System (7)
         assertThat(allActions).contains("screenshot")
         assertThat(allActions).contains("shell")
         assertThat(allActions).contains("keyEvent")

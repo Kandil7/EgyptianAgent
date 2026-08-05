@@ -37,7 +37,8 @@ class NLUManagerTest {
 
     @BeforeEach
     void setUp() {
-        when(mockContext.getApplicationContext()).thenReturn(mockApplicationContext);
+        // lenient: many tests never touch the context mock
+        lenient().when(mockContext.getApplicationContext()).thenReturn(mockApplicationContext);
     }
 
     @Nested

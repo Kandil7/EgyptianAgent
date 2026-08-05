@@ -43,7 +43,8 @@ class PerformanceBenchmarkTest {
 
     @BeforeEach
     void setUp() {
-        when(mockContext.getApplicationContext()).thenReturn(mockApplicationContext);
+        // lenient: most benchmark tests never touch the context mock
+        lenient().when(mockContext.getApplicationContext()).thenReturn(mockApplicationContext);
     }
 
     @Nested
