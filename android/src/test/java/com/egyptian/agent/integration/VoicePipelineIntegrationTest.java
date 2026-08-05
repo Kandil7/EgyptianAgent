@@ -3,6 +3,7 @@ package com.egyptian.agent.integration;
 import android.content.Context;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -14,9 +15,10 @@ import com.egyptian.agent.nlu.EgyptianNormalizer;
 import com.egyptian.agent.nlu.IntentResult;
 import com.egyptian.agent.nlu.IntentType;
 import com.egyptian.agent.nlu.NLUManager;
-import com.egyptian.agent.executor.EmergencyHandler;
+import com.egyptian.agent.executors.EmergencyHandler;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Voice Pipeline Integration Test Suite
