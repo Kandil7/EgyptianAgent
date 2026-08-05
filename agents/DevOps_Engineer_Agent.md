@@ -1,4 +1,4 @@
-# DevOps Engineer Agent
+﻿# DevOps Engineer Agent
 
 ## Agent Definition
 ```yaml
@@ -53,9 +53,9 @@ Use a script to download the specific model version during the build process fro
 ```yaml
 - name: Download AI Models
   run: |
-    mkdir -p app/src/main/assets/models
-    curl -L "https://huggingface.co/kandil/egyptian-llama/resolve/main/model-q4.gguf" -o app/src/main/assets/models/llama.gguf
-    chmod 644 app/src/main/assets/models/llama.gguf
+    mkdir -p android/src/main/assets/models
+    curl -L "https://huggingface.co/kandil/egyptian-llama/resolve/main/model-q4.gguf" -o android/src/main/assets/models/llama.gguf
+    chmod 644 android/src/main/assets/models/llama.gguf
   env:
     HF_TOKEN: ${{ secrets.HF_TOKEN }}
 ```
