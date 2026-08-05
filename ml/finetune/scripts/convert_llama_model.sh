@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # =============================================================================
 # Egyptian Agent - Llama Model Conversion Script
 # =============================================================================
@@ -8,7 +8,7 @@
 #   specified quantization for mobile deployment.
 #
 # USAGE:
-#   ./scripts/model/convert_llama_model.sh [OPTIONS]
+#   ./ml/finetune/scripts/convert_llama_model.sh [OPTIONS]
 #
 # OPTIONS:
 #   --model NAME        Model name (default: Llama-3.2-3B-Instruct)
