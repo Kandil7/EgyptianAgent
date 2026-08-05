@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # =============================================================================
 # Egyptian Agent - Hybrid Architecture Deployment Verification Script
 # =============================================================================
@@ -8,7 +8,7 @@
 #   EgyptianAgent Hybrid Architecture deployment on Android devices.
 #
 # USAGE:
-#   ./scripts/deploy/verify_deployment.sh [OPTIONS]
+#   ./deploy/scripts-deploy/verify_deployment.sh [OPTIONS]
 #
 # OPTIONS:
 #   --device SERIAL     Target device serial (for multiple devices)
@@ -217,8 +217,8 @@ adb_shell_quiet() {
 check_build_verification() {
     print_subheader "Check 1: Build Verification"
 
-    local apk_path="$PROJECT_DIR/app/build/outputs/apk/release/app-release.apk"
-    local debug_apk_path="$PROJECT_DIR/app/build/outputs/apk/debug/app-debug.apk"
+    local apk_path="$PROJECT_DIR/android/build/outputs/apk/release/app-release.apk"
+    local debug_apk_path="$PROJECT_DIR/android/build/outputs/apk/debug/app-debug.apk"
 
     # Check release APK first
     if [[ -f "$apk_path" ]]; then
@@ -327,7 +327,7 @@ check_app_installation() {
     if [[ "$is_installed" -eq 0 ]]; then
         CHECK_RESULTS["app_install"]="FAIL"
         FAILURES+=("$APP_NAME is not installed")
-        RECOMMENDATIONS+=("Install app: adb install -r app/build/outputs/apk/debug/app-debug.apk")
+        RECOMMENDATIONS+=("Install app: adb install -r android/build/outputs/apk/debug/app-debug.apk")
         return 1
     fi
 
@@ -473,8 +473,8 @@ check_models_deployed() {
     elif [[ "$models_found" -gt 0 ]]; then
         CHECK_RESULTS["models"]="WARN"
         WARNINGS+=("Missing models: ${models_missing[*]}")
-        RECOMMENDATIONS+=("Deploy models: ./scripts/deploy/deploy_functiongemma.sh")
-        RECOMMENDATIONS+=("Download Whisper: ./scripts/model/download_whisper_model.sh")
+        RECOMMENDATIONS+=("Deploy models: ./deploy/scripts-deploy/deploy_functiongemma.sh")
+        RECOMMENDATIONS+=("Download Whisper: ./ml/finetune/scripts/download_whisper_model.sh")
         return 1
     else
         CHECK_RESULTS["models"]="FAIL"
